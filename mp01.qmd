@@ -4,17 +4,17 @@ author: "Christie Cannon"
 editor: visual
 ---
 
-# Mini-Project 01: Fiscal Characteristics of Major US Public Transit Systems 
+# Mini-Project 01: Fiscal Characteristics of Major US Public Transit Systems
 
 Abstract:
 
-### Data Preprocessing 
+### Data Preprocessing
 
-```{r}
+```{r echo=TRUE, warning=FALSE, message=FALSE}
 # ============================================================
 # Downloading, Cleaning, and Joining Tables
 # ============================================================
-install.packages("dplyr")
+install.packages("dplyr", repos=c(CRAN = "https://cran.rstudio"))
 library(dplyr)
 
 #First snippet of code, provided by professor
@@ -151,9 +151,9 @@ sample_n(USAGE, 1000) |>
 
 ```
 
-## Task 1 
+## Task 1
 
-```{r}
+```{r echo=TRUE, warning=FALSE, message=FALSE}
 # ============================================================
 # Task 1 - Creating Syntatic Names 
 # ============================================================
@@ -175,7 +175,7 @@ names(MILES)
 
 ## Task 2
 
-```{r}
+```{r echo=TRUE, warning=FALSE, message=FALSE}
 # ============================================================
 # Task 2 - Recoding the Mode column
 # ============================================================
@@ -220,7 +220,7 @@ sample_n(USAGE, 1000) |>
 
 ### Question 1: What transit agency had the most total VRM in our data set?
 
-```{r}
+```{r echo=TRUE, warning=FALSE, message=FALSE}
 # 1. What transit agency had the most total VRM in our data set?
 #grouping by agency, summing VRM by agency & removing any NA values, arranging in descending order
 total_VRM_by_agency <- USAGE |>
@@ -239,7 +239,7 @@ print(highest_VRM_agency)
 
 ### Question 2: What transit mode had the most total VRM in our data set?
 
-```{r}
+```{r echo=TRUE, warning=FALSE, message=FALSE}
 # 2. What transit mode had the most total VRM in our data set?
 #grouping by mode, summing VRM by mode & removing any NA values, arranging in descending order
 total_VRM_by_mode <- USAGE |>
@@ -257,7 +257,7 @@ print(highest_VRM_mode)
 
 ### Question 3: How many trips were taken on the NYC Subway (Heavy Rail) in May 2024?
 
-```{r}
+```{r echo=TRUE, warning=FALSE, message=FALSE}
 # 3. How many trips were taken on the NYC Subway (Heavy Rail) in May 2024?
 #first filtering the condensed_usage data frame to only heavy rail to see what else needs to be filtered out
 heavy_rail_data <- USAGE |>
@@ -281,7 +281,7 @@ print(nyc_subway_trips_count)
 
 ### Question 5: How much did NYC subway ridership fall between April 2019 and April 2020?
 
-```{r}
+```{r echo=TRUE, warning=FALSE, message=FALSE}
 # 5. How much did NYC subway ridership fall between April 2019 and April 2020?
 #finding ridership for April 2019 first
 nyc_subway_trips_april_2019 <- USAGE |>
@@ -310,9 +310,9 @@ print(paste("NYC Ridership fell by ", nyc_ridership_change, " riders from April 
 
 ```
 
-## Exploratory data analysis 
+## Exploratory data analysis
 
-```{r}
+```{r echo=TRUE, warning=FALSE, message=FALSE}
 # ============================================================
 # Task 4 - Explore and Analyze
 # ============================================================
@@ -332,7 +332,7 @@ print(mta_ridership_by_mode) #table outlining different modes of transportation 
 
 ```
 
-```{r}
+```{r echo=TRUE, warning=FALSE, message=FALSE}
 # Additional fact 1b - listing most popular nyc mode and its ridership
 nyc_most_popular_mode <- mta_ridership_by_mode |>
   filter(Total_Ridership == max(Total_Ridership))
@@ -343,7 +343,7 @@ print(nyc_most_popular_mode) #heavy rail aka subway is most popular nyc mode of 
 
 ```
 
-```{r}
+```{r echo=TRUE, warning=FALSE, message=FALSE}
 # Additional fact 2 - Comparing NYC ridership pre and post pandemic 
 #pre-pandemic 
 pre_pandemic_ridership <- USAGE |>
@@ -426,7 +426,7 @@ USAGE_AND_FINANCIALS <- left_join(USAGE_2022_ANNUAL,
 head(USAGE_AND_FINANCIALS)
 ```
 
-## Farebox Recovery Among Major Systems 
+## Farebox Recovery Among Major Systems
 
 ### Which transit system (agency and mode) had the most UPT in 2022?
 
