@@ -639,3 +639,7 @@ print(paste("The transit system with the highest total fares per VRM is", highes
 ```
 
 We find the Chicago Water Taxi has the highest fares per VRM, at \~\$237. This translates to for every mile traveled by the ferry, the system generates over \$237 in revenue.
+
+### Conclusion
+
+To conclude, the MTA New York City Transit Heavy Rail Mode is the most efficient transportation system in the country. The subway had \$1.8B unlinked trips in 2022 alone. With the highest ridership and UPT, surpassing all other transportation systems in the country, the NYC subway provides the best service efficiency. The scale and service of the MTA NYC Transit system in unparalleled across the country.
