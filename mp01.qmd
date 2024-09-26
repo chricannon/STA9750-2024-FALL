@@ -2,15 +2,26 @@
 title: "mp01"
 author: "Christie Cannon"
 editor: visual
+format:
+  html:
+    default: true
 ---
 
 # Mini-Project 01: Fiscal Characteristics of Major US Public Transit Systems
 
-Abstract:
+**Abstract:** This report analyzes data from the National Transit Database. The report explores some of the fiscal characteristics of major US public transportation systems, such as: farebox revenues, total number of trips, total number of vehicle miles traveled, and total revenues and expenses by source. One key metric to keep in mind is the farebox recovery ratio. Farebox recovery ratio represents the proportion of operating expenses that are covered just by fares alone. The ratio is total fares/total operating expenses for said time frame. This ratio becomes important as we explore various cities, their agencies for public transportation, and their different modes of public transportation and look for the most efficient and profitable form.
 
 ### Data Preprocessing
 
-```{r echo=TRUE, warning=FALSE, message=FALSE}
+This study uses three primary datasets: 2022 Fare Revenue, 2022 Operating Expenses, and the latest Monthly Ridership data. A note to keep in mind: because the data is reported on a lag, the 2022 version of each report was used.
+
+As you will find in the code below, the three datasets were downloaded, cleaned, and merged. The fare revenue data was filtered to include only relevant columns and aggregated by the columns NTD ID, Agency Name and Mode. The expenses data was similarly filtered then aggregated by NTD ID and Mode. These two datasets were then merged into a single table titled FINANCIALS.
+
+The monthly ridership data was handled separately. The Unlinked Passenger Trips (UPT) and Vehicle Revenue Miles (VRM) data was extracted and combined into new table titled USAGE. This later allows for an easy calculation of farebox recovery and views of the highest/lowest VRM and UPT across different agencies and modes.
+
+The data pre-processing step was necessary to clean the data, put it in a consistent format, preparing it for further analysis.
+
+```{r echo=TRUE, results='hide', warning=FALSE, message=FALSE}
 # ============================================================
 # Downloading, Cleaning, and Joining Tables
 # ============================================================
@@ -151,9 +162,13 @@ sample_n(USAGE, 1000) |>
 
 ```
 
+The table above is a peek at the USAGE table, which comes into play for several topics of analysis later in the report.
+
 ## Task 1
 
-```{r echo=TRUE, warning=FALSE, message=FALSE}
+Below you will find the renaming of column UZA Name to metro_area. This variable is used multiple times across the analysis. By creating a syntatic name, the column no longer needs to be surrounded by quotes each times it is referenced, making for easier, cleaner code.
+
+```{r echo=TRUE, results='hide', warning=FALSE, message=FALSE}
 # ============================================================
 # Task 1 - Creating Syntatic Names 
 # ============================================================
@@ -175,7 +190,9 @@ names(MILES)
 
 ## Task 2
 
-```{r echo=TRUE, warning=FALSE, message=FALSE}
+In the code below, you will find Mode column in the USAGE table was recoded using the case_when function. The Mode columns were initially in a shorthand abbreviation and were transformed into their full terms, which provide for more descriptive, clear labels.
+
+```{r echo=TRUE, , results='hide', warning=FALSE, message=FALSE}
 # ============================================================
 # Task 2 - Recoding the Mode column
 # ============================================================
@@ -207,6 +224,9 @@ head(USAGE)
 USAGE |>
   distinct(Mode)
 
+```
+
+```{r echo=TRUE, warning=FALSE, message=FALSE}
 #creating an attractive summary table of cleaned up USAGE table 
 if(!require("DT")) install.packages("DT")
 library(DT)
@@ -214,28 +234,48 @@ library(DT)
 sample_n(USAGE, 1000) |> 
   mutate(month=as.character(month)) |> 
   DT::datatable()
+
 ```
+
+The displayed table above is a view of a random sample of 1000 from the cleaned USAGE table. The format is interactive, allowing users to sort and search through the data, making it easily accessible and usable, for even a non-technical user.
 
 ## Task 3
 
 ### Question 1: What transit agency had the most total VRM in our data set?
 
 ```{r echo=TRUE, warning=FALSE, message=FALSE}
+library(scales)
 # 1. What transit agency had the most total VRM in our data set?
 #grouping by agency, summing VRM by agency & removing any NA values, arranging in descending order
 total_VRM_by_agency <- USAGE |>
   group_by(Agency) |>
   summarize(Total_VRM = sum(VRM, na.rm =TRUE)) |>
-  arrange(desc(Total_VRM))
-#displaying summed VRM by agency table
-print(total_VRM_by_agency)
+  arrange(desc(Total_VRM)) 
+  
+
+#formatting table using gt package
+total_VRM_by_agency_formatted <- total_VRM_by_agency |>
+  mutate(Total_VRM = comma(Total_VRM, accuracy =1)) 
+
+#printing formatted table 
+print(total_VRM_by_agency_formatted)
+
+
 #displaying agency with highest total VRM
 highest_VRM_agency <- total_VRM_by_agency |>
-  filter(Total_VRM == max(Total_VRM))
+  filter(Total_VRM == max(Total_VRM)) |>
+  mutate(Total_VRM = comma(Total_VRM, accuracy =1)) 
+  
 #printing highest_VRM_agency
 print(highest_VRM_agency)
 
 ```
+
+The VRM, or Vehicle Revenue Miles, represents the total distance traveled by vehicles in revenue service.
+
+The analysis starts with aggregating the VRM values for each transit agency, grouping the data by Agency, and finally summing the total VRM for each group, or agency. Any missing values are excluded from the grouping, through the na.rm = TRUE statement. The results are then arranged in descending order, with the agency with the highest total VRM as the top row.
+
+The results show MTA NYC Transit to have the highest total VRM, with over 10.8B revenue miles. This tells us the MTA NYC Transit system is the most extensive when viewed with the lens of \# of miles covered.
 
 ### Question 2: What transit mode had the most total VRM in our data set?
 
@@ -250,14 +290,23 @@ total_VRM_by_mode <- USAGE |>
 print(total_VRM_by_mode)
 #displaying mode with highest total VRM
 highest_VRM_mode <- total_VRM_by_mode |>
-  filter(Total_VRM == max(Total_VRM))
+  filter(Total_VRM == max(Total_VRM)) |>
+  mutate(Total_VRM = comma(Total_VRM, accuracy =1)) 
 #printing highest_VRM_mode
 print(highest_VRM_mode)
 ```
 
+This section once again reviews the total Vehicle Revenue Miles, but instead grouped by transit mode.
+
+The code aggregates the VRM in a similar fashion to the first question, but instead groups by the Mode column.
+
+The result reveals the mode of Bus has the highest VRM amongst the modes in the dataset, with over \$49.4B vehicle revenue miles.
+
 ### Question 3: How many trips were taken on the NYC Subway (Heavy Rail) in May 2024?
 
-```{r echo=TRUE, warning=FALSE, message=FALSE}
+This question hones in on the NYC subway system specifically. To get our data into that granular level, the code, as shown below, filters the Mode to Heavy Rail.
+
+```{r echo=TRUE, results='hide',warning=FALSE, message=FALSE}
 # 3. How many trips were taken on the NYC Subway (Heavy Rail) in May 2024?
 #first filtering the condensed_usage data frame to only heavy rail to see what else needs to be filtered out
 heavy_rail_data <- USAGE |>
@@ -269,17 +318,32 @@ unique_metro_areas <- USAGE |>
   distinct(metro_area)
 print(unique_metro_areas)
 
+```
+
+The code then goes on to filter further, for the month of May and for the Agency being MTA New York City Transit.
+
+```{r echo=TRUE,warning=FALSE, message=FALSE}
 nyc_subway_trips_count <- USAGE |>
   filter(Mode == "Heavy Rail",
          month == "2024-05-01",
          Agency == "MTA New York City Transit") |>
-  summarize(Total_Trips = sum(UPT, na.rm = TRUE))
+  summarize(Total_Trips = sum(UPT, na.rm = TRUE)) |>
+  mutate(Total_Trips = comma(Total_Trips, accuracy =1)) 
 
 # Print the total trips taken on the NYC Subway in May 2024
 print(nyc_subway_trips_count)
+
 ```
 
+In May 2024, over 180M trips were taken on NYC subways.
+
 ### Question 5: How much did NYC subway ridership fall between April 2019 and April 2020?
+
+The below code aims to quantify the impact the COVID-19 pandemic had on NYC's public transit system, specifically focusing on the subways.
+
+The calculation is for ridership in April 2019, pre-pandemic, compared to ridership April 2020, at the height of the pandemic.
+
+The code calculates the ridership for each of these time periods separately, then takes a difference between the two.
 
 ```{r echo=TRUE, warning=FALSE, message=FALSE}
 # 5. How much did NYC subway ridership fall between April 2019 and April 2020?
@@ -304,13 +368,21 @@ nyc_subway_trips_april_2020 <- USAGE |>
 print(nyc_subway_trips_april_2020)
 #calculating the difference 
 nyc_ridership_change <- abs(nyc_subway_trips_april_2020 - nyc_subway_trips_april_2019)
-print(nyc_ridership_change)
+#print(nyc_ridership_change)
 #Statement defining ridership change. Using paste() function to allow for string + variable to print together
 print(paste("NYC Ridership fell by ", nyc_ridership_change, " riders from April 2019 to April 2020."))
 
 ```
 
+As shown in the output above, the ridership fell drastically from April 2019 to April 2020, by over 2.1B riders.
+
 ## Exploratory data analysis
+
+Next, the study continues in performing exploratory data analysis. The theme of this analysis is uncovering additional insights about the MTA New York City Transit system.
+
+Below, we explore NYC ridership across different transit modes. First, the focus is on breaking down the total ridership for each mode of transit available via MTA New York City Transit. The code first filters on MTA NYC Transit, groups by Mode and sums the Unlinked Passenger Trips (UPT) for each.
+
+The code reveals certain modes are much more used compared to others. In NYC, the subway, or heavy rail, surpasses all other modes of transportation. One can imagine how frequently riders use the NYC subway when commuting.
 
 ```{r echo=TRUE, warning=FALSE, message=FALSE}
 # ============================================================
@@ -318,12 +390,13 @@ print(paste("NYC Ridership fell by ", nyc_ridership_change, " riders from April 
 # ============================================================
 
 # Three more interesting transit facts 
-# Additional fact 1a - ridership for each mode by MTA NYC Transit 
+# Additional fact 1 - ridership for each mode by MTA NYC Transit 
 mta_ridership_by_mode <- USAGE |>
   filter(Agency == "MTA New York City Transit") |>
   group_by(Mode) |>
   summarize(Total_Ridership = sum(UPT, na.rm = TRUE)) |>
-  arrange(desc(Total_Ridership))
+  arrange(desc(Total_Ridership)) |>
+  mutate(Total_Ridership = comma(Total_Ridership, accuracy =1))
 
 print(mta_ridership_by_mode) #table outlining different modes of transportation and their total rides 
 
@@ -332,16 +405,11 @@ print(mta_ridership_by_mode) #table outlining different modes of transportation 
 
 ```
 
-```{r echo=TRUE, warning=FALSE, message=FALSE}
-# Additional fact 1b - listing most popular nyc mode and its ridership
-nyc_most_popular_mode <- mta_ridership_by_mode |>
-  filter(Total_Ridership == max(Total_Ridership))
+The table above provides a readable summary of the study - one can clearly see the Heavy Rail has the highest Total Ridership, followed by the Bus.
 
-print(nyc_most_popular_mode) #heavy rail aka subway is most popular nyc mode of transportation
+Below is another analysis of the MTA NYC Transit system - comparing subway ridership pre and post pandemic. The data is segmented into two time periods: the year of 2019 (1/1/19 - 12/31/19) for pre-pandemic and the year of 2022 (1/1/22 - 12/31/22) for post pandemic.
 
-
-
-```
+We find the average monthly ridership decreased by nearly 20M trips/per month from 2019 to 2022. This is a drop in subway ridership by about 34%.
 
 ```{r echo=TRUE, warning=FALSE, message=FALSE}
 # Additional fact 2 - Comparing NYC ridership pre and post pandemic 
@@ -362,7 +430,12 @@ post_pandemic_ridership <- USAGE |>
 
 print(post_pandemic_ridership)
 print(paste("The average ridership for the year of 2019, pre-pandemic, was ", round(pre_pandemic_ridership,0), " and the average ridership for the year of 2022, post pandemic, was ", round(post_pandemic_ridership,0)))
+
+round((1 - post_pandemic_ridership/pre_pandemic_ridership) * 100,0)
+
 ```
+
+The analysis below explores the ridership efficiency of the different NYC transit modes. Efficiency is measured as the average number of Unlinked Passenger Trips (UPT) per Vehicle Revenue Mile (VRM), which indicates how effectively each mode transports passengers against the distance covered.
 
 ```{r}
 # Additional fact 3
@@ -371,15 +444,27 @@ print(paste("The average ridership for the year of 2019, pre-pandemic, was ", ro
 ridership_efficiency <- USAGE |>
   filter(Agency == "MTA New York City Transit") |>
   group_by(Mode) |>
-  summarize(Efficiency = sum(UPT, na.rm = TRUE) / sum(VRM, na.rm = TRUE))
+  summarize(Efficiency = round(sum(UPT, na.rm = TRUE) / sum(VRM, na.rm = TRUE),2))
 print(ridership_efficiency) #efficiency = for every mile traveled, x# of passengers carried 
 
 
 ```
 
+Looking at the table above, the following may be concluded. The Rapid Bus it the most efficient mode of transport in NYC. With an efficiency score of 9.17, this translates into the Rapid Bus carrying over 9 passengers per mile traveled.
+
+Not surprisingly, the Demand Response as the lowest efficiency at 0.11. Demand Response modes of transportation are typically used for specialized transportation needs and are available upon request.
+
 ## Table Summarization
 
-```{r}
+In the task below, a comprehensive dataset is created via merging annual transit usage and financial data for 2022.
+
+First, the USAGE table is filtered on the year 2022, then aggregated each UPT and VRM for each transit agency and mode of transportation. This summarized data is stored in the new table titled USAGE_2022_ANNUAL.
+
+Then, the FINANCIALS table is updated to match the Mode labels in USAGE. Once again, the abbreviations are changed to their full names. This standardizes the Mode naming convention.
+
+Lastly, the USAGE_2022_ANNUAL table is merged with the updated FINANCIALS table, joined on NTD ID and Mode. The new table is titled USAGE_AND_FINANCIALS. This table becomes very useful when evaluating farebox recovery in the following section.
+
+```{r echo=TRUE, results='hide', warning=FALSE, message=FALSE}
 # ============================================================
 # Task 5 - Table Summarization
 # ============================================================
@@ -430,6 +515,8 @@ head(USAGE_AND_FINANCIALS)
 
 ### Which transit system (agency and mode) had the most UPT in 2022?
 
+For analysis, first the total UPT for each combination of agency and mode is summarized. The USAGE_AND_FINANCIALS table is used for this analysis.
+
 ```{r}
 # 1. Which transit system (agency and mode) had the most UPT in 2022?
 #table summarizing the total UPT for each agency and mode 
@@ -445,13 +532,17 @@ max_UPT <- UPT_summary_agency_mode |>
 max_UPT_system <- head(max_UPT,1)
 print(max_UPT_system)
 most_UPT_agency <- max_UPT_system$Agency #grabs the value from the column after the $ sign
-print(most_UPT_agency)
+#print(most_UPT_agency)
 most_UPT_mode <- max_UPT_system$Mode
-print(most_UPT_mode)
+#print(most_UPT_mode)
 print(paste("The Agency with the highest UPT is ", most_UPT_agency, " with a mode of ", most_UPT_mode))
 ```
 
+The top performing agency and its most with the highest UPT is displayed above. We find the MTA NYC Transit with its Heavy Rail mode to have the highest UPT, with \~1.8B unlinked passenger trips in 2022.
+
 ### Which transit system (agency and mode) had the highest farebox recovery, defined as the highest ratio of Total Fares to Expenses?
+
+To reiterate, the Farebox Recovery Ratio is the proportion of operating expenses coverd by fare revenue, and is calculated as the ratio of Total Fares to Expenses. The higher the Farebox Recovery Ratio, the greater financial stability through passenger fare revenue.
 
 ```{r}
 # 2. Which transit system (agency and mode) had the highest farebox recovery, defined as the highest ratio of Total Fares to Expenses?
@@ -460,7 +551,7 @@ highest_farebox_recovery <- USAGE_AND_FINANCIALS |>
   filter(Farebox_Recovery == max(Farebox_Recovery, na.rm = TRUE)) |>
   arrange(desc(Farebox_Recovery)) |>
   head(1) #returns top row
-print(highest_farebox_recovery)
+#print(highest_farebox_recovery)
 most_farebox_agency <- highest_farebox_recovery$Agency
 most_farebox_mode <- highest_farebox_recovery$Mode
 top_recovery <- highest_farebox_recovery$Farebox_Recovery
@@ -468,7 +559,11 @@ top_recovery <- highest_farebox_recovery$Farebox_Recovery
 print(paste("The Agency with the highest Farebox Recovery is", most_farebox_agency, "and its mode is", most_farebox_mode, "with a farebox recovery ratio of", round(top_recovery,2)))
 ```
 
+The Vanpool mode of transportation within the Transit Authority of Central Kentucky performed with the highest farebox recovery ratio. One caution to keep in mind is this report did not filter on only the major systems, as the programmer chose to include all transportation systems (Major and Minor).
+
 ### Which transit system (agency and mode) has the lowest expenses per UPT?
+
+The next analysis looks at the lowest operating expenses per UPT, which is an indicator of cost efficiency. The lower the expenses per UPT, the more cost-effective a transportation system is in transporting passengers.
 
 ```{r}
 # 3. Which transit system (agency and mode) has the lowest expenses per UPT?
@@ -505,6 +600,8 @@ print(paste("The transit system with the highest total fares per UPT is", highes
 
 ### Which transit system (agency and mode) has the lowest expenses per VRM?
 
+This study focuses on identifying the transit system with the lowest operating expenses per Vehicle Revenue Mile (VRM). This is another important metric in evaluating cost efficiency. In this case, we look at cost efficiency in relation to the distance covered by transit services.
+
 ```{r}
 # 5. Which transit system (agency and mode) has the lowest expenses per VRM?
 #very similar to code for #3 
@@ -519,6 +616,8 @@ lowest_exp_per_VRM_amt <- lowest_expenses_per_VRM$Expenses_per_VRM
 
 print(paste("The transit system with the lowest expenses per VRM is", lowest_exp_VRM_agency, "and its mode is", lowest_exp_VRM_mode, "with an expenses per VRM ratio of", round(lowest_exp_per_VRM_amt,2)))
 ```
+
+The output above tells us the New Mexico Department of Transportation, when operating the Vanpool mode, has the lowest expenses per VRM, at \$0.34 per mile. This portrays the efficient use of resources within this mode and agency.
 
 ### Which transit system (agency and mode) has the highest total fares per VRM?
 
@@ -538,3 +637,5 @@ print(paste("The transit system with the highest total fares per VRM is", highes
 
 
 ```
+
+We find the Chicago Water Taxi has the highest fares per VRM, at \~\$237. This translates to for every mile traveled by the ferry, the system generates over \$237 in revenue.
