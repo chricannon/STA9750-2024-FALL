@@ -1,0 +1,587 @@
+---
+title: "mp02"
+editor: visual
+format:
+  html:
+    code-fold: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache=FALSE, echo=TRUE, warning=FALSE, message=FALSE)
+```
+
+```{r install_packages, eval=FALSE}
+#Installing necessary packages
+packages <- c("dplyr", "ggplot2", "tidyr", "readr", "lintr", "gt" )
+install.packages(packages)
+
+# Check for missing packages and install them
+new_packages <- packages[!(packages %in% installed.packages()[,"Package"])]
+if(length(new_packages)) install.packages(new_packages)
+```
+
+```{r setup, include=FALSE}
+#Loading necessary libraries 
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(readr)
+library(lintr)
+library(gt)
+
+```
+
+```{r}
+# Creating a simple test table
+test_table <- data.frame(
+  A = c(1, 2),
+  B = c(3, 4)
+)
+
+# Formatting table with gt
+test_gt <- test_table |>
+  gt() |>
+  tab_header(
+    title = "Simple Test Table"
+  )
+
+# Display the table
+test_gt
+
+```
+
+```{r}
+get_imdb_file <- function(fname){
+    # Set the base URL to the professor's GitHub
+    BASE_URL <- "https://raw.githubusercontent.com/michaelweylandt/STA9750/main/miniprojects/mini02_preprocessed/"
+    fname_ext <- paste0(fname, "_small.csv.zip") # Use the correct .csv.zip extension
+    
+    # Check if the file exists locally, if not download it
+    if(!file.exists(fname_ext)){
+        FILE_URL <- paste0(BASE_URL, fname_ext)
+        download.file(FILE_URL, destfile = fname_ext)
+        message(paste("Downloaded:", fname_ext))
+    }
+    
+    # Read the .csv file directly from the .zip
+    data <- readr::read_csv(fname_ext)
+    
+    return(as.data.frame(data))
+}
+
+# Load the pre-processed datasets
+NAME_BASICS      <- get_imdb_file("name_basics")
+TITLE_BASICS     <- get_imdb_file("title_basics")
+TITLE_EPISODES   <- get_imdb_file("title_episodes")
+TITLE_RATINGS    <- get_imdb_file("title_ratings")
+TITLE_CREW       <- get_imdb_file("title_crew")
+TITLE_PRINCIPALS <- get_imdb_file("title_principals")
+
+
+```
+
+Pre-Processed Data has been loaded successfully.
+
+## Initial Exploration
+
+To better understand the structure of the data, we will use the `glimpse` function from the `dplyr` package to examine each table. This will provide insight into the number of columns, column names, and their respective data types for each dataset.
+
+```{r}
+glimpse(NAME_BASICS)
+
+glimpse(TITLE_BASICS)
+
+glimpse(TITLE_EPISODES)
+
+glimpse(TITLE_RATINGS)
+
+glimpse(TITLE_CREW)
+
+glimpse(TITLE_PRINCIPALS)
+```
+
+## Task 1: Column Type Conversion
+
+Most columns appear to be read in as character(string) vectors, but should be numeric. The "null" values are represented as \\N, which R does not recognize as NA values.
+
+Using the mutate and the as.numeric commands to change th types of columns.
+
+Starting with the NAME_BASICS table - taking character columns and converting to numeric, where needed.
+
+```{r}
+NAME_BASICS <- NAME_BASICS |>
+  mutate(birthYear = as.numeric(replace(birthYear, birthYear == "\\N", NA)),
+         deathYear = as.numeric(replace(deathYear, deathYear == "\\N", NA)))
+
+```
+
+Moving on to the TITLE_BASICS table. For this one, we adjust two columns from character to numeric. One new fix we are making it taking the isAdult column and converting it from numeric (with values 0 or 1) and converting it to logical (TRUE/FALSE values). This way we will not have to remember how 0 and 1 are defined as TRUE/FALSE values.
+
+```{r}
+TITLE_BASICS <- TITLE_BASICS |>
+  mutate(
+    endYear = as.numeric(replace(endYear, endYear == "\\N", NA)),
+    runtimeMinutes = as.numeric(replace(runtimeMinutes, runtimeMinutes == "\\N", NA)),
+    isAdult = as.logical(isAdult) 
+  )
+
+```
+
+Cleaning the TITLE_EPISODES table.
+
+```{r}
+TITLE_EPISODES <- TITLE_EPISODES |>
+  mutate(
+    seasonNumber = as.numeric(replace(seasonNumber, seasonNumber == "\\N", NA)),
+    episodeNumber = as.numeric(replace(episodeNumber, episodeNumber == "\\N", NA))
+  )
+
+```
+
+The next table to clean would be the TITLE_RATINGS table. The three columns have the correct datatypes so this table is skipped.
+
+The writers column in the TITLE_CREW table has several \\N values which need to be replaced with NA. We will maintain the writer column's type. This is done in the step below.
+
+```{r}
+TITLE_CREW <- TITLE_CREW |>
+    mutate(writers = na_if(writers, "\\N"))
+
+```
+
+The last table left for cleaning is the TITLE_PRINCIPALS table. We will replace the \\N values in the job and characters column with NA, while maintaining the columns' data type.
+
+```{r}
+TITLE_PRINCIPALS <- TITLE_PRINCIPALS |>
+    mutate(job = na_if(job, "\\N"),
+           characters = na_if(characters, "\\N"))
+
+```
+
+## Task 2: Instructor-Provided Questions
+
+The code below gives us a summary of the number of movies, TV series, and TV episodes in our dataset.
+
+The values are calculated using dplyr functionality, and the summary table is created using the previously downloaded gt package.
+
+```{r}
+# Creating summary table
+summary_table <- data.frame(
+  'Movies' = num_movies,
+  'TV Series' = num_tv_series, 
+  'TV Episodes' = num_tv_episodes
+)
+
+# Formatting summary table with gt
+summary_gt <- summary_table |>
+  gt() |>
+  tab_header(
+    title = "Total Movies, TV Series and Episodes"
+  ) |>
+  fmt_number(
+    columns = everything(),
+    decimals = 0
+  )
+
+# Display the table
+summary_gt
+
+```
+
+```{r, results='asis'}
+#Calculating counts 
+num_movies <- TITLE_BASICS |>
+  filter(titleType == "movie") |>
+  nrow()
+
+num_tv_series <- TITLE_BASICS |>
+  filter(titleType == "tvSeries") |>
+  nrow()
+
+num_tv_episodes <- TITLE_EPISODES |>
+  nrow()
+
+#Creating summary table
+summary_table <- data.frame(
+  'Movies' = num_movies,
+  'TV Series' = num_tv_series, 
+  'TV Episodes' = num_tv_episodes
+)
+
+#Formatting summary table using gt
+summary_gt <- summary_table |>
+  gt() |>
+  tab_header(
+    title = "Total Movies, TV Series and Episodes"
+  ) |>
+  fmt_number(
+    columns = everything(),
+    decimals = 0
+  )
+
+#Displaying table
+print(summary_gt)
+```
+
+The code below answers the question of who the oldest living person in our data set is. We first access the oldest living person from the NAME_BASICS dataset and then format the result into a table using gt.
+
+To access the oldest living person in the NAME_BASICS dataset, the code below filters to find the person with the maximum birthYear where deathYear is NA.
+
+```{r}
+# Filter out people with valid birthYear and living (i.e., deathYear is NA)
+oldest_living_person <- NAME_BASICS |>
+  filter(!is.na(birthYear) & is.na(deathYear)) |>
+  arrange(birthYear) |>
+  slice(1)  |>
+  select(primaryName, birthYear)
+
+oldest_living_person_tb <- oldest_living_person |>
+  gt() |>
+  tab_header(
+    title = "Oldest Living Person in Dataset"
+  ) |>
+  cols_label(
+    primaryName = "Name",
+    birthYear = "Birth Year"
+  ) |>
+  fmt_number(
+    columns = c(birthYear),
+    decimals = 0,
+    use_seps = FALSE
+  )
+
+print(oldest_living_person_tb)
+
+```
+
+```{r}
+# Filter out people with valid birthYear and living (i.e., deathYear is NA)
+oldest_living_person <- NAME_BASICS |>
+  filter(!is.na(birthYear) & is.na(deathYear)) |>
+  arrange(birthYear) |>
+  slice(1)  |>
+  select(primaryName, birthYear)
+
+# Create a table and format it using gt
+oldest_living_person_tb <- oldest_living_person |>
+  gt() 
+
+# Displaying the table
+print(oldest_living_person_tb)
+
+```
+
+```{r}
+print(oldest_living_person)
+```
+
+Next we aim to find the TV Episode with a perfect 10/10 rating and 200,000 IMDb ratings. To do so, we will need to access the TITLE_RATINGS, TITLE_BASICS, and TITLE_EPISODES tables.
+
+The code below filters the TITLE_RATINGS table for the episode with a 10/10 rating and at least 200,000 IMDb ratings.
+
+It then joins this filtered set of the TITLE_RATINGS table with the TITLE_BASICS table to access the show's title and series. "tconst" is the unique identifier for the episode's title we use to join. We use an inner join, so only rows that match in both tables are included.
+
+The second inner_join joins the result of the first join to TITLE_EPISODES. This is to be access the series name of the episode.
+
+The final inner_join with TITLE_BASICS retrieves the series name by matching the "parentTconst" of the episode to "tconst" of the series in the TITLE_BASICS table.
+
+We then use the select function to select only the relevant columns for our dataframe. We finally rename these columns to allow for more descriptive column names.
+
+```{r}
+# Filter for episodes with a perfect 10/10 rating and >= 200,000 votes
+perfect_episode <- TITLE_RATINGS |>
+  filter(averageRating == 10, numVotes >= 200000) |>
+  inner_join(
+    TITLE_BASICS |> filter(titleType == "tvEpisode"), 
+    by = "tconst"
+  ) |>
+  inner_join(TITLE_EPISODES, by = "tconst") |>
+  inner_join(
+    TITLE_BASICS |> filter(titleType == "tvSeries"), 
+    by = c("parentTconst" = "tconst")
+  ) |>
+  select(primaryTitle.x, primaryTitle.y, titleType.x, averageRating, numVotes)
+
+# Rename the columns for better understanding 
+perfect_episode <- perfect_episode |>
+  rename(
+    episodeTitle = primaryTitle.x,
+    seriesTitle = primaryTitle.y,
+    episodeType = titleType.x
+  )
+```
+
+The below code creates a summary table of our results.
+
+```{r}
+# Create the summary table with gt
+perfect_episode_tb <- perfect_episode |>
+  gt() |>
+  tab_header(
+    title = "Highly Rated TV Episode"
+  ) |>
+  cols_label(
+    episodeTitle = "Episode Title",
+    seriesTitle = "Series Title",
+    episodeType = "Type",
+    averageRating = "Rating",
+    numVotes = "# Votes"
+  ) |>
+  fmt_number(
+    columns = c(averageRating, numVotes),
+    decimals = 0
+  )
+
+# Display the table
+perfect_episode_tb
+```
+
+```         
+```
+
+We find the TV episode with a perfect 10/10 rating and at least 200,000 IMDb ratings is the episode titled "Ozymandias" in the "Breaking Bad" series.
+
+Moving on to learning more about the actor Mark Hamill. The code below finds the 4 most popular projects Mark Hamill worked on. The code filters the NAME_BASICS table to only Mark Hamill, then splits the knownForTitles columns into separate rows for each title, then joins to the TITLE_BASICS table to get project details. We then arrange the numVotes in descending order and take the top 4 using a slice function. We select the title and type for the final output of his projects.
+
+```{r}
+mark_hamill_top_4 <- NAME_BASICS |>
+  filter(primaryName == "Mark Hamill") |>
+  separate_rows(knownForTitles, sep=",") |>
+  inner_join(TITLE_BASICS, by =c("knownForTitles" = "tconst")) |>
+  arrange(desc(numVotes)) |>
+  slice_head(n=4) |>
+  select(primaryTitle, titleType)
+
+  
+```
+
+```{r}
+#creating table for display of resutls
+mark_hamill_top_4_tb <- mark_hamill_top_4 |>
+  gt() |>
+  tab_header(
+    title = "Mark Hamill's Top 4 Projects"
+  ) |>
+  cols_label(
+    primaryTitle = "Project Title",
+    titleType = "Type"
+  )
+
+# Display the table
+mark_hamill_top_4_tb
+
+```
+
+Next, we move on to answer the next question of: What TV series, with more than 12 episodes, has the highest average rating? (Q5)
+
+First, we filter the TITLE_BASICS table to only get TV series:
+
+```{r}
+tv_series <- TITLE_BASICS |>
+  filter(titleType == "tvSeries")
+```
+
+Then, filter the TITLE_EPISODES table to be grouped by series and filtered on series with more than 12 episodes:
+
+```{r}
+series_episodes_filtered <- TITLE_EPISODES |>
+  groupby(parentTconst) |>
+  summarize(numEpisodes = n()) |>
+  filter(numEpisodes > 12)
+```
+
+Joining the filtered TITLE_EPISODES table with the TITLE_RATINGS table to calculate average rating by series:
+
+```{r}
+series_avg_ratings <- series_episode_count |>
+  inner_join(TITLE_RATINGS, by = c("parentTconst" = "tconst")) |>
+  group_by(parentTconst) |>
+  summarize(avgRating = mean(averageRating, na.rm = TRUE), numEpisodes = first(numEpisodes)) |>
+  arrange(desc(avgRating)) |>
+  slice(1) #series with highest avg rating
+```
+
+Joining the series with the highest average rating back with TITLE_BASICS to access the series name:
+
+```{r}
+highest_rated_series <- series_ratings |>
+  inner_join(tv_series, by = c("parentTconst" = "tconst")) |>
+  select(primaryTitle, avgRating, numEpisodes)
+```
+
+Creating a table to display the results from the 4 steps of code above:
+
+```{r}
+
+highest_rated_series_tb <- highest_rated_series |>
+  gt() |>
+  tab_header(
+    title = "Highest Rated TV Series with More Than 12 Episodes"
+  ) |>
+  cols_label(
+    primaryTitle = "Series Title",
+    avgRating = "Average Rating",
+    numEpisodes = "Number of Episodes"
+  ) |>
+  fmt_number(
+    columns = c(avgRating),
+    decimals = 1
+  )
+
+#displaying table 
+highest_rated_series_tb
+
+```
+
+Moving on to the final question of Task 2, regarding the TV series Happy Days (1974-1984) (Q6)
+
+First, filtering to get only the "Happy Days" TV series from the TITLE_BASICS table.
+
+```{r}
+happy_days_series <- TITLE_BASICS |>
+  filter(primaryTitle == "Happy Days" & titleType == "tvSeries")
+```
+
+Next, joining with TITLE_EPISODES to get episode data for "Happy Days".
+
+```{r}
+happy_days_episodes <- TITLE_EPISODES |> 
+  inner_join(happy_days_series, by c("parentTconst" = "tconst"))
+```
+
+Performing another join with TITLE_RATINGS to get the ratings for each Happy Days episode.
+
+```{r}
+happy_days_ratings <- happy_days_episodes |>
+  inner_join(TITLE_RATINGS, by = "tconst")
+```
+
+Grouping by season and calculating the average rating for each season.
+
+```{r}
+happy_days_avg_ratings <- happy_days_ratings |>
+  group_by(seasonNumber) |>
+  summarize(avgRating = mean(averageRating, na.rm = TRUE))
+```
+
+For this question, a bar chart will be a great way to visualize our results. The below code creates a bar chart of average ratings by season, using the previously downloaded library ggplot2.
+
+```{r}
+ggplot(happy_days_avg_ratings, aes(x = as.factor(seasonNumber), y = avgRating)) + geom_bar(stat = "identity", fill = "steelblue") + labs(
+  title = "Average Ratings by Season for Happy Days",
+  x = "Season Number",
+  y = "Average Rating"
+) +
+  theme_minimal()
+```
+
+## Quantifying Success
+
+The goal of the following section is to define a success metric for movies, given only IMDb ratings.
+
+\## Task 3: Custom Success Metric
+
+In creating a custom success metric, important metrics to consider are both the quality and popularity of a movie. Quality could be reflected by average IMDb rating and popularity could be reflected by the number of IMDb votes.
+
+We can combine these two metric into a **Success Metric** formula as follows:
+
+'Success Metric = averageRating x log(numVotes)'
+
+Note: We use the logarithm of the number of votes to prevent movies with a large number of votes from skewing the results due to their popularity. The logarithm serves as a method to normalize the the scale of votes.
+
+Creating success metric:
+
+```{r}
+#adding success metric to TITLE_RATINGS table
+TITLE_RATINGS <- TITLE_RATINGS |> 
+  mutate(success_metric = averageRating * log1p(numVotes))
+
+# taking a peek at updated TITLE_RATINGS table 
+glimpse(TITLE_RATINGS)
+```
+
+Validating success metric:
+
+1.  Highest success metric top 5-10 movies
+
+    Using a bar chart to display the top 10 movies based on the custom success metric.
+
+```{r}
+#top 10 movies by success metric
+top_10_movies <- TITLE_RATINGS |>
+  inner_join(TITLE_BASICS, by = "tconst") |>
+  filter(titleType == "movie") |>
+  arrange(desc(success_metric)) |>
+  slice(1:10) |>
+  select(primaryTitle, averageRating, numVotes, success_metric)
+
+#bar chart to visualize top 10 movies
+ggplot(top_movies, aes(x = reorder(primaryTitle, success_metric), y = success_metric)) + geom_bar(stat = "identity", fill = "steelblue") +
+  coord_flip() +
+  labs(
+    title = "Top 10 Movies by Success Metric",
+    x = "Movie Title",
+    y = "Success Metric"
+  ) +
+  theme_minimal()
+
+```
+
+2.  Movies with High Votes but Low Success Scores
+
+    Using a scatter plot to display 5 movies with a large number of votes but poor success scores.
+
+    ```{r}
+    #grabbing movies with high votes and low success scores
+    low_success_movies <- TITLE_RATINGS |>
+      filter(numVotes > 100000) |>
+      arrange(success_metric) |>
+      slice(1:5) |>
+      inner_join(TITLE_BASICS, by = "tconst") |>
+      select(primaryTitle, averageRating, numVotes, success_metric)
+
+    #creating scatter plot to visualize 
+    ggplot(low_success_movies, aes(x = numVotes, y = success_metric)) + geom_point(size=3, color="red") + geom_text(aes(label = primaryTitle), vjust = -1) + labs(
+      title = "Movies with High Votes and Low Success Scores",
+      x= "Number of Votes",
+      y="Success Metric"
+    ) +
+      theme_minimal() 
+    ```
+
+3.  Prestigous Actor Check
+
+In this validation method, the modeler selects a prestigious actor and confirms they have many projects with high success scores based on the defined success metric.
+
+Chosen Actor: Robert De Niro
+
+The code below walks us through the steps taken to get to Robert De Niro's projects and their ratings.
+
+First, filter for Robert De Niro in the NAME_BASICS table.
+
+Next, join with the TITLE_BASICS on the knownForTitles column, after splitting this column.
+
+Then, join with TITLE_RATINGS to get ratings for the projects.
+
+```{r}
+de_niro_projects <- NAME_BASICS |>
+  filter(primaryName == "Robert De Niro") |>
+  separate_rows(knownForTitles, sep = ",") |>
+  inner_join(TITLE_BASICS, by = c("knownForTitles" = "tconst")) |>
+  inner_join(TITLE_RATINGS, by = "tconst") |>
+  arrange(desc(success_metric)) |>
+  select(primaryTitle, averageRating, numVotes, success_metric)
+```
+
+We use a scatterplot to display the averageRating vs Success Metric. The trend line is included to help highlight any linear relationship between these two variables.
+
+```{r}
+ggplot(de_niro_projects, aes(x = averageRating, y = success_metric)) +
+  geom_point(size = 3, color = "blue") +  # Scatter plot points
+  geom_smooth(method = "lm", color = "red", linetype = "dashed") +  # Add a trend line (linear regression)
+  labs(
+    title = "Robert De Niro's Projects: IMDb Rating vs Success Metric",
+    x = "IMDb Average Rating",
+    y = "Success Metric"
+  ) +
+  theme_minimal()
+```
