@@ -4,6 +4,7 @@ editor: visual
 format:
   html:
     code-fold: true
+output-dir: docs
 ---
 
 ```{r setup, include=FALSE}
@@ -20,7 +21,7 @@ new_packages <- packages[!(packages %in% installed.packages()[,"Package"])]
 if(length(new_packages)) install.packages(new_packages)
 ```
 
-```{r setup, include=FALSE}
+```{r libraries, include=FALSE}
 #Loading necessary libraries 
 library(dplyr)
 library(ggplot2)
@@ -227,13 +228,14 @@ The code below answers the question of who the oldest living person in our data 
 To access the oldest living person in the NAME_BASICS dataset, the code below filters to find the person with the maximum birthYear where deathYear is NA.
 
 ```{r}
-# Filter out people with valid birthYear and living (i.e., deathYear is NA)
+# Filter out people with valid birthYear and living (i.e., deathYear is NA or equal to "NA")
 oldest_living_person <- NAME_BASICS |>
-  filter(!is.na(birthYear) & is.na(deathYear)) |>
+  filter(!is.na(birthYear) & is.na(deathYear) & birthYear >= 1900) |>
   arrange(birthYear) |>
-  slice(1)  |>
+  slice(1) |>
   select(primaryName, birthYear)
 
+# Create a table and format it using gt
 oldest_living_person_tb <- oldest_living_person |>
   gt() |>
   tab_header(
@@ -249,29 +251,9 @@ oldest_living_person_tb <- oldest_living_person |>
     use_seps = FALSE
   )
 
-print(oldest_living_person_tb)
-
-```
-
-```{r}
-# Filter out people with valid birthYear and living (i.e., deathYear is NA)
-oldest_living_person <- NAME_BASICS |>
-  filter(!is.na(birthYear) & is.na(deathYear)) |>
-  arrange(birthYear) |>
-  slice(1)  |>
-  select(primaryName, birthYear)
-
-# Create a table and format it using gt
-oldest_living_person_tb <- oldest_living_person |>
-  gt() 
-
 # Displaying the table
 print(oldest_living_person_tb)
 
-```
-
-```{r}
-print(oldest_living_person)
 ```
 
 Next we aim to find the TV Episode with a perfect 10/10 rating and 200,000 IMDb ratings. To do so, we will need to access the TITLE_RATINGS, TITLE_BASICS, and TITLE_EPISODES tables.
@@ -332,10 +314,7 @@ perfect_episode_tb <- perfect_episode |>
   )
 
 # Display the table
-perfect_episode_tb
-```
-
-```         
+print(perfect_episode_tb)
 ```
 
 We find the TV episode with a perfect 10/10 rating and at least 200,000 IMDb ratings is the episode titled "Ozymandias" in the "Breaking Bad" series.
@@ -343,23 +322,18 @@ We find the TV episode with a perfect 10/10 rating and at least 200,000 IMDb rat
 Moving on to learning more about the actor Mark Hamill. The code below finds the 4 most popular projects Mark Hamill worked on. The code filters the NAME_BASICS table to only Mark Hamill, then splits the knownForTitles columns into separate rows for each title, then joins to the TITLE_BASICS table to get project details. We then arrange the numVotes in descending order and take the top 4 using a slice function. We select the title and type for the final output of his projects.
 
 ```{r}
-mark_hamill_top_4 <- NAME_BASICS |>
+# Step 1: Find the four projects Mark Hamill is most known for using a join
+mark_hamill_projects <- NAME_BASICS |>
   filter(primaryName == "Mark Hamill") |>
-  separate_rows(knownForTitles, sep=",") |>
-  inner_join(TITLE_BASICS, by =c("knownForTitles" = "tconst")) |>
-  arrange(desc(numVotes)) |>
-  slice_head(n=4) |>
+  separate_rows(knownForTitles, sep = ",") |>
+  inner_join(TITLE_BASICS, by = c("knownForTitles" = "tconst")) |>
   select(primaryTitle, titleType)
 
-  
-```
-
-```{r}
-#creating table for display of resutls
-mark_hamill_top_4_tb <- mark_hamill_top_4 |>
+# Step 2: Create a gt table to display the four projects
+mark_hamill_projects_tb <- mark_hamill_projects |>
   gt() |>
   tab_header(
-    title = "Mark Hamill's Top 4 Projects"
+    title = "Mark Hamill's Most Known Projects"
   ) |>
   cols_label(
     primaryTitle = "Project Title",
@@ -367,8 +341,7 @@ mark_hamill_top_4_tb <- mark_hamill_top_4 |>
   )
 
 # Display the table
-mark_hamill_top_4_tb
-
+mark_hamill_projects_tb
 ```
 
 Next, we move on to answer the next question of: What TV series, with more than 12 episodes, has the highest average rating? (Q5)
@@ -384,7 +357,7 @@ Then, filter the TITLE_EPISODES table to be grouped by series and filtered on se
 
 ```{r}
 series_episodes_filtered <- TITLE_EPISODES |>
-  groupby(parentTconst) |>
+  group_by(parentTconst) |>
   summarize(numEpisodes = n()) |>
   filter(numEpisodes > 12)
 ```
@@ -392,7 +365,7 @@ series_episodes_filtered <- TITLE_EPISODES |>
 Joining the filtered TITLE_EPISODES table with the TITLE_RATINGS table to calculate average rating by series:
 
 ```{r}
-series_avg_ratings <- series_episode_count |>
+series_avg_ratings <- series_episodes_filtered |>
   inner_join(TITLE_RATINGS, by = c("parentTconst" = "tconst")) |>
   group_by(parentTconst) |>
   summarize(avgRating = mean(averageRating, na.rm = TRUE), numEpisodes = first(numEpisodes)) |>
@@ -403,7 +376,7 @@ series_avg_ratings <- series_episode_count |>
 Joining the series with the highest average rating back with TITLE_BASICS to access the series name:
 
 ```{r}
-highest_rated_series <- series_ratings |>
+highest_rated_series <- series_avg_ratings |>
   inner_join(tv_series, by = c("parentTconst" = "tconst")) |>
   select(primaryTitle, avgRating, numEpisodes)
 ```
