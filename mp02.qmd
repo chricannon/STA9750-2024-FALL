@@ -7,6 +7,10 @@ format:
 output-dir: docs
 ---
 
+# Mini-Project #02: The Business of Show Business
+
+Abstract: The modeler of this project plays the role of a Hollywood development executive; the executive in charge of coming up with new movie ideas. The project aims to develop a set of data-driven ideas for new movies. The process involves diving into Hollywood history to: identify key characteristics of successful movies, identify successful filmmakers and actors, and examine some of Hollywood's most famous flops.
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(cache=FALSE, echo=TRUE, warning=FALSE, message=FALSE)
 ```
@@ -21,7 +25,7 @@ new_packages <- packages[!(packages %in% installed.packages()[,"Package"])]
 if(length(new_packages)) install.packages(new_packages)
 ```
 
-```{r libraries, include=FALSE}
+```{r libraries}
 #Loading necessary libraries 
 library(dplyr)
 library(ggplot2)
@@ -32,24 +36,9 @@ library(gt)
 
 ```
 
-```{r}
-# Creating a simple test table
-test_table <- data.frame(
-  A = c(1, 2),
-  B = c(3, 4)
-)
+Installed necessary packages and loaded libraries successfully.
 
-# Formatting table with gt
-test_gt <- test_table |>
-  gt() |>
-  tab_header(
-    title = "Simple Test Table"
-  )
-
-# Display the table
-test_gt
-
-```
+[Note: Due to technical difficulties, a pre-processed data set was loaded.]{.smallcaps}
 
 ```{r}
 get_imdb_file <- function(fname){
@@ -87,7 +76,7 @@ Pre-Processed Data has been loaded successfully.
 
 To better understand the structure of the data, we will use the `glimpse` function from the `dplyr` package to examine each table. This will provide insight into the number of columns, column names, and their respective data types for each dataset.
 
-```{r}
+```{r, echo=TRUE, results='markup',fold=TRUE}
 glimpse(NAME_BASICS)
 
 glimpse(TITLE_BASICS)
@@ -160,11 +149,25 @@ TITLE_PRINCIPALS <- TITLE_PRINCIPALS |>
 
 ## Task 2: Instructor-Provided Questions
 
-The code below gives us a summary of the number of movies, TV series, and TV episodes in our dataset.
+The code below gives us a summary of the number of movies, TV series, and TV episodes in our dataset. **(Q1)**
 
 The values are calculated using dplyr functionality, and the summary table is created using the previously downloaded gt package.
 
-```{r}
+```{r calculate_counts, cache=FALSE}
+num_movies <- TITLE_BASICS |>
+  filter(titleType == "movie") |>
+  nrow()
+
+num_tv_series <- TITLE_BASICS |>
+  filter(titleType == "tvSeries") |>
+  nrow()
+
+num_tv_episodes <- TITLE_EPISODES |>
+  nrow()
+
+```
+
+```{r render_table, depends_on="calculate_counts"}
 # Creating summary table
 summary_table <- data.frame(
   'Movies' = num_movies,
@@ -188,54 +191,17 @@ summary_gt
 
 ```
 
-```{r, results='asis'}
-#Calculating counts 
-num_movies <- TITLE_BASICS |>
-  filter(titleType == "movie") |>
-  nrow()
-
-num_tv_series <- TITLE_BASICS |>
-  filter(titleType == "tvSeries") |>
-  nrow()
-
-num_tv_episodes <- TITLE_EPISODES |>
-  nrow()
-
-#Creating summary table
-summary_table <- data.frame(
-  'Movies' = num_movies,
-  'TV Series' = num_tv_series, 
-  'TV Episodes' = num_tv_episodes
-)
-
-#Formatting summary table using gt
-summary_gt <- summary_table |>
-  gt() |>
-  tab_header(
-    title = "Total Movies, TV Series and Episodes"
-  ) |>
-  fmt_number(
-    columns = everything(),
-    decimals = 0
-  )
-
-#Displaying table
-print(summary_gt)
-```
-
-The code below answers the question of who the oldest living person in our data set is. We first access the oldest living person from the NAME_BASICS dataset and then format the result into a table using gt.
+The code below answers the question of who the oldest living person in our data set is. We first access the oldest living person from the NAME_BASICS dataset and then format the result into a table using gt. **(Q2)**
 
 To access the oldest living person in the NAME_BASICS dataset, the code below filters to find the person with the maximum birthYear where deathYear is NA.
 
-```{r}
-# Filter out people with valid birthYear and living (i.e., deathYear is NA or equal to "NA")
+```{r, results='asis'}
 oldest_living_person <- NAME_BASICS |>
   filter(!is.na(birthYear) & is.na(deathYear) & birthYear >= 1900) |>
   arrange(birthYear) |>
   slice(1) |>
   select(primaryName, birthYear)
 
-# Create a table and format it using gt
 oldest_living_person_tb <- oldest_living_person |>
   gt() |>
   tab_header(
@@ -251,12 +217,11 @@ oldest_living_person_tb <- oldest_living_person |>
     use_seps = FALSE
   )
 
-# Displaying the table
 print(oldest_living_person_tb)
 
 ```
 
-Next we aim to find the TV Episode with a perfect 10/10 rating and 200,000 IMDb ratings. To do so, we will need to access the TITLE_RATINGS, TITLE_BASICS, and TITLE_EPISODES tables.
+Next we aim to find the TV Episode with a perfect 10/10 rating and 200,000 IMDb ratings. To do so, we will need to access the TITLE_RATINGS, TITLE_BASICS, and TITLE_EPISODES tables. **(Q3)**
 
 The code below filters the TITLE_RATINGS table for the episode with a 10/10 rating and at least 200,000 IMDb ratings.
 
@@ -269,7 +234,7 @@ The final inner_join with TITLE_BASICS retrieves the series name by matching the
 We then use the select function to select only the relevant columns for our dataframe. We finally rename these columns to allow for more descriptive column names.
 
 ```{r}
-# Filter for episodes with a perfect 10/10 rating and >= 200,000 votes
+
 perfect_episode <- TITLE_RATINGS |>
   filter(averageRating == 10, numVotes >= 200000) |>
   inner_join(
@@ -283,7 +248,6 @@ perfect_episode <- TITLE_RATINGS |>
   ) |>
   select(primaryTitle.x, primaryTitle.y, titleType.x, averageRating, numVotes)
 
-# Rename the columns for better understanding 
 perfect_episode <- perfect_episode |>
   rename(
     episodeTitle = primaryTitle.x,
@@ -294,8 +258,8 @@ perfect_episode <- perfect_episode |>
 
 The below code creates a summary table of our results.
 
-```{r}
-# Create the summary table with gt
+```{r, results='asis'}
+
 perfect_episode_tb <- perfect_episode |>
   gt() |>
   tab_header(
@@ -313,23 +277,22 @@ perfect_episode_tb <- perfect_episode |>
     decimals = 0
   )
 
-# Display the table
+
 print(perfect_episode_tb)
 ```
 
 We find the TV episode with a perfect 10/10 rating and at least 200,000 IMDb ratings is the episode titled "Ozymandias" in the "Breaking Bad" series.
 
-Moving on to learning more about the actor Mark Hamill. The code below finds the 4 most popular projects Mark Hamill worked on. The code filters the NAME_BASICS table to only Mark Hamill, then splits the knownForTitles columns into separate rows for each title, then joins to the TITLE_BASICS table to get project details. We then arrange the numVotes in descending order and take the top 4 using a slice function. We select the title and type for the final output of his projects.
+Moving on to learning more about the actor Mark Hamill. The code below finds the 4 most popular projects Mark Hamill worked on. The code filters the NAME_BASICS table to only Mark Hamill, then splits the knownForTitles columns into separate rows for each title, then joins to the TITLE_BASICS table to get project details. We then arrange the numVotes in descending order and take the top 4 using a slice function. We select the title and type for the final output of his projects. **(Q4)**
 
-```{r}
-# Step 1: Find the four projects Mark Hamill is most known for using a join
+```{r, results = 'asis'}
+
 mark_hamill_projects <- NAME_BASICS |>
   filter(primaryName == "Mark Hamill") |>
   separate_rows(knownForTitles, sep = ",") |>
   inner_join(TITLE_BASICS, by = c("knownForTitles" = "tconst")) |>
   select(primaryTitle, titleType)
 
-# Step 2: Create a gt table to display the four projects
 mark_hamill_projects_tb <- mark_hamill_projects |>
   gt() |>
   tab_header(
@@ -340,11 +303,11 @@ mark_hamill_projects_tb <- mark_hamill_projects |>
     titleType = "Type"
   )
 
-# Display the table
+
 mark_hamill_projects_tb
 ```
 
-Next, we move on to answer the next question of: What TV series, with more than 12 episodes, has the highest average rating? (Q5)
+Next, we move on to answer the next question of: What TV series, with more than 12 episodes, has the highest average rating? **(Q5)**
 
 First, we filter the TITLE_BASICS table to only get TV series:
 
@@ -383,7 +346,7 @@ highest_rated_series <- series_avg_ratings |>
 
 Creating a table to display the results from the 4 steps of code above:
 
-```{r}
+```{r, results='asis'}
 
 highest_rated_series_tb <- highest_rated_series |>
   gt() |>
@@ -405,7 +368,7 @@ highest_rated_series_tb
 
 ```
 
-Moving on to the final question of Task 2, regarding the TV series Happy Days (1974-1984) (Q6)
+Moving on to the final question of Task 2, regarding the TV series Happy Days (1974-1984) **(Q6)**
 
 First, filtering to get only the "Happy Days" TV series from the TITLE_BASICS table.
 
@@ -418,7 +381,7 @@ Next, joining with TITLE_EPISODES to get episode data for "Happy Days".
 
 ```{r}
 happy_days_episodes <- TITLE_EPISODES |> 
-  inner_join(happy_days_series, by c("parentTconst" = "tconst"))
+  inner_join(happy_days_series, by =  c("parentTconst" = "tconst"))
 ```
 
 Performing another join with TITLE_RATINGS to get the ratings for each Happy Days episode.
@@ -451,17 +414,17 @@ ggplot(happy_days_avg_ratings, aes(x = as.factor(seasonNumber), y = avgRating)) 
 
 The goal of the following section is to define a success metric for movies, given only IMDb ratings.
 
-\## Task 3: Custom Success Metric
+### Task 3: Custom Success Metric
 
 In creating a custom success metric, important metrics to consider are both the quality and popularity of a movie. Quality could be reflected by average IMDb rating and popularity could be reflected by the number of IMDb votes.
 
 We can combine these two metric into a **Success Metric** formula as follows:
 
-'Success Metric = averageRating x log(numVotes)'
+[`Success Metric = averageRating x log(numVotes)`]{.underline}
 
 Note: We use the logarithm of the number of votes to prevent movies with a large number of votes from skewing the results due to their popularity. The logarithm serves as a method to normalize the the scale of votes.
 
-Creating success metric:
+-   Creating success metric:
 
 ```{r}
 #adding success metric to TITLE_RATINGS table
@@ -472,9 +435,9 @@ TITLE_RATINGS <- TITLE_RATINGS |>
 glimpse(TITLE_RATINGS)
 ```
 
-Validating success metric:
+-   Validating success metric:
 
-1.  Highest success metric top 5-10 movies
+1.  Highest Success Metric Top 10 Movies
 
     Using a bar chart to display the top 10 movies based on the custom success metric.
 
@@ -488,7 +451,7 @@ top_10_movies <- TITLE_RATINGS |>
   select(primaryTitle, averageRating, numVotes, success_metric)
 
 #bar chart to visualize top 10 movies
-ggplot(top_movies, aes(x = reorder(primaryTitle, success_metric), y = success_metric)) + geom_bar(stat = "identity", fill = "steelblue") +
+ggplot(top_10_movies, aes(x = reorder(primaryTitle, success_metric), y = success_metric)) + geom_bar(stat = "identity", fill = "steelblue") +
   coord_flip() +
   labs(
     title = "Top 10 Movies by Success Metric",
@@ -521,11 +484,11 @@ ggplot(top_movies, aes(x = reorder(primaryTitle, success_metric), y = success_me
       theme_minimal() 
     ```
 
-3.  Prestigous Actor Check
+3.  Prestigious Actor Check
 
 In this validation method, the modeler selects a prestigious actor and confirms they have many projects with high success scores based on the defined success metric.
 
-Chosen Actor: Robert De Niro
+Chosen Actor: **Robert De Niro**
 
 The code below walks us through the steps taken to get to Robert De Niro's projects and their ratings.
 
@@ -536,19 +499,55 @@ Next, join with the TITLE_BASICS on the knownForTitles column, after splitting t
 Then, join with TITLE_RATINGS to get ratings for the projects.
 
 ```{r}
-de_niro_projects <- NAME_BASICS |>
+de_niro_titles <- NAME_BASICS |>
   filter(primaryName == "Robert De Niro") |>
-  separate_rows(knownForTitles, sep = ",") |>
-  inner_join(TITLE_BASICS, by = c("knownForTitles" = "tconst")) |>
+  separate_rows(knownForTitles, sep = ",")
+
+print(de_niro_titles)
+```
+
+```{r}
+de_niro_basic_join <- de_niro_titles |>
+  inner_join(TITLE_BASICS, by = c("knownForTitles" = "tconst"))
+
+glimpse(de_niro_basic_join)
+```
+
+```{r}
+
+de_niro_basic_join <- de_niro_basic_join |>
+  rename(tconst = knownForTitles)
+
+de_niro_success <- de_niro_basic_join |>
   inner_join(TITLE_RATINGS, by = "tconst") |>
   arrange(desc(success_metric)) |>
-  select(primaryTitle, averageRating, numVotes, success_metric)
+  select(primaryTitle, titleType, averageRating, numVotes, success_metric)
+
+glimpse(de_niro_success)
+
+```
+
+```{r, results='asis'}
+#creating a table to display results above
+de_niro_table <- de_niro_success |>
+  gt() |>
+  tab_header(
+    title = "Robert De Niro's Top 4 Projects by Success Metric"
+  ) |>
+  fmt_number(
+    columns = c(averageRating, numVotes, success_metric),
+    decimals = 2
+  )
+
+#printing table
+de_niro_table
+
 ```
 
 We use a scatterplot to display the averageRating vs Success Metric. The trend line is included to help highlight any linear relationship between these two variables.
 
 ```{r}
-ggplot(de_niro_projects, aes(x = averageRating, y = success_metric)) +
+ggplot(de_niro_success, aes(x = averageRating, y = success_metric)) +
   geom_point(size = 3, color = "blue") +  # Scatter plot points
   geom_smooth(method = "lm", color = "red", linetype = "dashed") +  # Add a trend line (linear regression)
   labs(
@@ -558,3 +557,453 @@ ggplot(de_niro_projects, aes(x = averageRating, y = success_metric)) +
   ) +
   theme_minimal()
 ```
+
+We find Robert De Niro's projects with the highest success rating also have a high success score, which further validates the chosen success metric.
+
+4.  Further Validation
+
+    In an effort to continue validating our chosen success metric, we explore the use of scatterplots to analyze the relationship between IMDb rating and success metric score.
+
+```{r}
+all_movies_success <- TITLE_RATINGS |>
+  inner_join(TITLE_BASICS, by = "tconst") |>
+  filter(titleType == "movie")
+
+ggplot(all_movies_success, aes(x = averageRating, y = success_metric)) +
+  geom_point(color = "blue", size = 2, alpha = 0.5) +  # All movie points
+  geom_smooth(method = "lm", color = "red", se = FALSE, linetype = "dashed") +  # Trend line
+  labs(x = "IMDb Average Rating", y = "Success Metric", title = "Scatterplot of Success Metric vs IMDb Average Rating (All Movies)") +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+    axis.title.x = element_text(size = 14),
+    axis.title.y = element_text(size = 14)
+  )
+
+```
+
+Applying jittering to make the scatterplot slightly more readable.
+
+```{r}
+
+ggplot(all_movies_success, aes(x = averageRating, y = success_metric)) +
+  geom_jitter(color = "blue", size = 1.5, alpha = 0.3, width = 0.2, height = 0.2) +  # Jitter points
+  geom_smooth(method = "lm", color = "red", se = FALSE, linetype = "dashed") +  # Trend line
+  labs(x = "IMDb Average Rating", y = "Success Metric", title = "Scatterplot of Success Metric vs IMDb Average Rating (All Movies)") +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+    axis.title.x = element_text(size = 14),
+    axis.title.y = element_text(size = 14)
+  )
+```
+
+Cleaning dataset to eliminate outliers, set a threshold for the minimum number of votes, and remove NAs. This allows for a smaller dataset to hopefully improve the visibility of our scatterplot.
+
+```{r}
+
+min_votes_threshold <- 1000  # You can adjust this value based on your needs
+
+all_movies_filtered <- all_movies_success |>
+  filter(!is.na(averageRating) & !is.na(numVotes)) |>  # Remove rows with missing values
+  filter(numVotes >= min_votes_threshold) |>  # Remove movies with too few votes
+  filter(averageRating >= 2 & averageRating <= 9.5) |> # Remove movies with extreme ratings
+  filter(!is.na(startYear) & genres != "\\N")
+
+ggplot(all_movies_filtered, aes(x = averageRating, y = success_metric)) +
+  geom_jitter(color = "blue", size = 1.5, alpha = 0.3, width = 0.2, height = 0.2) +
+  geom_smooth(method = "lm", color = "red", se = FALSE, linetype = "dashed") +
+  labs(x = "IMDb Average Rating", y = "Success Metric", title = "Scatterplot of Success Metric vs IMDb Average Rating (Filtered Movies)") +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+    axis.title.x = element_text(size = 14),
+    axis.title.y = element_text(size = 14)
+  )
+
+```
+
+Given the volume of movies in our dataset, this only slightly improved the visibility of the scatterplot. In all three versions, the correlation is clear, movies with a higher average rating tend to have a higher success metric.
+
+To further validate the custom success metric, we find the correlation coefficient between the IMDb average rating and the success metric. This measures the linear relationship between the two variables.
+
+```{r, results='asis'}
+
+correlation <- cor(all_movies_filtered$averageRating, all_movies_filtered$success_metric, use = "complete.obs")
+
+correlation_df <- data.frame(
+  x = "IMDb Average Rating",
+  y = "Success Metric",
+  Correlation_Coefficient = sprintf("%.2f", correlation)
+)
+
+correlation_table <- correlation_df |>
+  gt() |>
+  tab_header(
+    title = "Correlation between IMDb Average Rating and Success Metric"
+  )
+
+print(correlation_table)
+
+
+```
+
+The calculated correlation coefficient of 0.78 indicates a strong positive correlation between the IMDb average rating and the success metric. This translates to, movies with higher IMDb ratings also tend to score higher on the success metric, which is the trend we can visualize in the scatterplots above. This further supports and validates the use of the success metric.
+
+5.  Define a Numerical Threshold for Successful Project
+
+    Establishing a **numerical threshold** for the custom success metric requires a few steps.
+
+    1\) Analyzing the distribution of the success metric
+
+    ```{r, results = 'asis'}
+    success_summary <- all_movies_filtered |>
+      summarise(
+        Min = round(min(success_metric),2),
+        Q1 = round(quantile(success_metric, 0.25),2),
+        Median = round(median(success_metric),2),
+        Q3 = round(quantile(success_metric, 0.75),2),
+        Max = round(max(success_metric),2),
+        Mean = round(mean(success_metric),2),
+        SD = round(sd(success_metric),2)
+      )
+
+    success_summary_table <- success_summary |>
+      gt() |>
+      tab_header(
+        title = "Summary Statistics for Success Metric"
+      )
+
+    print(success_summary_table)
+
+    ```
+
+2) Visualizing the Success Metric
+
+```{r}
+ggplot(all_movies_filtered, aes(x = "", y = success_metric)) +
+  geom_boxplot() +
+  labs(
+    title = "Boxplot of Success Metric for All Movies",
+    y = "Success Metric"
+  )
+
+```
+
+The box plot helps visualize the distribution of the success metric and outliers above the upper quartile. A majoriy of the success metrics lie between 50 and 75, with outliers above 100.
+
+```{r}
+ggplot(all_movies_filtered, aes(x = success_metric)) +
+  geom_histogram(bins = 30, fill = "blue", alpha = 0.7) +
+  labs(
+    title = "Distribution of Success Metric for All Movies",
+    x = "Success Metric",
+    y = "Count"
+  )
+```
+
+The histogram of the success metric shows a right-skewed distribution, with the majority of movies clustered around a success metric of 50 to 75. Another observation includes the significant number of high-performing movies in the dataset, as we can see from the long tail extending towards higher success values.
+
+3) Defining the Success Threshold
+
+We can pick a threshold at the third quartile, Q3, given the top 25% of movies fall above this threshold. By setting this threshold, we ensure only movies that are significantly better than the median are classified as "solid" or better.
+
+[Our success threshold chosen is our Q3 value of **62.06**.]{.underline}
+
+## Examining Success by Genre and Decade 
+
+### Task 4: Trends in Success Over Time 
+
+The analysis may be broken down by decades and genres.
+
+We start with categorizing movies by decade. The code below creates a new column that groups movies by the decade they were released, through the use of the startYear column. We add a decade column through the use of the mutate function.
+
+```{r}
+all_movies_filtered <- all_movies_filtered |> 
+  mutate(decade = floor(startYear / 10) * 10)
+
+```
+
+Moving on to grouping by genres. The code below splits the genres column into separate rows so movies can be individually analyzed by each genre.
+
+```{r}
+all_movies_filtered <- all_movies_filtered |>
+  separate_rows(genres, sep=",")
+```
+
+We then filter the movies that are considered successful. We define our success_threshold as the Q3 value, or 62.05, found in the previous task.
+
+```{r}
+success_threshold <- 62.05 
+successful_movies <- all_movies_filtered |>
+  filter(success_metric >= success_threshold)
+```
+
+Then group by genre and decade, and count the number of successes.
+
+```{r}
+success_by_genre_decade <- successful_movies |>
+  group_by(genres, decade) |>
+  summarize(success_count=n(), .groups="drop")
+```
+
+Let's take a look at few different views of our trends.
+
+Line Plot showing Success Over Time by Genre:
+
+Each line in the plot below represents the number of successful movies for a given genre in each decade, as defined by the custom success metric, filtered above the 62.05 threshold, showing only "successful" movies.
+
+```{r}
+ggplot(success_by_genre_decade, aes(x = decade, y = success_count, color = genres)) +
+  geom_line(size = 1) +
+  labs(title = "Trends in Movie Success by Genre and Decade",
+       x = "Decade", y = "Number of Successful Movies") +
+  theme_minimal()
+```
+
+Observations on the above:
+
+-   Documentaries appear to dominate the successful movie space, while seeing a sharp rise from the 1980s to early 2000's, and then a significant decline to follow
+
+-   Notable increase in biography popularity, with a peak in the early 2000's
+
+-   Success in the early 2000's, as we see most of the genres peak around 2010
+
+Bar Chart showing Success by Genre since 2010:
+
+```{r}
+success_2010s <- success_by_genre_decade |> 
+  filter(decade >= 2010)
+
+ggplot(success_2010s, aes(x = reorder(genres, success_count), y = success_count, fill = genres)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Successful Movies by Genre (Post-2010)",
+       x = "Genre", y = "Number of Successful Movies") +
+  coord_flip() +  # Flip the axis to make it easier to read
+  theme_minimal()
+
+```
+
+When we take a look at genre success following the year 2010, we see drama dominating the field, followed by comedy, action, then crime.
+
+We find that documentaries, while extremely popular before 2010, are quite low on the list in comparison to other genres.
+
+With these results, the **chosen genre** for the next project, which will be used in the following task, is **Action**.
+
+## Successful Personnel in the Genre 
+
+### Task 5: Key Personnel 
+
+The chosen genre is Action. we start with filtering only on Action movies. Rather than filtering from the TITLE_BASICS table, we filter from our cleaned dataset of movies, all_movies_filtered.
+
+We join our dataset of cleaned movies data, filtered to only action movies, with the TITLE_PRINCIPALS table to get the principals, which will be actors and directors, in our case.
+
+This dataset is then joined to the NAME_BASICS table, so we can later access the names of the actors and directors.
+
+```{r}
+action_movies_filtered <- successful_movies |>
+  separate_rows(genres, sep = ",") |>
+  filter(genres == "Action")
+
+action_principals <- TITLE_PRINCIPALS |>
+  inner_join(action_movies_filtered, by = "tconst")
+
+action_personnel <- action_principals |>
+  inner_join(NAME_BASICS, by = "nconst")
+
+```
+
+The code below accesses directors and leads to creating and displaying a table of the top 5 directors, who have worked on action movies, in our dataset.
+
+```{r, results='asis'}
+
+
+directors <- action_personnel |>
+  filter(category == "director")
+
+director_success <- directors |>
+  group_by(nconst, primaryName) |>
+  summarize(
+    success_count = n(),
+    avg_success_metric = round(mean(success_metric, na.rm = TRUE),2),
+    known_for_titles = first(knownForTitles)
+  ) |>
+  arrange(desc(avg_success_metric)) |>
+  ungroup() |>
+  slice_head(n=5)
+
+directors_known_for <- director_success |>
+  separate_rows(known_for_titles, sep = ",") |>
+  inner_join(TITLE_BASICS, by = c("known_for_titles" = "tconst")) |>
+  group_by(primaryName) |>
+  summarize(
+    success_count = first(success_count),
+    avg_success_metric = first(avg_success_metric),
+    known_for_titles = paste(primaryTitle, collapse = ", ")
+  )
+
+director_table <- directors_known_for |>
+  slice_head(n = 5) |>
+  select(primaryName, success_count, avg_success_metric, known_for_titles) |>
+  gt() |>
+  tab_header(title = "Top 5 Action Directors") |>
+  cols_label(
+    primaryName = "Director",
+    success_count = "Number of Successful Movies",
+    avg_success_metric = "Average Success Metric",
+    known_for_titles = "Known For Titles"
+  )
+
+print(director_table)
+```
+
+The **chosen director** is [Peter Jackson]{.underline}. We see he's had 4 successful movies and one of the highest success metrics.
+
+The code below accesses actors and leads to creating and displaying a table of the top 5 actors, who have worked on action movies, in our dataset.
+
+```{r, results='asis'}
+
+actors <- action_personnel |>
+  filter(category == "actor" | category == "actress") |>
+  group_by(nconst, primaryName) |>
+  summarize(success_count=n(), avg_success_metric = round(mean(success_metric),2), known_for_titles = first(knownForTitles)) |>
+  arrange(desc(avg_success_metric)) |>
+  ungroup() |>
+  slice_head(n=5)
+
+actors_known_for <- actors |>
+  separate_rows(known_for_titles, sep = ",") |>
+  inner_join(TITLE_BASICS, by = c("known_for_titles" = "tconst")) |>
+  group_by(primaryName) |>
+  summarize(
+    success_count = first(success_count),
+    avg_success_metric = first(avg_success_metric),
+    known_for_titles = paste(primaryTitle, collapse = ", ")
+  )
+
+actor_table <- actors_known_for |>
+  slice_head(n = 5) |>
+  gt() |>
+  tab_header(title = "Top 5 Action Actors") |>
+  cols_label(
+    primaryName = "Actor",
+    success_count = "Number of Successful Movies",
+    avg_success_metric = "Average Success Metric",
+    known_for_titles = "Known For Titles"
+  )
+
+actor_table
+```
+
+The table above displays the top 4 actors involved in action movies, by highest average success scores.
+
+The **two chosen actors** are [Noel Appleby]{.underline} and [Alan Howard]{.underline}, given they've worked together on a successful film, The Lord of the Rings: The Fellowship of the Ring, and have each seen success in a few other known films throughout their career. They go along well with the chosen director, who was the director of The Lord of the Rings.
+
+The team has known success as we can see from their metrics displayed in the corresponding tables and visualized below. The three have worked together in the past, on a movie which was deemed successful, making this team more reliable.
+
+```{r}
+
+
+selected_personnel <- bind_rows(
+  actors_known_for |> select(primaryName, avg_success_metric) |> mutate(type = "Actor"),
+  directors_known_for |> select(primaryName, avg_success_metric) |> mutate(type = "Director")
+)
+
+ggplot(selected_personnel, aes(x = reorder(primaryName, avg_success_metric), y = avg_success_metric, fill = type)) +
+  geom_bar(stat = "identity", show.legend = TRUE) +
+  coord_flip() +
+  labs(
+    title = "Success Metrics for Selected Actors and Directors",
+    x = "Personnel",
+    y = "Average Success Metric"
+  ) +
+  theme_minimal() +
+  scale_fill_manual(values = c("Actor" = "skyblue", "Director" = "orange")) +
+  geom_text(aes(label = round(avg_success_metric, 2)), hjust = -0.1) +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+
+```
+
+## Nostalgia and Remakes 
+
+### Task 6: Finding a Classic Movie to Remake 
+
+In this task, our goal is to identify a classic action movie to remake. This movie is to have a large number of IMDb ratings, a high average rating, and not have been remade in the past 25 years.
+
+The code below focuses on successful action movies released before 1999, sorted by the custom success metric, IMDb rating, and vote count.
+
+```{r}
+
+classic_successful_action_movies <- successful_movies |>
+  separate_rows(genres, sep = ",") |>
+  filter(genres == "Action" & startYear < 1999)
+
+classic_successful_action_movies_sorted <- classic_successful_action_movies |>
+  arrange(desc(success_metric), desc(averageRating), desc(numVotes))
+
+classic_successful_action_movies_sorted <- classic_successful_action_movies_sorted |>
+  select(primaryTitle, startYear, averageRating, numVotes, success_metric)
+
+top_classic_successful_action_movies <- classic_successful_action_movies_sorted |> 
+  slice_head(n = 10)
+
+print(top_classic_successful_action_movies)
+
+```
+
+The output above displays the top 10 successful classic action movies, as defined above.
+
+The **chosen classic movie** is [Aliens]{.underline}. This movie has not been remake in the past 25 years, has an 8.4 average IMDb rating, a 114.01 custom success rating, and over 78,000 votes.
+
+These key details on the movie are pulled from the code below, and displayed in the table output.
+
+```{r, results='asis'}
+# Filter for the movie "Aliens"
+aliens_info <- top_classic_successful_action_movies |>
+  filter(primaryTitle == "Aliens") |>
+  select(primaryTitle, averageRating, numVotes, startYear, success_metric)
+
+# Create a gt table to display the details for "Aliens"
+aliens_gt_table <- aliens_info |>
+  gt() |>
+  tab_header(title = "Details for the Movie: Aliens") |>
+  cols_label(
+    primaryTitle = "Movie Title",
+    averageRating = "IMDb Rating",
+    numVotes = "Number of Votes",
+    startYear = "Release Year",
+    success_metric = "Success Metric"
+  ) |>
+  fmt_number(
+    columns = c(averageRating, success_metric),
+    decimals = 2
+  ) |>
+  fmt_number(
+    columns = numVotes,
+    use_seps = TRUE,
+    decimals = 0
+  )
+
+# Print the table
+print(aliens_gt_table)
+
+```
+
+## Putting It Together
+
+### Task 7: Write and Deliver Your Pitch 
+
+### Elevator Pitch:
+
+Imagine an action-packed remake of the 1986 sci-fi classic *Aliens*, a film that has captivated audiences with its 8.4 IMDb rating, 784,536 votes, and a success metric of 114.01. We are breathing new life into this iconic movie with a fresh, bold vision.
+
+Leading the charge is Peter Jackson, the legendary director behind *The Lord of the Rings* series. With 4 highly successful films under his belt, and one of the highest success metrics in the industry, Peter Jackson’s vision is the perfect blend of spectacle and storytelling to make this *Aliens* remake a sure hit.
+
+We’ve also assembled a powerhouse cast. Noel Appleby and Alan Howard, both having achieved success in *The Lord of the Rings: The Fellowship of the Ring*, bring an undeniable chemistry to the screen. Their performances, combined with Jackson’s directorial mastery, promise to elevate this project beyond a mere remake—it’s a revitalized epic that honors the original while pushing the boundaries of modern sci-fi action.
+
+With proven success across the board—genre, director, and cast—this project is a guaranteed box office hit and a thrilling adventure for fans, old and new.
+
+![](aliens_poster.jpg)
