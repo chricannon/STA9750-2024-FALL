@@ -314,7 +314,7 @@ As shown above, we find TX has the greatest difference, with 14 additional seats
 
     > Please go [here](https://protectdemocracy.org/work/fusion-voting-explained/) for a further understanding of Fusion Voting
     >
-    > \![Description of Fusion Voting](docs/images/fusion.png)
+    > ![](images/clipboard-2469181396.png){width="678"}
 
 The code below involves a few steps to get us to test if there are any elections in our data where the election would have had a different outcome if the "fusion" system was not used and candidates only received the votes they received from their "major party line", instead of their total number of votes across all lines.
 
