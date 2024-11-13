@@ -156,14 +156,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><u>Abstact</u></p>
 <p>This project aims to display a <em>political fact-check</em>, investigating the claim that the US Electoral College systemically biases election results away from the voice of the people (<em>vox populi).</em></p>
 <p><u>Background</u></p>
-<p>As a refresh, the basic rules of electing the President of the United States, as outlined in the [US Constitution] (<a href="https://constitution.congress.gov/constitution/)" class="uri">https://constitution.congress.gov/constitution/)</a> is as follows. The selected visuals provide a clear understanding of how the electoral college allocates their votes in each state. For further background information, you may review the attached summary of the electoral colelge from the [Institute For Mathematics and Democracy] (<a href="https://mathematics-democracy-institute.org/electoral-college/" class="uri">https://mathematics-democracy-institute.org/electoral-college/</a>)</p>
+<p>As a refresh, the basic rules of electing the President of the United States, as outlined in the <a href="https://constitution.congress.gov/constitution/">US Constitution</a> is as follows. The selected visuals provide a clear understanding of how the electoral college allocates their votes in each state. For further background information, you may review the attached summary of the electoral college from the <a href="https://mathematics-democracy-institute.org/electoral-college/">Institute For Mathematics and Democracy</a></p>
+<p>!<a href="docs/images/what_is_the_electoral_college.pgn">Electoral College</a></p>
 <p><img src="images/clipboard-1795305008.png" class="img-fluid"></p>
 <p>Each state gets R + 2 electoral college votes, where R is the number of Representatives that state has in the US House of Representatives.</p>
 <p>For the purposes of this project, the # of districts in a state = the # of congressional representatives</p>
+<p>!<a href="plus_2_effect.pgn">Plus 2</a></p>
 <p><img src="images/clipboard-3182049500.png" class="img-fluid"></p>
 <p>The “+2 effect” refers to the impact of the two additional electoral votes that every state receives due to its two Senate seats. While a state’s representation in the House—and therefore a portion of its electoral votes—reflects its population size, these two extra votes are the same for every state, regardless of population. As a result, individual votes in smaller states carry slightly more weight than in larger states because of this fixed “plus two” factor.</p>
+<p>!<a href="popular_v_electoral_vote.png">Popular vs.&nbsp;Electoral Vote</a></p>
 <p><img src="images/clipboard-3252953898.png" class="img-fluid"></p>
 <p>This image explains the difference between the popular vote and the electoral vote in U.S. presidential elections. Each state has a set number of electoral votes, which are generally based on its population, but every state also gets two additional votes for its senators. This can create situations where the electoral vote winner does not align with the popular vote winner.</p>
+<p>!<a href="fixing_electoral_college.pgn">Fixing the Electoral College</a></p>
 <p><img src="images/clipboard-747219911.png" class="img-fluid"></p>
 <p>There are several proposed ideas for reforming the Electoral College, addressing criticisms of the current winner-take-all-system, used by all states other than Maine and Nebraska today.</p>
 <p>Maine and Nebraska split Electoral College Votes (ECVs) by congressional district.</p>
@@ -191,38 +195,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>house_votes <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"~/Downloads/1976-2022-house.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stderr">
-<pre><code>Rows: 32452 Columns: 20
-── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr (7): state, state_po, office, stage, candidate, party, mode
-dbl (8): year, state_fips, state_cen, state_ic, district, candidatevotes, to...
-lgl (5): runoff, special, writein, unofficial, fusion_ticket
-
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-</div>
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>presidential_votes <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"~/Downloads/1976-2020-president.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stderr">
-<pre><code>Rows: 4287 Columns: 15
-── Column specification ────────────────────────────────────────────────────────
-Delimiter: ","
-chr (6): state, state_po, office, candidate, party_detailed, party_simplified
-dbl (7): year, state_fips, state_cen, state_ic, candidatevotes, totalvotes, ...
-lgl (2): writein, notes
-
-ℹ Use `spec()` to retrieve the full column specification for this data.
-ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-</div>
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(house_votes)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(presidential_votes)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>house_votes <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"~/Downloads/1976-2022-house.csv"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>presidential_votes <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"~/Downloads/1976-2020-president.csv"</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(house_votes)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(presidential_votes)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -235,48 +212,48 @@ lgl (2): writein, notes
 <p>The code below automates the download of files from the 94th to the 112th Congresses (1976-2012) and extracting the shapefiles from within the zip files.</p>
 <p>The steps taken involve:</p>
 <ul>
-<li><p>Defining the function get_congressional_shapefile(), which automates the download and import of congressional district shapefiles for the specified range of congressional sessions (94 to 112)</p></li>
+<li><p>Defining the function <code>get_congressional_shapefile()</code>, which automates the download and import of congressional district shapefiles for the specified range of congressional sessions (94 to 112)</p></li>
 <li><p>Storing each shapefile in a zip archive while the function checks if the file already exists locally. If not, file is downloaded. This avoids any redundant downloads.</p></li>
-<li><p>Unzipping downloaded zip file, and the shapefile within is read into R using read_sf()</p></li>
+<li><p>Unzipping downloaded zip file, and the shapefile within is read into R using <code>read_sf()</code></p></li>
 </ul>
 <p>A few additional steps were added to handle the large and complex shapefiles. The code includes a few lines involved in standardizing and simplifying the shapefiles.</p>
 <p>The steps taken involve:</p>
 <ul>
-<li><p>st_transform() is applied to reproject each shapefile to a common Coordinate Reference System (CRS), which uses latitude and longitude coordinates, which are useful when working with geographic data</p></li>
-<li><p>st_simplify() simplifies the geometries of each shapefile. This reduces the number of intricate edges and details, making for improved performance while maintaining accuracy</p></li>
-<li><p>sf_use_s2(FALSE) is set to avoid any issues with spherical geometry when simplifying data in a projected CRS</p></li>
+<li><p><code>st_transform()</code> is applied to reproject each shapefile to a common Coordinate Reference System (CRS), which uses latitude and longitude coordinates, which are useful when working with geographic data</p></li>
+<li><p><code>st_simplify()</code> simplifies the geometries of each shapefile. This reduces the number of intricate edges and details, making for improved performance while maintaining accuracy</p></li>
+<li><p><code>sf_use_s2(FALSE)</code> is set to avoid any issues with spherical geometry when simplifying data in a projected CRS</p></li>
 </ul>
 <p>Finally, we consolidate all shapefiles into the spatial object ALL_SHAPES.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>sf<span class="sc">::</span><span class="fu">sf_use_s2</span>(<span class="cn">FALSE</span>)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>get_congressional_shapefile <span class="ot">&lt;-</span> <span class="cf">function</span>(congress_number) {</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  BASE_URL <span class="ot">&lt;-</span> <span class="st">"https://cdmaps.polisci.ucla.edu/shp/"</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  fname <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"districts"</span>, <span class="fu">formatC</span>(congress_number, <span class="at">width =</span> <span class="dv">3</span>, <span class="at">format =</span> <span class="st">"d"</span>, <span class="at">flag =</span> <span class="st">"0"</span>), <span class="st">".zip"</span>)</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">file.exists</span>(fname)) {</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    FILE_URL <span class="ot">&lt;-</span> <span class="fu">paste0</span>(BASE_URL, fname)</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">download.file</span>(FILE_URL, <span class="at">destfile =</span> fname)</span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  zip_contents <span class="ot">&lt;-</span> <span class="fu">unzip</span>(fname, <span class="at">exdir =</span> <span class="fu">tempdir</span>())</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  shp_file <span class="ot">&lt;-</span> zip_contents[<span class="fu">grepl</span>(<span class="st">"shp$"</span>, zip_contents)]</span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>  sf_data <span class="ot">&lt;-</span> <span class="fu">read_sf</span>(shp_file)</span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  sf_data <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(sf_data, <span class="at">crs =</span> <span class="dv">3857</span>)</span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>  sf_data <span class="ot">&lt;-</span> <span class="fu">st_simplify</span>(sf_data, <span class="at">dTolerance =</span> <span class="dv">1000</span>)</span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>  sf_data <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(sf_data, <span class="at">crs =</span> <span class="dv">4326</span>)</span>
-<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>  sf_data<span class="sc">$</span>congress_number <span class="ot">&lt;-</span> congress_number</span>
-<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(sf_data)</span>
-<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>ALL_SHAPES <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(<span class="fu">lapply</span>(<span class="dv">94</span><span class="sc">:</span><span class="dv">112</span>, get_congressional_shapefile))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>sf<span class="sc">::</span><span class="fu">sf_use_s2</span>(<span class="cn">FALSE</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>get_congressional_shapefile <span class="ot">&lt;-</span> <span class="cf">function</span>(congress_number) {</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  BASE_URL <span class="ot">&lt;-</span> <span class="st">"https://cdmaps.polisci.ucla.edu/shp/"</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  fname <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"districts"</span>, <span class="fu">formatC</span>(congress_number, <span class="at">width =</span> <span class="dv">3</span>, <span class="at">format =</span> <span class="st">"d"</span>, <span class="at">flag =</span> <span class="st">"0"</span>), <span class="st">".zip"</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="sc">!</span><span class="fu">file.exists</span>(fname)) {</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    FILE_URL <span class="ot">&lt;-</span> <span class="fu">paste0</span>(BASE_URL, fname)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">download.file</span>(FILE_URL, <span class="at">destfile =</span> fname)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  zip_contents <span class="ot">&lt;-</span> <span class="fu">unzip</span>(fname, <span class="at">exdir =</span> <span class="fu">tempdir</span>())</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  shp_file <span class="ot">&lt;-</span> zip_contents[<span class="fu">grepl</span>(<span class="st">"shp$"</span>, zip_contents)]</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  sf_data <span class="ot">&lt;-</span> <span class="fu">read_sf</span>(shp_file)</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  sf_data <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(sf_data, <span class="at">crs =</span> <span class="dv">3857</span>)</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>  sf_data <span class="ot">&lt;-</span> <span class="fu">st_simplify</span>(sf_data, <span class="at">dTolerance =</span> <span class="dv">1000</span>)</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>  sf_data <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(sf_data, <span class="at">crs =</span> <span class="dv">4326</span>)</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>  sf_data<span class="sc">$</span>congress_number <span class="ot">&lt;-</span> congress_number</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(sf_data)</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>ALL_SHAPES <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(<span class="fu">lapply</span>(<span class="dv">94</span><span class="sc">:</span><span class="dv">112</span>, get_congressional_shapefile))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -286,35 +263,35 @@ lgl (2): writein, notes
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>get_census_shapefile <span class="ot">&lt;-</span> <span class="cf">function</span>(year, congress_number) {</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    BASE_URL <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"https://www2.census.gov/geo/tiger/TIGER"</span>, year, <span class="st">"/CD/"</span>)</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    fname <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"tl_"</span>, year, <span class="st">"_us_cd"</span>, congress_number, <span class="st">".zip"</span>)</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span><span class="fu">file.exists</span>(fname)) {</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>        FILE_URL <span class="ot">&lt;-</span> <span class="fu">paste0</span>(BASE_URL, fname)</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>        <span class="fu">download.file</span>(FILE_URL, <span class="at">destfile =</span> fname)</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    zip_contents <span class="ot">&lt;-</span> <span class="fu">unzip</span>(fname, <span class="at">exdir =</span> <span class="fu">tempdir</span>())</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    shp_file <span class="ot">&lt;-</span> zip_contents[<span class="fu">grepl</span>(<span class="st">"shp$"</span>, zip_contents)]</span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    sf_data <span class="ot">&lt;-</span> <span class="fu">read_sf</span>(shp_file)</span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(sf_data)</span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (year <span class="cf">in</span> <span class="dv">2014</span><span class="sc">:</span><span class="dv">2022</span>) {</span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    congress_number <span class="ot">&lt;-</span> <span class="cf">if</span> (year <span class="sc">&lt;=</span> <span class="dv">2015</span>) {</span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>      <span class="dv">114</span></span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> <span class="cf">if</span> (year <span class="sc">&lt;=</span> <span class="dv">2017</span>) {</span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>      <span class="dv">115</span></span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>      <span class="dv">116</span></span>
-<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    sf_data <span class="ot">&lt;-</span> <span class="fu">get_census_shapefile</span>(year, congress_number)</span>
-<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">assign</span>(<span class="fu">paste0</span>(<span class="st">"congress_"</span>, year, <span class="st">"_sf"</span>), sf_data)</span>
-<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>get_census_shapefile <span class="ot">&lt;-</span> <span class="cf">function</span>(year, congress_number) {</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    BASE_URL <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"https://www2.census.gov/geo/tiger/TIGER"</span>, year, <span class="st">"/CD/"</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    fname <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"tl_"</span>, year, <span class="st">"_us_cd"</span>, congress_number, <span class="st">".zip"</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span><span class="fu">file.exists</span>(fname)) {</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        FILE_URL <span class="ot">&lt;-</span> <span class="fu">paste0</span>(BASE_URL, fname)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        <span class="fu">download.file</span>(FILE_URL, <span class="at">destfile =</span> fname)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    zip_contents <span class="ot">&lt;-</span> <span class="fu">unzip</span>(fname, <span class="at">exdir =</span> <span class="fu">tempdir</span>())</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    shp_file <span class="ot">&lt;-</span> zip_contents[<span class="fu">grepl</span>(<span class="st">"shp$"</span>, zip_contents)]</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    sf_data <span class="ot">&lt;-</span> <span class="fu">read_sf</span>(shp_file)</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(sf_data)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (year <span class="cf">in</span> <span class="dv">2014</span><span class="sc">:</span><span class="dv">2022</span>) {</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    congress_number <span class="ot">&lt;-</span> <span class="cf">if</span> (year <span class="sc">&lt;=</span> <span class="dv">2015</span>) {</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>      <span class="dv">114</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> <span class="cf">if</span> (year <span class="sc">&lt;=</span> <span class="dv">2017</span>) {</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>      <span class="dv">115</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>      <span class="dv">116</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    sf_data <span class="ot">&lt;-</span> <span class="fu">get_census_shapefile</span>(year, congress_number)</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">assign</span>(<span class="fu">paste0</span>(<span class="st">"congress_"</span>, year, <span class="st">"_sf"</span>), sf_data)</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -333,44 +310,40 @@ lgl (2): writein, notes
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>house_seats_by_year <span class="ot">&lt;-</span> house_votes <span class="sc">|&gt;</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(year, state_po) <span class="sc">|&gt;</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">num_districts =</span> <span class="fu">n_distinct</span>(district), <span class="at">.groups =</span> <span class="st">'drop'</span>)</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 2: Calculate the year-over-year seat changes for each state</span></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>seat_changes <span class="ot">&lt;-</span> house_seats_by_year <span class="sc">|&gt;</span></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(state_po, year) <span class="sc">|&gt;</span></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(state_po) <span class="sc">|&gt;</span></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">seat_change =</span> num_districts <span class="sc">-</span> <span class="fu">lag</span>(num_districts, <span class="at">default =</span> <span class="fu">first</span>(num_districts))) <span class="sc">|&gt;</span></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 3: Identify the years with the largest seat changes</span></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>largest_changes <span class="ot">&lt;-</span> seat_changes <span class="sc">|&gt;</span></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(seat_change)) <span class="sc">|&gt;</span></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(<span class="fu">abs</span>(seat_change))) <span class="sc">|&gt;</span></span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">top_n</span>(<span class="dv">5</span>, <span class="fu">abs</span>(seat_change))  <span class="co"># Selecting the top 5 largest changes</span></span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 4: Plot the seat changes over time with enhancements</span></span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(seat_changes, <span class="fu">aes</span>(<span class="at">x =</span> year, <span class="at">y =</span> seat_change, <span class="at">fill =</span> seat_change <span class="sc">&gt;</span> <span class="dv">0</span>)) <span class="sc">+</span></span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>, <span class="at">position =</span> <span class="st">"dodge"</span>) <span class="sc">+</span></span>
-<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Add a prominent line at y = 0</span></span>
-<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>, <span class="at">color =</span> <span class="st">"black"</span>, <span class="at">size =</span> <span class="fl">1.2</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
-<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Add markers for years with the largest changes</span></span>
-<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data =</span> largest_changes, <span class="fu">aes</span>(<span class="at">x =</span> year, <span class="at">y =</span> seat_change), </span>
-<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>             <span class="at">color =</span> <span class="st">"darkorange"</span>, <span class="at">size =</span> <span class="dv">3</span>, <span class="at">shape =</span> <span class="dv">21</span>, <span class="at">fill =</span> <span class="st">"white"</span>) <span class="sc">+</span></span>
-<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"TRUE"</span> <span class="ot">=</span> <span class="st">"blue"</span>, <span class="st">"FALSE"</span> <span class="ot">=</span> <span class="st">"red"</span>), </span>
-<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>                    <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Loss"</span>, <span class="st">"Gain"</span>)) <span class="sc">+</span></span>
-<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Yearly Changes in US House Seats by State"</span>,</span>
-<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Year"</span>,</span>
-<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Seat Change"</span>,</span>
-<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Seat Change"</span>) <span class="sc">+</span></span>
-<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"top"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>house_seats_by_year <span class="ot">&lt;-</span> house_votes <span class="sc">|&gt;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(year, state_po) <span class="sc">|&gt;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">num_districts =</span> <span class="fu">n_distinct</span>(district), <span class="at">.groups =</span> <span class="st">'drop'</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 2: Calculate the year-over-year seat changes for each state</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>seat_changes <span class="ot">&lt;-</span> house_seats_by_year <span class="sc">|&gt;</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(state_po, year) <span class="sc">|&gt;</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(state_po) <span class="sc">|&gt;</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">seat_change =</span> num_districts <span class="sc">-</span> <span class="fu">lag</span>(num_districts, <span class="at">default =</span> <span class="fu">first</span>(num_districts))) <span class="sc">|&gt;</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 3: Identify the years with the largest seat changes</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>largest_changes <span class="ot">&lt;-</span> seat_changes <span class="sc">|&gt;</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(seat_change)) <span class="sc">|&gt;</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(<span class="fu">abs</span>(seat_change))) <span class="sc">|&gt;</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">top_n</span>(<span class="dv">5</span>, <span class="fu">abs</span>(seat_change))  <span class="co"># Selecting the top 5 largest changes</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 4: Plot the seat changes over time with enhancements</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(seat_changes, <span class="fu">aes</span>(<span class="at">x =</span> year, <span class="at">y =</span> seat_change, <span class="at">fill =</span> seat_change <span class="sc">&gt;</span> <span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>, <span class="at">position =</span> <span class="st">"dodge"</span>) <span class="sc">+</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Add a prominent line at y = 0</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>, <span class="at">color =</span> <span class="st">"black"</span>, <span class="at">size =</span> <span class="fl">1.2</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Add markers for years with the largest changes</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data =</span> largest_changes, <span class="fu">aes</span>(<span class="at">x =</span> year, <span class="at">y =</span> seat_change), </span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>             <span class="at">color =</span> <span class="st">"darkorange"</span>, <span class="at">size =</span> <span class="dv">3</span>, <span class="at">shape =</span> <span class="dv">21</span>, <span class="at">fill =</span> <span class="st">"white"</span>) <span class="sc">+</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"TRUE"</span> <span class="ot">=</span> <span class="st">"blue"</span>, <span class="st">"FALSE"</span> <span class="ot">=</span> <span class="st">"red"</span>), </span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>                    <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Loss"</span>, <span class="st">"Gain"</span>)) <span class="sc">+</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Yearly Changes in US House Seats by State"</span>,</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Year"</span>,</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Seat Change"</span>,</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Seat Change"</span>) <span class="sc">+</span></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"top"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
-ℹ Please use `linewidth` instead.</code></pre>
-</div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -382,7 +355,7 @@ lgl (2): writein, notes
 </ol>
 <p>Recognizing the need for consistent state abbreviations to enhance the clarity of visualizations, I identified that the <code>house_seats_by_year</code> table lacked state abbreviations, which would make presenting net changes by state more straightforward. To address this, I used R’s built-in datasets, specifically <code>state.name</code> and <code>state.abb</code>, which contain full state names and their corresponding abbreviations.</p>
 <p>The next few chunks of code modify the house_seats_by_year table.</p>
-<p>state_abbreviations &lt;- data.frame( state_name = state.name, state_abbreviation = state.abb )</p>
+<p><code>state_abbreviations &lt;- data.frame( state_name = state.name, state_abbreviation = state.abb )</code></p>
 <p>Adjusting title case in house_votes table to match the format in house_seats_by_year table, for the state column.</p>
 <p>With both tables now in a consistent format, I have <code>house_seats_by_year</code> and <code>house_votes</code> tables where state names are in title case, and <code>house_seats_by_year</code> now includes a <code>state_abbreviation</code> column. These adjustments ensure that visualizations involving state abbreviations will be clean and standardized, with both tables ready for further analysis.</p>
 <p>Now, going back to the original question, the code below analyzes changes in the US House representation by comparing the number of congressional districts in each state between 1976 and 2022.</p>
@@ -391,31 +364,31 @@ lgl (2): writein, notes
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter data for 1976 and 2022 seat counts</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>seats_1976 <span class="ot">&lt;-</span> house_seats_by_year <span class="sc">|&gt;</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(year <span class="sc">==</span> <span class="dv">1976</span>) <span class="sc">|&gt;</span></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(state_po, <span class="at">num_districts_1976 =</span> num_districts)</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>seats_2022 <span class="ot">&lt;-</span> house_seats_by_year <span class="sc">|&gt;</span></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(year <span class="sc">==</span> <span class="dv">2022</span>) <span class="sc">|&gt;</span></span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(state_po, <span class="at">num_districts_2022 =</span> num_districts)</span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate the difference in seats between 2022 and 1976</span></span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>seat_differences <span class="ot">&lt;-</span> seats_2022 <span class="sc">|&gt;</span></span>
-<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(seats_1976, <span class="at">by =</span> <span class="st">"state_po"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">seat_difference =</span> num_districts_2022 <span class="sc">-</span> num_districts_1976) <span class="sc">|&gt;</span></span>
-<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(seat_difference <span class="sc">!=</span> <span class="dv">0</span>)  <span class="co"># Exclude states with no difference</span></span>
-<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the bar graph</span></span>
-<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(seat_differences, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(state_po, seat_difference), <span class="at">y =</span> seat_difference, <span class="at">fill =</span> seat_difference <span class="sc">&gt;</span> <span class="dv">0</span>)) <span class="sc">+</span></span>
-<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>) <span class="sc">+</span></span>
-<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"TRUE"</span> <span class="ot">=</span> <span class="st">"blue"</span>, <span class="st">"FALSE"</span> <span class="ot">=</span> <span class="st">"red"</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Gain"</span>, <span class="st">"Loss"</span>)) <span class="sc">+</span></span>
-<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Change in US House Seats by State (1976 to 2022)"</span>,</span>
-<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"State"</span>,</span>
-<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Seat Difference"</span>,</span>
-<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Seat Change"</span>) <span class="sc">+</span></span>
-<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>, <span class="at">hjust =</span> <span class="dv">1</span>), <span class="at">legend.position =</span> <span class="st">"top"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter data for 1976 and 2022 seat counts</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>seats_1976 <span class="ot">&lt;-</span> house_seats_by_year <span class="sc">|&gt;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(year <span class="sc">==</span> <span class="dv">1976</span>) <span class="sc">|&gt;</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(state_po, <span class="at">num_districts_1976 =</span> num_districts)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>seats_2022 <span class="ot">&lt;-</span> house_seats_by_year <span class="sc">|&gt;</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(year <span class="sc">==</span> <span class="dv">2022</span>) <span class="sc">|&gt;</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(state_po, <span class="at">num_districts_2022 =</span> num_districts)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate the difference in seats between 2022 and 1976</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>seat_differences <span class="ot">&lt;-</span> seats_2022 <span class="sc">|&gt;</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(seats_1976, <span class="at">by =</span> <span class="st">"state_po"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">seat_difference =</span> num_districts_2022 <span class="sc">-</span> num_districts_1976) <span class="sc">|&gt;</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(seat_difference <span class="sc">!=</span> <span class="dv">0</span>)  <span class="co"># Exclude states with no difference</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the bar graph</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(seat_differences, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(state_po, seat_difference), <span class="at">y =</span> seat_difference, <span class="at">fill =</span> seat_difference <span class="sc">&gt;</span> <span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>) <span class="sc">+</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"TRUE"</span> <span class="ot">=</span> <span class="st">"blue"</span>, <span class="st">"FALSE"</span> <span class="ot">=</span> <span class="st">"red"</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Gain"</span>, <span class="st">"Loss"</span>)) <span class="sc">+</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Change in US House Seats by State (1976 to 2022)"</span>,</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"State"</span>,</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Seat Difference"</span>,</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Seat Change"</span>) <span class="sc">+</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>, <span class="at">hjust =</span> <span class="dv">1</span>), <span class="at">legend.position =</span> <span class="st">"top"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
@@ -429,52 +402,48 @@ lgl (2): writein, notes
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter the top 5 states by absolute seat difference (gain or loss)</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>top_5_seat_differences <span class="ot">&lt;-</span> seat_differences <span class="sc">|&gt;</span></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(<span class="fu">abs</span>(seat_difference))) <span class="sc">|&gt;</span></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>) <span class="sc">|&gt;</span></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(state_po, seat_difference) <span class="sc">|&gt;</span></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">State =</span> state_po, <span class="st">`</span><span class="at">Seat Difference</span><span class="st">`</span> <span class="ot">=</span> seat_difference)</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the gt package</span></span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gt)</span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a nicely formatted gt table</span></span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>top_5_seat_differences <span class="sc">|&gt;</span></span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gt</span>() <span class="sc">|&gt;</span></span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tab_header</span>(</span>
-<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Top 5 States with Seat Differences (1976 to 2022)"</span></span>
-<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fmt_integer</span>(</span>
-<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">columns =</span> <span class="fu">vars</span>(<span class="st">`</span><span class="at">Seat Difference</span><span class="st">`</span>)</span>
-<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cols_align</span>(</span>
-<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">align =</span> <span class="st">"center"</span>,</span>
-<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">columns =</span> <span class="fu">everything</span>()</span>
-<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter the top 5 states by absolute seat difference (gain or loss)</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>top_5_seat_differences <span class="ot">&lt;-</span> seat_differences <span class="sc">|&gt;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(<span class="fu">abs</span>(seat_difference))) <span class="sc">|&gt;</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>) <span class="sc">|&gt;</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(state_po, seat_difference) <span class="sc">|&gt;</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">State =</span> state_po, <span class="st">`</span><span class="at">Seat Difference</span><span class="st">`</span> <span class="ot">=</span> seat_difference)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the gt package</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gt)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a nicely formatted gt table</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>top_5_seat_differences <span class="sc">|&gt;</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gt</span>() <span class="sc">|&gt;</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tab_header</span>(</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Top 5 States with Seat Differences (1976 to 2022)"</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fmt_integer</span>(</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">columns =</span> <span class="fu">vars</span>(<span class="st">`</span><span class="at">Seat Difference</span><span class="st">`</span>)</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cols_align</span>(</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">align =</span> <span class="st">"center"</span>,</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">columns =</span> <span class="fu">everything</span>()</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: Since gt v0.3.0, `columns = vars(...)` has been deprecated.
-• Please use `columns = c(...)` instead.</code></pre>
-</div>
 <div class="cell-output-display">
-<div id="pnudybvwyn" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#pnudybvwyn table {
+<div id="njwlyiaxxu" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#njwlyiaxxu table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#pnudybvwyn thead, #pnudybvwyn tbody, #pnudybvwyn tfoot, #pnudybvwyn tr, #pnudybvwyn td, #pnudybvwyn th {
+#njwlyiaxxu thead, #njwlyiaxxu tbody, #njwlyiaxxu tfoot, #njwlyiaxxu tr, #njwlyiaxxu td, #njwlyiaxxu th {
   border-style: none;
 }
 
-#pnudybvwyn p {
+#njwlyiaxxu p {
   margin: 0;
   padding: 0;
 }
 
-#pnudybvwyn .gt_table {
+#njwlyiaxxu .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -500,12 +469,12 @@ lgl (2): writein, notes
   border-left-color: #D3D3D3;
 }
 
-#pnudybvwyn .gt_caption {
+#njwlyiaxxu .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#pnudybvwyn .gt_title {
+#njwlyiaxxu .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -517,7 +486,7 @@ lgl (2): writein, notes
   border-bottom-width: 0;
 }
 
-#pnudybvwyn .gt_subtitle {
+#njwlyiaxxu .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -529,7 +498,7 @@ lgl (2): writein, notes
   border-top-width: 0;
 }
 
-#pnudybvwyn .gt_heading {
+#njwlyiaxxu .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -541,13 +510,13 @@ lgl (2): writein, notes
   border-right-color: #D3D3D3;
 }
 
-#pnudybvwyn .gt_bottom_border {
+#njwlyiaxxu .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#pnudybvwyn .gt_col_headings {
+#njwlyiaxxu .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -562,7 +531,7 @@ lgl (2): writein, notes
   border-right-color: #D3D3D3;
 }
 
-#pnudybvwyn .gt_col_heading {
+#njwlyiaxxu .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -582,7 +551,7 @@ lgl (2): writein, notes
   overflow-x: hidden;
 }
 
-#pnudybvwyn .gt_column_spanner_outer {
+#njwlyiaxxu .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -594,15 +563,15 @@ lgl (2): writein, notes
   padding-right: 4px;
 }
 
-#pnudybvwyn .gt_column_spanner_outer:first-child {
+#njwlyiaxxu .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#pnudybvwyn .gt_column_spanner_outer:last-child {
+#njwlyiaxxu .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#pnudybvwyn .gt_column_spanner {
+#njwlyiaxxu .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -614,11 +583,11 @@ lgl (2): writein, notes
   width: 100%;
 }
 
-#pnudybvwyn .gt_spanner_row {
+#njwlyiaxxu .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#pnudybvwyn .gt_group_heading {
+#njwlyiaxxu .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -644,7 +613,7 @@ lgl (2): writein, notes
   text-align: left;
 }
 
-#pnudybvwyn .gt_empty_group_heading {
+#njwlyiaxxu .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -659,15 +628,15 @@ lgl (2): writein, notes
   vertical-align: middle;
 }
 
-#pnudybvwyn .gt_from_md > :first-child {
+#njwlyiaxxu .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#pnudybvwyn .gt_from_md > :last-child {
+#njwlyiaxxu .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#pnudybvwyn .gt_row {
+#njwlyiaxxu .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -686,7 +655,7 @@ lgl (2): writein, notes
   overflow-x: hidden;
 }
 
-#pnudybvwyn .gt_stub {
+#njwlyiaxxu .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -699,7 +668,7 @@ lgl (2): writein, notes
   padding-right: 5px;
 }
 
-#pnudybvwyn .gt_stub_row_group {
+#njwlyiaxxu .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -713,15 +682,15 @@ lgl (2): writein, notes
   vertical-align: top;
 }
 
-#pnudybvwyn .gt_row_group_first td {
+#njwlyiaxxu .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#pnudybvwyn .gt_row_group_first th {
+#njwlyiaxxu .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#pnudybvwyn .gt_summary_row {
+#njwlyiaxxu .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -731,16 +700,16 @@ lgl (2): writein, notes
   padding-right: 5px;
 }
 
-#pnudybvwyn .gt_first_summary_row {
+#njwlyiaxxu .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#pnudybvwyn .gt_first_summary_row.thick {
+#njwlyiaxxu .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#pnudybvwyn .gt_last_summary_row {
+#njwlyiaxxu .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -750,7 +719,7 @@ lgl (2): writein, notes
   border-bottom-color: #D3D3D3;
 }
 
-#pnudybvwyn .gt_grand_summary_row {
+#njwlyiaxxu .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -760,7 +729,7 @@ lgl (2): writein, notes
   padding-right: 5px;
 }
 
-#pnudybvwyn .gt_first_grand_summary_row {
+#njwlyiaxxu .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -770,7 +739,7 @@ lgl (2): writein, notes
   border-top-color: #D3D3D3;
 }
 
-#pnudybvwyn .gt_last_grand_summary_row_top {
+#njwlyiaxxu .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -780,11 +749,11 @@ lgl (2): writein, notes
   border-bottom-color: #D3D3D3;
 }
 
-#pnudybvwyn .gt_striped {
+#njwlyiaxxu .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#pnudybvwyn .gt_table_body {
+#njwlyiaxxu .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -793,7 +762,7 @@ lgl (2): writein, notes
   border-bottom-color: #D3D3D3;
 }
 
-#pnudybvwyn .gt_footnotes {
+#njwlyiaxxu .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -807,7 +776,7 @@ lgl (2): writein, notes
   border-right-color: #D3D3D3;
 }
 
-#pnudybvwyn .gt_footnote {
+#njwlyiaxxu .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -816,7 +785,7 @@ lgl (2): writein, notes
   padding-right: 5px;
 }
 
-#pnudybvwyn .gt_sourcenotes {
+#njwlyiaxxu .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -830,7 +799,7 @@ lgl (2): writein, notes
   border-right-color: #D3D3D3;
 }
 
-#pnudybvwyn .gt_sourcenote {
+#njwlyiaxxu .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -838,72 +807,72 @@ lgl (2): writein, notes
   padding-right: 5px;
 }
 
-#pnudybvwyn .gt_left {
+#njwlyiaxxu .gt_left {
   text-align: left;
 }
 
-#pnudybvwyn .gt_center {
+#njwlyiaxxu .gt_center {
   text-align: center;
 }
 
-#pnudybvwyn .gt_right {
+#njwlyiaxxu .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#pnudybvwyn .gt_font_normal {
+#njwlyiaxxu .gt_font_normal {
   font-weight: normal;
 }
 
-#pnudybvwyn .gt_font_bold {
+#njwlyiaxxu .gt_font_bold {
   font-weight: bold;
 }
 
-#pnudybvwyn .gt_font_italic {
+#njwlyiaxxu .gt_font_italic {
   font-style: italic;
 }
 
-#pnudybvwyn .gt_super {
+#njwlyiaxxu .gt_super {
   font-size: 65%;
 }
 
-#pnudybvwyn .gt_footnote_marks {
+#njwlyiaxxu .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#pnudybvwyn .gt_asterisk {
+#njwlyiaxxu .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#pnudybvwyn .gt_indent_1 {
+#njwlyiaxxu .gt_indent_1 {
   text-indent: 5px;
 }
 
-#pnudybvwyn .gt_indent_2 {
+#njwlyiaxxu .gt_indent_2 {
   text-indent: 10px;
 }
 
-#pnudybvwyn .gt_indent_3 {
+#njwlyiaxxu .gt_indent_3 {
   text-indent: 15px;
 }
 
-#pnudybvwyn .gt_indent_4 {
+#njwlyiaxxu .gt_indent_4 {
   text-indent: 20px;
 }
 
-#pnudybvwyn .gt_indent_5 {
+#njwlyiaxxu .gt_indent_5 {
   text-indent: 25px;
 }
 
-#pnudybvwyn .katex-display {
+#njwlyiaxxu .katex-display {
   display: inline-flex !important;
   margin-bottom: 0.75em !important;
 }
 
-#pnudybvwyn div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#njwlyiaxxu div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
   height: 0px !important;
 }
 </style>
@@ -950,28 +919,26 @@ lgl (2): writein, notes
 <li><p>Analyzing NY’s “fusion” voting system</p>
 <blockquote class="blockquote">
 <p>Please go <a href="https://protectdemocracy.org/work/fusion-voting-explained/">here</a> for a further understanding of Fusion Voting</p>
-<ul>
-<li><img src="images/Screenshot 2024-11-11 at 6.50.16 PM.png" class="img-fluid"></li>
-</ul>
+<p>!<a href="docs/images/fusion.png">Description of Fusion Voting</a></p>
 </blockquote></li>
 </ol>
 <p>The code below involves a few steps to get us to test if there are any elections in our data where the election would have had a different outcome if the “fusion” system was not used and candidates only received the votes they received from their “major party line”, instead of their total number of votes across all lines.</p>
 <p>We limit our data to New York elections, where fusion voting occurs.</p>
-<p>We create the data frames major_party_votes and total_votes to calculate and compare the election outcomes under different scenarios.</p>
+<p>We create the data frames <code>major_party_votes</code> and <code>total_votes</code> to calculate and compare the election outcomes under different scenarios.</p>
 <ul>
-<li><p>major_party_votes (hypothetical outcome): contains the total number of votes each candidate received from their <strong>major party line only</strong> (Democrat or Republican) and ignores any votes they received from minor parties. <a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p></li>
-<li><p>total_votes (actual outcome): contains the actual total number of votes each candidate received across <strong>all party lines</strong>, which is the real vote total used in New York State’s fusion system</p></li>
+<li><p><code>major_party_votes</code> (hypothetical outcome): contains the total number of votes each candidate received from their <strong>major party line only</strong> (Democrat or Republican) and ignores any votes they received from minor parties. <a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p></li>
+<li><p><code>total_votes</code> (actual outcome): contains the actual total number of votes each candidate received across <strong>all party lines</strong>, which is the real vote total used in New York State’s fusion system</p></li>
 </ul>
-<p>For each district in New York State, we check if the candidate with the highest major_party_votes differs from the candidate with the highest total_votes.</p>
+<p>For each district in New York State, we check if the candidate with the highest <code>major_party_votes</code> differs from the candidate with the highest <code>total_votes</code>.</p>
 <p>Our data frame hypothetical_winners lists any elections where the outcome would have changed if only major party line votes were counted, or our hypothetical scenario. <a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>ny_elections <span class="ot">&lt;-</span> house_votes <span class="sc">|&gt;</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(state_po <span class="sc">==</span> <span class="st">"NY"</span> <span class="sc">&amp;</span> candidatevotes <span class="sc">&gt;=</span> <span class="dv">0</span> ) <span class="sc">|&gt;</span></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">major_party_line =</span> <span class="fu">if_else</span>(<span class="sc">!</span><span class="fu">is.na</span>(party) <span class="sc">&amp;</span> (party <span class="sc">==</span> <span class="st">"DEMOCRAT"</span> <span class="sc">|</span> party <span class="sc">==</span> <span class="st">"REPUBLICAN"</span>), <span class="st">"major"</span>, <span class="st">"minor"</span>))</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">table</span>(ny_elections<span class="sc">$</span>major_party_line))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>ny_elections <span class="ot">&lt;-</span> house_votes <span class="sc">|&gt;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(state_po <span class="sc">==</span> <span class="st">"NY"</span> <span class="sc">&amp;</span> candidatevotes <span class="sc">&gt;=</span> <span class="dv">0</span> ) <span class="sc">|&gt;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">major_party_line =</span> <span class="fu">if_else</span>(<span class="sc">!</span><span class="fu">is.na</span>(party) <span class="sc">&amp;</span> (party <span class="sc">==</span> <span class="st">"DEMOCRAT"</span> <span class="sc">|</span> party <span class="sc">==</span> <span class="st">"REPUBLICAN"</span>), <span class="st">"major"</span>, <span class="st">"minor"</span>))</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">table</span>(ny_elections<span class="sc">$</span>major_party_line))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
@@ -980,30 +947,30 @@ major minor
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>major_party_votes <span class="ot">&lt;-</span> ny_elections <span class="sc">|&gt;</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(major_party_line <span class="sc">==</span> <span class="st">"major"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(year, district, candidate, party) <span class="sc">|&gt;</span></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">major_party_votes =</span> <span class="fu">sum</span>(candidatevotes), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>total_votes <span class="ot">&lt;-</span> ny_elections <span class="sc">|&gt;</span></span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(year, district, candidate, party) <span class="sc">|&gt;</span></span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">total_votes =</span> <span class="fu">sum</span>(candidatevotes), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>election_outcomes <span class="ot">&lt;-</span> major_party_votes <span class="sc">|&gt;</span></span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(total_votes, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"year"</span>, <span class="st">"district"</span>, <span class="st">"candidate"</span>, <span class="st">"party"</span>))</span>
-<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>hypothetical_winners <span class="ot">&lt;-</span> election_outcomes <span class="sc">|&gt;</span></span>
-<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(year, district) <span class="sc">|&gt;</span></span>
-<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
-<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">actual_winner =</span> candidate[<span class="fu">which.max</span>(total_votes)],</span>
-<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">actual_winner_party =</span> party[<span class="fu">which.max</span>(total_votes)],</span>
-<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">hypothetical_winner =</span> candidate[<span class="fu">which.max</span>(major_party_votes)],</span>
-<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">hypothetical_winner_party =</span> party[<span class="fu">which.max</span>(major_party_votes)],</span>
-<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
-<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(actual_winner <span class="sc">!=</span> hypothetical_winner)</span>
-<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(hypothetical_winners)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>major_party_votes <span class="ot">&lt;-</span> ny_elections <span class="sc">|&gt;</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(major_party_line <span class="sc">==</span> <span class="st">"major"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(year, district, candidate, party) <span class="sc">|&gt;</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">major_party_votes =</span> <span class="fu">sum</span>(candidatevotes), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>total_votes <span class="ot">&lt;-</span> ny_elections <span class="sc">|&gt;</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(year, district, candidate, party) <span class="sc">|&gt;</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">total_votes =</span> <span class="fu">sum</span>(candidatevotes), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>election_outcomes <span class="ot">&lt;-</span> major_party_votes <span class="sc">|&gt;</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(total_votes, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"year"</span>, <span class="st">"district"</span>, <span class="st">"candidate"</span>, <span class="st">"party"</span>))</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>hypothetical_winners <span class="ot">&lt;-</span> election_outcomes <span class="sc">|&gt;</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(year, district) <span class="sc">|&gt;</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">actual_winner =</span> candidate[<span class="fu">which.max</span>(total_votes)],</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">actual_winner_party =</span> party[<span class="fu">which.max</span>(total_votes)],</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">hypothetical_winner =</span> candidate[<span class="fu">which.max</span>(major_party_votes)],</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">hypothetical_winner_party =</span> party[<span class="fu">which.max</span>(major_party_votes)],</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(actual_winner <span class="sc">!=</span> hypothetical_winner)</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(hypothetical_winners)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 0 × 6
@@ -1020,17 +987,17 @@ major minor
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Aggregate votes for house races</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>house_votes_aggregated <span class="ot">&lt;-</span> house_votes <span class="sc">|&gt;</span></span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(party)) <span class="sc">|&gt;</span></span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(year, state_po, party) <span class="sc">|&gt;</span></span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">house_total_votes =</span> <span class="fu">sum</span>(candidatevotes), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Aggregate votes for presidential races</span></span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>presidential_votes_aggregated <span class="ot">&lt;-</span> presidential_votes <span class="sc">|&gt;</span></span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(party_simplified)) <span class="sc">|&gt;</span></span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(year, state_po, <span class="at">party =</span> party_simplified) <span class="sc">|&gt;</span></span>
-<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">presidential_total_votes =</span> <span class="fu">sum</span>(candidatevotes), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Aggregate votes for house races</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>house_votes_aggregated <span class="ot">&lt;-</span> house_votes <span class="sc">|&gt;</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(party)) <span class="sc">|&gt;</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(year, state_po, party) <span class="sc">|&gt;</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">house_total_votes =</span> <span class="fu">sum</span>(candidatevotes), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Aggregate votes for presidential races</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>presidential_votes_aggregated <span class="ot">&lt;-</span> presidential_votes <span class="sc">|&gt;</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(party_simplified)) <span class="sc">|&gt;</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(year, state_po, <span class="at">party =</span> party_simplified) <span class="sc">|&gt;</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">presidential_total_votes =</span> <span class="fu">sum</span>(candidatevotes), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div></li>
 </ol>
@@ -1038,49 +1005,49 @@ major minor
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>combined_votes <span class="ot">&lt;-</span> house_votes_aggregated <span class="sc">|&gt;</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(presidential_votes_aggregated, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"year"</span>, <span class="st">"state_po"</span>, <span class="st">"party"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>combined_votes <span class="ot">&lt;-</span> house_votes_aggregated <span class="sc">|&gt;</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(presidential_votes_aggregated, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"year"</span>, <span class="st">"state_po"</span>, <span class="st">"party"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Step 3: Calculate Difference Between Presidential and House Votes</p>
-<p><strong>vote_difference = presidential_total_votes - house_total_votes</strong></p>
+<p><strong><code>vote_difference = presidential_total_votes - house_total_votes</code></strong></p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>combined_votes <span class="ot">&lt;-</span> combined_votes <span class="sc">|&gt;</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">vote_difference =</span> presidential_total_votes <span class="sc">-</span> house_total_votes, <span class="at">ahead_or_behind =</span> <span class="fu">if_else</span>(vote_difference <span class="sc">&gt;</span><span class="dv">0</span>, <span class="st">"Ahead"</span>, <span class="st">"Behind"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>combined_votes <span class="ot">&lt;-</span> combined_votes <span class="sc">|&gt;</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">vote_difference =</span> presidential_total_votes <span class="sc">-</span> house_total_votes, <span class="at">ahead_or_behind =</span> <span class="fu">if_else</span>(vote_difference <span class="sc">&gt;</span><span class="dv">0</span>, <span class="st">"Ahead"</span>, <span class="st">"Behind"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Step 4: Generate Visualization. The code below creates a time series plot showing the trend of average vote differences between presidential and congressional candidates across major parties from 1976 to 2020.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>average_vote_difference <span class="ot">&lt;-</span> combined_votes <span class="sc">|&gt;</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(year, party) <span class="sc">|&gt;</span></span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">avg_vote_difference =</span> <span class="fu">mean</span>(vote_difference), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(average_vote_difference <span class="sc">|&gt;</span> <span class="fu">filter</span>(party <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"DEMOCRAT"</span>, <span class="st">"REPUBLICAN"</span>)), </span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> year, <span class="at">y =</span> avg_vote_difference, <span class="at">color =</span> party)) <span class="sc">+</span></span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">size =</span> <span class="fl">1.2</span>) <span class="sc">+</span></span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"DEMOCRAT"</span> <span class="ot">=</span> <span class="st">"blue"</span>, <span class="st">"REPUBLICAN"</span> <span class="ot">=</span> <span class="st">"red"</span>)) <span class="sc">+</span></span>
-<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
-<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Average Vote Difference Between Presidential and Congressional Candidates"</span>,</span>
-<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Positive values indicate presidential candidates ran ahead of congressional candidates"</span>,</span>
-<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Year"</span>,</span>
-<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Average Vote Difference"</span>,</span>
-<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"Party"</span></span>
-<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span>comma) <span class="sc">+</span></span>
-<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
-<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="st">"top"</span>,</span>
-<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>),</span>
-<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>),</span>
-<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">14</span>, <span class="at">face =</span> <span class="st">"bold"</span>),</span>
-<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.subtitle =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>)</span>
-<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>average_vote_difference <span class="ot">&lt;-</span> combined_votes <span class="sc">|&gt;</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(year, party) <span class="sc">|&gt;</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">avg_vote_difference =</span> <span class="fu">mean</span>(vote_difference), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(average_vote_difference <span class="sc">|&gt;</span> <span class="fu">filter</span>(party <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"DEMOCRAT"</span>, <span class="st">"REPUBLICAN"</span>)), </span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> year, <span class="at">y =</span> avg_vote_difference, <span class="at">color =</span> party)) <span class="sc">+</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">size =</span> <span class="fl">1.2</span>) <span class="sc">+</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"DEMOCRAT"</span> <span class="ot">=</span> <span class="st">"blue"</span>, <span class="st">"REPUBLICAN"</span> <span class="ot">=</span> <span class="st">"red"</span>)) <span class="sc">+</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Average Vote Difference Between Presidential and Congressional Candidates"</span>,</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Positive values indicate presidential candidates ran ahead of congressional candidates"</span>,</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Year"</span>,</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Average Vote Difference"</span>,</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"Party"</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span>comma) <span class="sc">+</span></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="st">"top"</span>,</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>),</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>),</span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">14</span>, <span class="at">face =</span> <span class="st">"bold"</span>),</span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.subtitle =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">12</span>)</span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
@@ -1096,44 +1063,44 @@ major minor
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>avg_vote_diff_states <span class="ot">&lt;-</span> combined_votes <span class="sc">|&gt;</span></span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(year,state_po,party) <span class="sc">|&gt;</span></span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">avg_vote_difference =</span> <span class="fu">mean</span>(vote_difference, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 1: Identify the top 10 states by maximum absolute average vote difference</span></span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>top_states <span class="ot">&lt;-</span> avg_vote_diff_states <span class="sc">|&gt;</span></span>
-<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(state_po) <span class="sc">|&gt;</span></span>
-<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">max_abs_diff =</span> <span class="fu">max</span>(<span class="fu">abs</span>(avg_vote_difference), <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(max_abs_diff)) <span class="sc">|&gt;</span></span>
-<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">10</span>) <span class="sc">|&gt;</span></span>
-<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(state_po)</span>
-<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 2: Filter the data for only the top 10 states and create the plot</span></span>
-<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(avg_vote_diff_states <span class="sc">|&gt;</span></span>
-<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>         <span class="fu">filter</span>(state_po <span class="sc">%in%</span> top_states, party <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"DEMOCRAT"</span>, <span class="st">"REPUBLICAN"</span>)),</span>
-<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> year, <span class="at">y =</span> avg_vote_difference, <span class="at">color =</span> party, <span class="at">group =</span> party)) <span class="sc">+</span></span>
-<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
-<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
-<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
-<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"DEMOCRAT"</span> <span class="ot">=</span> <span class="st">"blue"</span>, <span class="st">"REPUBLICAN"</span> <span class="ot">=</span> <span class="st">"red"</span>)) <span class="sc">+</span></span>
-<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span>comma) <span class="sc">+</span>  <span class="co"># Format y-axis without scientific notation</span></span>
-<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
-<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Average Vote Difference Between Presidential and Congressional Candidates by Top 10 States"</span>,</span>
-<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Positive values indicate presidential candidates ran ahead of congressional candidates"</span>,</span>
-<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Year"</span>,</span>
-<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Average Vote Difference"</span>,</span>
-<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"Party"</span></span>
-<span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb22-30"><a href="#cb22-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb22-31"><a href="#cb22-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
-<span id="cb22-32"><a href="#cb22-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="st">"top"</span>,</span>
-<span id="cb22-33"><a href="#cb22-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">8</span>, <span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>),</span>
-<span id="cb22-34"><a href="#cb22-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">8</span>),</span>
-<span id="cb22-35"><a href="#cb22-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">strip.text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>, <span class="at">face =</span> <span class="st">"bold"</span>),</span>
-<span id="cb22-36"><a href="#cb22-36" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.margin =</span> <span class="fu">margin</span>(<span class="dv">10</span>, <span class="dv">10</span>, <span class="dv">10</span>, <span class="dv">10</span>)</span>
-<span id="cb22-37"><a href="#cb22-37" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb22-38"><a href="#cb22-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> state_po, <span class="at">scales =</span> <span class="st">"free_y"</span>, <span class="at">ncol =</span> <span class="dv">5</span>)  <span class="co"># Arrange in 2 rows for readability</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>avg_vote_diff_states <span class="ot">&lt;-</span> combined_votes <span class="sc">|&gt;</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(year,state_po,party) <span class="sc">|&gt;</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">avg_vote_difference =</span> <span class="fu">mean</span>(vote_difference, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 1: Identify the top 10 states by maximum absolute average vote difference</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>top_states <span class="ot">&lt;-</span> avg_vote_diff_states <span class="sc">|&gt;</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(state_po) <span class="sc">|&gt;</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">max_abs_diff =</span> <span class="fu">max</span>(<span class="fu">abs</span>(avg_vote_difference), <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(max_abs_diff)) <span class="sc">|&gt;</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">10</span>) <span class="sc">|&gt;</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(state_po)</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 2: Filter the data for only the top 10 states and create the plot</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(avg_vote_diff_states <span class="sc">|&gt;</span></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>         <span class="fu">filter</span>(state_po <span class="sc">%in%</span> top_states, party <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"DEMOCRAT"</span>, <span class="st">"REPUBLICAN"</span>)),</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> year, <span class="at">y =</span> avg_vote_difference, <span class="at">color =</span> party, <span class="at">group =</span> party)) <span class="sc">+</span></span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"DEMOCRAT"</span> <span class="ot">=</span> <span class="st">"blue"</span>, <span class="st">"REPUBLICAN"</span> <span class="ot">=</span> <span class="st">"red"</span>)) <span class="sc">+</span></span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span>comma) <span class="sc">+</span>  <span class="co"># Format y-axis without scientific notation</span></span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Average Vote Difference Between Presidential and Congressional Candidates by Top 10 States"</span>,</span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Positive values indicate presidential candidates ran ahead of congressional candidates"</span>,</span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Year"</span>,</span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Average Vote Difference"</span>,</span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"Party"</span></span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="st">"top"</span>,</span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">8</span>, <span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>),</span>
+<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">8</span>),</span>
+<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">strip.text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>, <span class="at">face =</span> <span class="st">"bold"</span>),</span>
+<span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.margin =</span> <span class="fu">margin</span>(<span class="dv">10</span>, <span class="dv">10</span>, <span class="dv">10</span>, <span class="dv">10</span>)</span>
+<span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb16-38"><a href="#cb16-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> state_po, <span class="at">scales =</span> <span class="st">"free_y"</span>, <span class="at">ncol =</span> <span class="dv">5</span>)  <span class="co"># Arrange in 2 rows for readability</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
@@ -1148,8 +1115,8 @@ major minor
 <h3 class="anchored" data-anchor-id="importing-and-plotting-shape-file-data">Importing and Plotting Shape File Data</h3>
 <p><strong>Task 4: Automate Zip File Extraction</strong></p>
 <p>Please note, the code for Task 1, simultaneously completes both tasks 1 and 4.</p>
-<p>The function get_congressional_shapefile() combines downlaoding the files, extracitng the shapefile,a nd reading into R. The funciton get_congressional_shapefile() serves the same purpose as read_shp_from_zip(), as provided in the sample code for Task 4.</p>
-<p>Given the function get_congressional_shapefile() handles the downloading, extraction, and reading all in one step, this function is even more streamlined than using the separate read_shp_from_zip() function.</p>
+<p>The function <code>get_congressional_shapefile()</code> combines downloading the files, extracitng the shapefile, and reading into R. The function <code>get_congressional_shapefile()</code> serves the same purpose as <code>read_shp_from_zip()</code>, as provided in the sample code for Task 4.</p>
+<p>Given the function <code>get_congressional_shapefile()</code> handles the downloading, extraction, and reading all in one step, this function is even more streamlined than using the separate read_shp_from_zip() function.</p>
 <p>See a more detailed explanation for the combined steps taken for Tasks 1 &amp; 4 outlined under Task 1.</p>
 <p><strong>Task 5: Chloropleth Visualization of the 2000 Presidential Election Electoral College Results</strong></p>
 
