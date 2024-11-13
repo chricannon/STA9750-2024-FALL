@@ -53,7 +53,7 @@ Another dataset downloaded was the statewide presidential vote counts from 1976 
 
 The code below loads the election data into our environment.
 
-```{r}
+```{r, message=FALSE, warning=FALSE, results='hide'}
 library(dplyr)
 library(readr)
 library(stringr)
@@ -63,7 +63,7 @@ library(ggplot2)
 library(scales)
 ```
 
-```{r}
+```{r, results='hide'}
 house_votes <- read_csv("~/Downloads/1976-2022-house.csv")
 presidential_votes <- read_csv("~/Downloads/1976-2020-president.csv")
 
