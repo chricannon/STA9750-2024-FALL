@@ -394,31 +394,30 @@ hypothetical_winners <- election_outcomes |>
   ) |>
   filter(actual_winner != hypothetical_winner)
 
-print(hypothetical_winners)
 ```
 
 3.  Presidential Candidate Performance Relative to Congressional Candidates
 
-    Given this is an in-depth question, we will chunk the code into steps, for better understanding.
+Given this is an in-depth question, we will chunk the code into steps, for better understanding.
 
-    (For a reviewer, I am curious if you prefer the code in the single chunk format, like I did for #2, or this step-by-step format, shown below)
+<!--# For a reviewer, I am curious if you prefer the code in the single chunk format, like I did for #2, or this step-by-step format, shown below) -->
 
-    Step 1: Aggregating Votes for House and Presidential Races by Year, State, and Party
+Step 1: Aggregating Votes for House and Presidential Races by Year, State, and Party
 
-    ```{r}
-    # Aggregate votes for house races
-    house_votes_aggregated <- house_votes |>
-      filter(!is.na(party)) |>
-      group_by(year, state_po, party) |>
-      summarize(house_total_votes = sum(candidatevotes), .groups = "drop")
+```{r}
+# Aggregate votes for house races
+house_votes_aggregated <- house_votes |>
+  filter(!is.na(party)) |>
+  group_by(year, state_po, party) |>
+  summarize(house_total_votes = sum(candidatevotes), .groups = "drop")
 
-    # Aggregate votes for presidential races
-    presidential_votes_aggregated <- presidential_votes |>
-      filter(!is.na(party_simplified)) |>
-      group_by(year, state_po, party = party_simplified) |>
-      summarize(presidential_total_votes = sum(candidatevotes), .groups = "drop")
+# Aggregate votes for presidential races
+presidential_votes_aggregated <- presidential_votes |>
+  filter(!is.na(party_simplified)) |>
+  group_by(year, state_po, party = party_simplified) |>
+  summarize(presidential_total_votes = sum(candidatevotes), .groups = "drop")
 
-    ```
+```
 
 Step 2: Merge Aggregated Tables
 
@@ -429,7 +428,7 @@ combined_votes <- house_votes_aggregated |>
 
 Step 3: Calculate Difference Between Presidential and House Votes
 
-**`vote_difference = presidential_total_votes - house_total_votes`**
+> **`vote_difference = presidential_total_votes - house_total_votes`**
 
 ```{r}
 combined_votes <- combined_votes |>
@@ -598,34 +597,11 @@ map_data_2000 <- map_data_2000 |>
 
 Next, we join our `election_data_2000` with the state shapefile, to create the map of the US with state boundaries.
 
-```{r, warning=FALSE, eval=FALSE}
-
-map_data_2000 <- state_shapefile_filtered |>
-  left_join(election_2000, by = c("STUSPS" = "State")) |>
-  mutate(Winner = ifelse(is.na(Winner), "None", Winner))
-
-
-ggplot(map_data_2000) +
-  geom_sf(aes(fill = Winner), color = "white") +
-  scale_fill_manual(values = c("Bush" = "red", "Gore" = "blue")) +
-  geom_sf_text(aes(label = ElectoralVotes), size = 3, color = "black") +
-  theme_minimal() +
-  labs(
-    title = "2000 Presidential Election Electoral College Results",
-    fill = "Winner"
-  ) +
-  theme(legend.position = "bottom") +
-    coord_sf(crs = st_crs(4326), xlim = c(-130, -65), ylim = c(24, 50)) 
-```
-
-This is close, but only includes mainland US and does not highlight states in red and blue, for states Bush and Gore won, respectfully.
-
 After some research, found the `cowplot` package will allow us to place the mainland US map alongside smaller insets for Alaska and Hawaii.
 
-```{r, warning=FALSE}
+```{r, warning=FALSE, message=FALSE}
 
 library(cowplot)
-
 
 mainland_map <- ggplot(map_data_2000) +
   geom_sf(aes(fill = Winner), color = "white") +
@@ -668,7 +644,7 @@ We find that all 50 states + DC are now properly accounted for, with their numbe
 
 We now try using the `tmap` package, in the attempts to properly shade each state red or blue, based on the winning candidate from the 2000 election.
 
-```{r, warning=FALSE}
+```{r, warning=FALSE, message=FALSE}
 
 library(tmap)
 library(gridExtra)
@@ -719,7 +695,7 @@ grid.arrange(
 
 The code below once again makes use of the library `tmap`. You will find there are some debugging steps included in this code as there were attempts made to adjust the grey space/NAs in the resulting facet plot, before moving on to a different approach.
 
-```{r}
+```{, warning=FALSE, message=FALSE}
 
 library(tmap)
 
@@ -797,7 +773,7 @@ knitr::include_graphics("anim_map.gif")
 
 ```
 
-### Comparing the Effects of ECV Allocation Rules 
+### Comparing the Effects of ECV Allocation Rules
 
 Please note the various state Electoral College Vote allocation methods:
 
