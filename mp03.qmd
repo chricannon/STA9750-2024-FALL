@@ -695,7 +695,7 @@ grid.arrange(
 
 The code below once again makes use of the library `tmap`. You will find there are some debugging steps included in this code as there were attempts made to adjust the grey space/NAs in the resulting facet plot, before moving on to a different approach.
 
-```{, warning=FALSE, message=FALSE}
+```{r, warning=FALSE, message=FALSE}
 
 library(tmap)
 
@@ -742,7 +742,7 @@ tm_shape(map_data_with_year) +
 
 The code below makes use of the libraries `tools` and `gifski` to successfully generate an animated chloropleth, displaying presidential election results throughout the 21st century.
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 
 library(tools)
 library(gifski)
