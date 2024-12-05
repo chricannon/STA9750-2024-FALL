@@ -1,9 +1,12 @@
 ---
 title: "mp04"
 editor: visual
-format:
+format: 
   html:
     code-fold: true
+execute:
+  warning: false
+  message: false
 output-dir: docs
 ---
 
@@ -21,7 +24,7 @@ The second retirement plan option is called the Optional Retirement Plan (ORP). 
 
 The analysis below evaluates these plans in detail, incorporating data from AlphaVantage and FRED to simulate market returns and inflation trends, and uses computational models to project outcomes over an employee's career.
 
-```{r}
+```{r, results='hide'}
 library(dplyr)
 library(gt)
 library(purrr)
@@ -43,7 +46,7 @@ alpha_api_key <- readLines(api_key_file)
 
 Next, we downloaded the package and loaded library `httr2`, which is a tool for making HTTP requests in R, which was designed to simplify interactions with APIs.
 
-```{r}
+```{r, results='hide'}
 library(httr2)
 ```
 
@@ -66,7 +69,7 @@ Before beginning the Monte Carlo analysis, we identify and download historical d
 
     Instead, we accessed the **Average Hourly Earnings of Production and Nonsupervisory Employees: Total Private** (*series ID: CES050000003)*. This gives us an alternative to understand wage growth patterns over time, within the private sector, given we were unable to find a puclic sector match. The `httr2` packages allows us to send the request to the the API and parse the JSON response directly into R. We use a 20 year time period, starting 1/1/2003 and ending 12/31/2003.
 
-    ```{r}
+    ```{r, results='hide'}
 
     #FRED API base URL
     fred_base_url <- "https://api.stlouisfed.org/fred/series/observations"
