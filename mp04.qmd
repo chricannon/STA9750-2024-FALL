@@ -69,7 +69,7 @@ Before beginning the Monte Carlo analysis, we identify and download historical d
 
     Instead, we accessed the **Average Hourly Earnings of Production and Nonsupervisory Employees: Total Private** (*series ID: CES050000003)*. This gives us an alternative to understand wage growth patterns over time, within the private sector, given we were unable to find a puclic sector match. The `httr2` packages allows us to send the request to the the API and parse the JSON response directly into R. We use a 20 year time period, starting 1/1/2003 and ending 12/31/2003.
 
-    ```{r, results='hide'}
+    ```{r, results='hide', include='false'}
 
     #FRED API base URL
     fred_base_url <- "https://api.stlouisfed.org/fred/series/observations"
@@ -521,7 +521,7 @@ head(t_bill_df)
 
 Before moving on to the next task, we filter all (applicable) data sets to reflect the time frame of 2007-2023, keeping in mind our wage growth data was only able to go back to mid-2006. This adjustment aligns our data for further analysis.
 
-```{r}
+```{r, include='false'}
 #defining the date range
 start_date <- as.Date("2007-01-01")
 end_date <- as.Date("2023-12-31")
@@ -633,8 +633,7 @@ variance_stats <- aligned_data |>
 summary_stats_aligned <- mean_stats |>
   left_join(variance_stats, by = "Data Metric")
 
-# Display the summary statistics using the gt package
-library(gt)
+
 summary_stats_aligned |>
   gt() |>
   tab_header(
@@ -682,6 +681,141 @@ ggplot(cor_long, aes(x = Var1, y = Var2, fill = value)) +
 The heatmap visualizes the correlations among the economic indicators. We see a **strong positive correlation** between wage growth and CIP, indicating that as wages increase, consumer prices tend to rise, which aligns with inflationary trends. Differently, we find a **weak positive correlation** between T-bill returns and other indicators like bond returns and international equities. This highlights the more stable and less market-sensitive nature of these economic indicators.
 
 ## Task 5: Historical Comparison
+
+In this step, we implement the TRS and OPR retirement formulas and compare the value of each of them for the first month of retirement.
+
+The following **assumptions** are made for every employee:
+
+-   They joined CUNY in the first month of the historical data (January 2007)
+
+-   They retired from CUNY in the last month of the historical data (December 2023)
+
+Our steps include:
+
+> 1.  Define Assumptions
+> 2.  Simulate Career Earnings
+> 3.  Implement TRS
+> 4.  Implement ORP
+> 5.  Compare Outcomes
+
+```{r}
+# Define assumptions
+starting_salary <- 50000
+working_years <- as.integer(difftime(max(aligned_data$date), min(aligned_data$date), units = "days") / 365.25)
+retirement_age <- 65
+retirement_month <- max(aligned_data$date)
+
+# TRS Monthly Pension Calculation
+calculate_trs <- function(starting_salary, wage_growth_data, inflation_data, years_worked) {
+  salary <- starting_salary
+  salaries <- numeric(years_worked)
+  
+  for (i in 1:years_worked) {
+    growth_rate <- wage_growth_data$wage_growth[i %% nrow(wage_growth_data) + 1] / 1000  # Dividing by 1000 for scaling
+    inflation_rate <- inflation_data$cpi[i %% nrow(inflation_data) + 1] / 1000  # Dividing by 1000 for scaling
+    salary <- salary * (1 + growth_rate + inflation_rate)
+    salaries[i] <- salary
+  }
+  
+  # Final Average Salary (last 3 years)
+  final_average_salary <- mean(tail(salaries, 3))
+  
+  # Calculate pension based on years worked
+  pension <- if (years_worked <= 20) {
+    0.015 * final_average_salary * years_worked
+  } else if (years_worked <= 30) {
+    0.02 * final_average_salary * years_worked
+  } else {
+    0.6 * final_average_salary
+  }
+  
+  # Convert to monthly pension and scale down
+  monthly_pension <- pension / 60  #Dividing by 60 for additional scaling
+  return(monthly_pension)
+}
+
+# ORP Monthly Income Calculation
+calculate_orp <- function(starting_salary, wage_growth_data, equity_data, bond_data, years_worked, employer_contribution_rate = 0.08, withdrawal_rate = 0.04) {
+  salary <- starting_salary
+  account_balance <- 0
+  
+  for (i in 1:years_worked) {
+    growth_rate <- wage_growth_data$wage_growth[i %% nrow(wage_growth_data) + 1] / 10000  # Dividing by 10000 for scaling
+    equity_return <- equity_data$int_equity[i %% nrow(equity_data) + 1] / 1000  # Dividing by 1000 for scaling
+    bond_return <- bond_data$bond_return[i %% nrow(bond_data) + 1] / 1000  # Dividing by 1000 for scaling
+    market_return <- 0.6 * equity_return + 0.4 * bond_return
+    
+    salary <- salary * (1 + growth_rate)
+    
+    employee_contribution <- salary * 0.06
+    employer_contribution <- salary * employer_contribution_rate
+    total_contribution <- employee_contribution + employer_contribution
+    
+    # Update account balance with contributions and market return
+    account_balance <- account_balance * (1 + market_return) + total_contribution
+  }
+  
+  # Calculate monthly withdrawal and scale down
+  monthly_withdrawal <- (account_balance * withdrawal_rate) / 60  # Dividing by 60 for additional scaling
+  return(monthly_withdrawal)
+}
+
+# Simulate TRS and ORP income
+trs_income <- calculate_trs(
+  starting_salary = starting_salary,
+  wage_growth_data = aligned_data,
+  inflation_data = aligned_data,
+  years_worked = working_years
+)
+
+orp_income <- calculate_orp(
+  starting_salary = starting_salary,
+  wage_growth_data = aligned_data,
+  equity_data = aligned_data,
+  bond_data = aligned_data,
+  years_worked = working_years
+)
+
+results_table <- data.frame(
+  Plan = c("TRS", "ORP"),
+  First_Month_Income = c(round(trs_income, 2), round(orp_income, 2))
+)
+
+# Generate the gt table
+results_table |> 
+  gt() |> 
+  tab_header(
+    title = "Comparison of First-Month Retirement Income",
+    subtitle = "TRS vs. ORP for CUNY Employees"
+  ) |> 
+  fmt_number(
+    columns = c(First_Month_Income), # Use c() for the column selection
+    decimals = 2
+  )
+
+# Data for the chart
+comparison_data <- data.frame(
+  Plan = c("TRS", "ORP"),
+  Income = c(trs_income, orp_income)
+)
+
+# Generate bar chart
+ggplot(comparison_data, aes(x = Plan, y = Income, fill = Plan)) +
+  geom_bar(stat = "identity", width = 0.6) +
+  labs(
+    title = "Comparison of First-Month Retirement Income",
+    x = "Retirement Plan",
+    y = "Monthly Income ($)"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c("TRS" = "blue", "ORP" = "red"))
+
+```
+
+You may see the comparison above displaying the different projected first-month reitrement incomes from each of the two retirement plans offered to CUNY employees (TRS and ORP).
+
+The TRS offers a monthly income of **\$4540.35** while OPR offers a monthly income of **\$213.33**. These figures highlight the significant differences between a defined-benefit plan like TRS, which guarantees a pension based on years worked and final average salary, compared to a defined-contribution plan like ORP, which depends on investment returns and contribution levels.
 
 ## Task 6: Fixed-Rate Analysis
 

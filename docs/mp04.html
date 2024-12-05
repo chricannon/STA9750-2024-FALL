@@ -206,53 +206,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ul>
 <li><p><strong>Wage growth</strong> - this metric is necessary as wage growth determines how an individual’s income evolves over time. We first attempted to access the <strong>Average Hourly Earnings of State and Local Government Employees (</strong><em>series ID: CES9091000003),</em> given CUNY employees are New York State employees, but it was no longer available in the <code>FRED</code> repository.</p>
 <p>Instead, we accessed the <strong>Average Hourly Earnings of Production and Nonsupervisory Employees: Total Private</strong> (<em>series ID: CES050000003)</em>. This gives us an alternative to understand wage growth patterns over time, within the private sector, given we were unable to find a puclic sector match. The <code>httr2</code> packages allows us to send the request to the the API and parse the JSON response directly into R. We use a 20 year time period, starting 1/1/2003 and ending 12/31/2003.</p>
-<div class="cell">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#FRED API base URL</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>fred_base_url <span class="ot">&lt;-</span> <span class="st">"https://api.stlouisfed.org/fred/series/observations"</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co">#FRED API parameters for wage growth data</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>fred_params <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">series_id =</span> <span class="st">"CES0500000003"</span>,  <span class="co">#average Hourly Earnings (Private Sector)</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">api_key =</span> fred_api_key,       </span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">file_type =</span> <span class="st">"json"</span>,           <span class="co"># Response format</span></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">observation_start =</span> <span class="st">"2003-01-01"</span>,  <span class="co"># Start date</span></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">observation_end =</span> <span class="st">"2023-12-31"</span>     <span class="co"># End date</span></span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co">#fetch data</span></span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>resp <span class="ot">&lt;-</span> <span class="fu">request</span>(fred_base_url) <span class="sc">|&gt;</span></span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_url_query</span>(<span class="sc">!!!</span>fred_params) <span class="sc">|&gt;</span></span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_perform</span>()</span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="co">#parse the JSON response into a data frame</span></span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>wage_growth_data <span class="ot">&lt;-</span> <span class="fu">resp_body_json</span>(resp)</span>
-<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>wage_growth_df <span class="ot">&lt;-</span> wage_growth_data<span class="sc">$</span>observations <span class="sc">|&gt;</span></span>
-<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span></span>
-<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transform</span>(<span class="at">date =</span> <span class="fu">as.Date</span>(date), <span class="at">value =</span> <span class="fu">as.numeric</span>(value))</span>
-<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Display the first few rows of the data frame</span></span>
-<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">head</span>(wage_growth_df))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-</div>
 <p>After completing this step and viewing the dataframe in the R environment, it appeared as a list. The below code converts the <code>wage_growth_df</code> to a proper dataframe.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#extract and convert the observations into a data frame</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>wage_growth_df <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(wage_growth_data<span class="sc">$</span>observations, as.data.frame)) <span class="sc">|&gt;</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transform</span>(</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">date =</span> <span class="fu">as.Date</span>(date),            <span class="co"># Convert 'date' column to Date format</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">value =</span> <span class="fu">as.numeric</span>(value)        <span class="co"># Convert 'value' column to numeric</span></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co">#drop unnecessary columns</span></span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>wage_growth_df <span class="ot">&lt;-</span> wage_growth_df[, <span class="fu">c</span>(<span class="st">"date"</span>, <span class="st">"value"</span>)]</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="co">#view the structure of the resulting data frame</span></span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(wage_growth_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#extract and convert the observations into a data frame</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>wage_growth_df <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(wage_growth_data<span class="sc">$</span>observations, as.data.frame)) <span class="sc">|&gt;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transform</span>(</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">date =</span> <span class="fu">as.Date</span>(date),            <span class="co"># Convert 'date' column to Date format</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">value =</span> <span class="fu">as.numeric</span>(value)        <span class="co"># Convert 'value' column to numeric</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co">#drop unnecessary columns</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>wage_growth_df <span class="ot">&lt;-</span> wage_growth_df[, <span class="fu">c</span>(<span class="st">"date"</span>, <span class="st">"value"</span>)]</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="co">#view the structure of the resulting data frame</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(wage_growth_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>'data.frame':   214 obs. of  2 variables:
@@ -261,8 +231,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">#display the first few rows</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(wage_growth_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">#display the first few rows</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(wage_growth_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>        date value
@@ -278,37 +248,37 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">#FRED API base URL</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>fred_base_url <span class="ot">&lt;-</span> <span class="st">"https://api.stlouisfed.org/fred/series/observations"</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co">#FRED API parameters for CPI data</span></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>fred_params <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">series_id =</span> <span class="st">"CPIAUCSL"</span>,            <span class="co"># CPI for All Urban Consumers: All Items</span></span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">api_key =</span> fred_api_key,            <span class="co"># Your API key</span></span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">file_type =</span> <span class="st">"json"</span>,                <span class="co"># Response format</span></span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">observation_start =</span> <span class="st">"2003-01-01"</span>,  <span class="co"># Start date</span></span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">observation_end =</span> <span class="st">"2023-12-31"</span>     <span class="co"># End date</span></span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="co">#fetch CPI data</span></span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>resp <span class="ot">&lt;-</span> <span class="fu">request</span>(fred_base_url) <span class="sc">|&gt;</span></span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_url_query</span>(<span class="sc">!!!</span>fred_params) <span class="sc">|&gt;</span></span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_perform</span>()</span>
-<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a><span class="co">#parse the JSON response into a data frame</span></span>
-<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>cpi_data <span class="ot">&lt;-</span> <span class="fu">resp_body_json</span>(resp)</span>
-<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>cpi_df <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(cpi_data<span class="sc">$</span>observations, as.data.frame)) <span class="sc">|&gt;</span></span>
-<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span></span>
-<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transform</span>(</span>
-<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">date =</span> <span class="fu">as.Date</span>(date),            <span class="co"># Convert 'date' column to Date format</span></span>
-<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">value =</span> <span class="fu">as.numeric</span>(value)        <span class="co"># Convert 'value' column to numeric</span></span>
-<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a><span class="co">#drop unnecessary columns </span></span>
-<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>cpi_df <span class="ot">&lt;-</span> cpi_df[, <span class="fu">c</span>(<span class="st">"date"</span>, <span class="st">"value"</span>)]</span>
-<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a><span class="co">#view the structure of the resulting data frame</span></span>
-<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(cpi_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">#FRED API base URL</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>fred_base_url <span class="ot">&lt;-</span> <span class="st">"https://api.stlouisfed.org/fred/series/observations"</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">#FRED API parameters for CPI data</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>fred_params <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">series_id =</span> <span class="st">"CPIAUCSL"</span>,            <span class="co"># CPI for All Urban Consumers: All Items</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">api_key =</span> fred_api_key,            <span class="co"># Your API key</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">file_type =</span> <span class="st">"json"</span>,                <span class="co"># Response format</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">observation_start =</span> <span class="st">"2003-01-01"</span>,  <span class="co"># Start date</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">observation_end =</span> <span class="st">"2023-12-31"</span>     <span class="co"># End date</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co">#fetch CPI data</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>resp <span class="ot">&lt;-</span> <span class="fu">request</span>(fred_base_url) <span class="sc">|&gt;</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_url_query</span>(<span class="sc">!!!</span>fred_params) <span class="sc">|&gt;</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_perform</span>()</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="co">#parse the JSON response into a data frame</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>cpi_data <span class="ot">&lt;-</span> <span class="fu">resp_body_json</span>(resp)</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>cpi_df <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(cpi_data<span class="sc">$</span>observations, as.data.frame)) <span class="sc">|&gt;</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transform</span>(</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">date =</span> <span class="fu">as.Date</span>(date),            <span class="co"># Convert 'date' column to Date format</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">value =</span> <span class="fu">as.numeric</span>(value)        <span class="co"># Convert 'value' column to numeric</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a><span class="co">#drop unnecessary columns </span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>cpi_df <span class="ot">&lt;-</span> cpi_df[, <span class="fu">c</span>(<span class="st">"date"</span>, <span class="st">"value"</span>)]</span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a><span class="co">#view the structure of the resulting data frame</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(cpi_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>'data.frame':   252 obs. of  2 variables:
@@ -317,8 +287,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">#display the first few rows of the data frame</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(cpi_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">#display the first few rows of the data frame</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(cpi_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>        date value
@@ -342,22 +312,22 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">#base URL for AlphaVantage API</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>alpha_base_url <span class="ot">&lt;-</span> <span class="st">"https://www.alphavantage.co/query"</span></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co">#API parameters for SPY</span></span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>test_params <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">function</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"TIME_SERIES_DAILY_ADJUSTED"</span>,  </span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">symbol =</span> <span class="st">"SPY"</span>,                          </span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">apikey =</span> alpha_api_key                 </span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="co">#test request</span></span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>resp <span class="ot">&lt;-</span> <span class="fu">request</span>(alpha_base_url) <span class="sc">|&gt;</span></span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_url_query</span>(<span class="sc">!!!</span>test_params) <span class="sc">|&gt;</span></span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_perform</span>()</span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">resp_body_string</span>(resp))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">#base URL for AlphaVantage API</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>alpha_base_url <span class="ot">&lt;-</span> <span class="st">"https://www.alphavantage.co/query"</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co">#API parameters for SPY</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>test_params <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">function</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"TIME_SERIES_DAILY_ADJUSTED"</span>,  </span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">symbol =</span> <span class="st">"SPY"</span>,                          </span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">apikey =</span> alpha_api_key                 </span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="co">#test request</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>resp <span class="ot">&lt;-</span> <span class="fu">request</span>(alpha_base_url) <span class="sc">|&gt;</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_url_query</span>(<span class="sc">!!!</span>test_params) <span class="sc">|&gt;</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_perform</span>()</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">resp_body_string</span>(resp))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "{\n    \"Information\": \"Thank you for using Alpha Vantage! This is a premium endpoint. You may subscribe to any of the premium plans at https://www.alphavantage.co/premium/ to instantly unlock all premium endpoints\"\n}"</code></pre>
@@ -368,40 +338,40 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">#define the base URL for AlphaVantage API</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>alpha_base_url <span class="ot">&lt;-</span> <span class="st">"https://www.alphavantage.co/query"</span></span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co">#minimal API parameters for SPY</span></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>test_params <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">function</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"TIME_SERIES_DAILY"</span>,  <span class="co"># Function to fetch daily prices</span></span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">symbol =</span> <span class="st">"SPY"</span>,                          <span class="co"># S&amp;P 500 ETF</span></span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">apikey =</span> alpha_api_key                    <span class="co"># Your AlphaVantage API key</span></span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="co">#send the test request</span></span>
-<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>resp <span class="ot">&lt;-</span> <span class="fu">request</span>(alpha_base_url) <span class="sc">|&gt;</span></span>
-<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_url_query</span>(<span class="sc">!!!</span>test_params) <span class="sc">|&gt;</span></span>
-<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_perform</span>()</span>
-<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a><span class="co">#parse the JSON response</span></span>
-<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>spy_data <span class="ot">&lt;-</span> <span class="fu">resp_body_json</span>(resp)</span>
-<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a><span class="co">#extract the daily time series data</span></span>
-<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>spy_daily <span class="ot">&lt;-</span> spy_data[[<span class="st">"Time Series (Daily)"</span>]]</span>
-<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a><span class="co">#convert to a data frame</span></span>
-<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>spy_df <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">names</span>(spy_daily), <span class="cf">function</span>(date) {</span>
-<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
-<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">date =</span> <span class="fu">as.Date</span>(date),</span>
-<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">close =</span> <span class="fu">as.numeric</span>(spy_daily[[date]][[<span class="st">"4. close"</span>]])</span>
-<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>}))</span>
-<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a><span class="co">#sort by date</span></span>
-<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a>spy_df <span class="ot">&lt;-</span> spy_df[<span class="fu">order</span>(spy_df<span class="sc">$</span>date), ]</span>
-<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a><span class="co">#view the resulting data frame</span></span>
-<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(spy_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co">#define the base URL for AlphaVantage API</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>alpha_base_url <span class="ot">&lt;-</span> <span class="st">"https://www.alphavantage.co/query"</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co">#minimal API parameters for SPY</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>test_params <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">function</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"TIME_SERIES_DAILY"</span>,  <span class="co"># Function to fetch daily prices</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">symbol =</span> <span class="st">"SPY"</span>,                          <span class="co"># S&amp;P 500 ETF</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">apikey =</span> alpha_api_key                    <span class="co"># Your AlphaVantage API key</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="co">#send the test request</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>resp <span class="ot">&lt;-</span> <span class="fu">request</span>(alpha_base_url) <span class="sc">|&gt;</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_url_query</span>(<span class="sc">!!!</span>test_params) <span class="sc">|&gt;</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_perform</span>()</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a><span class="co">#parse the JSON response</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>spy_data <span class="ot">&lt;-</span> <span class="fu">resp_body_json</span>(resp)</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a><span class="co">#extract the daily time series data</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>spy_daily <span class="ot">&lt;-</span> spy_data[[<span class="st">"Time Series (Daily)"</span>]]</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a><span class="co">#convert to a data frame</span></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>spy_df <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">names</span>(spy_daily), <span class="cf">function</span>(date) {</span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">date =</span> <span class="fu">as.Date</span>(date),</span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">close =</span> <span class="fu">as.numeric</span>(spy_daily[[date]][[<span class="st">"4. close"</span>]])</span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>}))</span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a><span class="co">#sort by date</span></span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>spy_df <span class="ot">&lt;-</span> spy_df[<span class="fu">order</span>(spy_df<span class="sc">$</span>date), ]</span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a><span class="co">#view the resulting data frame</span></span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(spy_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>'data.frame':   100 obs. of  2 variables:
@@ -410,7 +380,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(spy_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(spy_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>          date  close
@@ -426,40 +396,40 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the base URL for the FRED API</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>fred_base_url <span class="ot">&lt;-</span> <span class="st">"https://api.stlouisfed.org/fred/series/observations"</span></span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Define API parameters for US equity market (S&amp;P 500 Index as an alternative to Wilshire 5000)</span></span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>fred_params_us <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">series_id =</span> <span class="st">"SP500"</span>,              <span class="co"># S&amp;P 500 Index series ID</span></span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">api_key =</span> fred_api_key,           <span class="co"># Your FRED API key</span></span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">file_type =</span> <span class="st">"json"</span>,               <span class="co"># Response format</span></span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">observation_start =</span> <span class="st">"2003-01-01"</span>, <span class="co"># Start date</span></span>
-<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">observation_end =</span> <span class="st">"2023-12-31"</span>    <span class="co"># End date</span></span>
-<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Fetch the data from FRED API</span></span>
-<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>resp <span class="ot">&lt;-</span> <span class="fu">request</span>(fred_base_url) <span class="sc">|&gt;</span></span>
-<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_url_query</span>(<span class="sc">!!!</span>fred_params_us) <span class="sc">|&gt;</span></span>
-<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_perform</span>()</span>
-<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Parse the JSON response</span></span>
-<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>us_equity_data <span class="ot">&lt;-</span> <span class="fu">resp_body_json</span>(resp)</span>
-<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert the observations list into a clean dataframe</span></span>
-<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>us_equity_df <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(us_equity_data<span class="sc">$</span>observations, <span class="cf">function</span>(x) {</span>
-<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
-<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">date =</span> <span class="fu">as.Date</span>(x<span class="sc">$</span>date),                  <span class="co"># Convert 'date' to Date format</span></span>
-<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">us_equity =</span> <span class="fu">as.numeric</span>(<span class="fu">ifelse</span>(x<span class="sc">$</span>value <span class="sc">==</span> <span class="st">"."</span>, <span class="cn">NA</span>, x<span class="sc">$</span>value)), <span class="co"># Handle "." as NA</span></span>
-<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span>                <span class="co"># Avoid unnecessary factor conversion</span></span>
-<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a>}))</span>
-<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Drop rows with NA values if necessary</span></span>
-<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a>us_equity_df <span class="ot">&lt;-</span> us_equity_df[<span class="sc">!</span><span class="fu">is.na</span>(us_equity_df<span class="sc">$</span>us_equity), ]</span>
-<span id="cb20-32"><a href="#cb20-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-33"><a href="#cb20-33" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify the structure and content of the dataframe</span></span>
-<span id="cb20-34"><a href="#cb20-34" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(us_equity_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the base URL for the FRED API</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>fred_base_url <span class="ot">&lt;-</span> <span class="st">"https://api.stlouisfed.org/fred/series/observations"</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Define API parameters for US equity market (S&amp;P 500 Index as an alternative to Wilshire 5000)</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>fred_params_us <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">series_id =</span> <span class="st">"SP500"</span>,              <span class="co"># S&amp;P 500 Index series ID</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">api_key =</span> fred_api_key,           <span class="co"># Your FRED API key</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">file_type =</span> <span class="st">"json"</span>,               <span class="co"># Response format</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">observation_start =</span> <span class="st">"2003-01-01"</span>, <span class="co"># Start date</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">observation_end =</span> <span class="st">"2023-12-31"</span>    <span class="co"># End date</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Fetch the data from FRED API</span></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>resp <span class="ot">&lt;-</span> <span class="fu">request</span>(fred_base_url) <span class="sc">|&gt;</span></span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_url_query</span>(<span class="sc">!!!</span>fred_params_us) <span class="sc">|&gt;</span></span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_perform</span>()</span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Parse the JSON response</span></span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>us_equity_data <span class="ot">&lt;-</span> <span class="fu">resp_body_json</span>(resp)</span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert the observations list into a clean dataframe</span></span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>us_equity_df <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(us_equity_data<span class="sc">$</span>observations, <span class="cf">function</span>(x) {</span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">date =</span> <span class="fu">as.Date</span>(x<span class="sc">$</span>date),                  <span class="co"># Convert 'date' to Date format</span></span>
+<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">us_equity =</span> <span class="fu">as.numeric</span>(<span class="fu">ifelse</span>(x<span class="sc">$</span>value <span class="sc">==</span> <span class="st">"."</span>, <span class="cn">NA</span>, x<span class="sc">$</span>value)), <span class="co"># Handle "." as NA</span></span>
+<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span>                <span class="co"># Avoid unnecessary factor conversion</span></span>
+<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a>}))</span>
+<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Drop rows with NA values if necessary</span></span>
+<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a>us_equity_df <span class="ot">&lt;-</span> us_equity_df[<span class="sc">!</span><span class="fu">is.na</span>(us_equity_df<span class="sc">$</span>us_equity), ]</span>
+<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify the structure and content of the dataframe</span></span>
+<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(us_equity_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>'data.frame':   2282 obs. of  2 variables:
@@ -468,7 +438,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(us_equity_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(us_equity_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>        date us_equity
@@ -486,40 +456,40 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the base URL for AlphaVantage API</span></span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>alpha_base_url <span class="ot">&lt;-</span> <span class="st">"https://www.alphavantage.co/query"</span></span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Minimal API parameters for EFA (MSCI EAFE ETF)</span></span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>efa_params <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">function</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"TIME_SERIES_DAILY"</span>,  <span class="co"># Function to fetch daily prices</span></span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">symbol =</span> <span class="st">"EFA"</span>,                   <span class="co"># MSCI EAFE ETF</span></span>
-<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">apikey =</span> alpha_api_key             <span class="co"># Your AlphaVantage API key</span></span>
-<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Send the request</span></span>
-<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>resp <span class="ot">&lt;-</span> <span class="fu">request</span>(alpha_base_url) <span class="sc">|&gt;</span></span>
-<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_url_query</span>(<span class="sc">!!!</span>efa_params) <span class="sc">|&gt;</span></span>
-<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_perform</span>()</span>
-<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Parse the JSON response</span></span>
-<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>efa_data <span class="ot">&lt;-</span> <span class="fu">resp_body_json</span>(resp)</span>
-<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract the daily time series data</span></span>
-<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a>efa_daily <span class="ot">&lt;-</span> efa_data[[<span class="st">"Time Series (Daily)"</span>]]</span>
-<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert to a data frame</span></span>
-<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a>efa_df <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">names</span>(efa_daily), <span class="cf">function</span>(date) {</span>
-<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
-<span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">date =</span> <span class="fu">as.Date</span>(date),</span>
-<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">close =</span> <span class="fu">as.numeric</span>(efa_daily[[date]][[<span class="st">"4. close"</span>]])</span>
-<span id="cb24-27"><a href="#cb24-27" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb24-28"><a href="#cb24-28" aria-hidden="true" tabindex="-1"></a>}))</span>
-<span id="cb24-29"><a href="#cb24-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-30"><a href="#cb24-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Sort by date</span></span>
-<span id="cb24-31"><a href="#cb24-31" aria-hidden="true" tabindex="-1"></a>efa_df <span class="ot">&lt;-</span> efa_df[<span class="fu">order</span>(efa_df<span class="sc">$</span>date), ]</span>
-<span id="cb24-32"><a href="#cb24-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-33"><a href="#cb24-33" aria-hidden="true" tabindex="-1"></a><span class="co"># View the resulting data frame</span></span>
-<span id="cb24-34"><a href="#cb24-34" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(efa_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the base URL for AlphaVantage API</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>alpha_base_url <span class="ot">&lt;-</span> <span class="st">"https://www.alphavantage.co/query"</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Minimal API parameters for EFA (MSCI EAFE ETF)</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>efa_params <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">function</span><span class="st">`</span> <span class="ot">=</span> <span class="st">"TIME_SERIES_DAILY"</span>,  <span class="co"># Function to fetch daily prices</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">symbol =</span> <span class="st">"EFA"</span>,                   <span class="co"># MSCI EAFE ETF</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">apikey =</span> alpha_api_key             <span class="co"># Your AlphaVantage API key</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Send the request</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>resp <span class="ot">&lt;-</span> <span class="fu">request</span>(alpha_base_url) <span class="sc">|&gt;</span></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_url_query</span>(<span class="sc">!!!</span>efa_params) <span class="sc">|&gt;</span></span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_perform</span>()</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Parse the JSON response</span></span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>efa_data <span class="ot">&lt;-</span> <span class="fu">resp_body_json</span>(resp)</span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract the daily time series data</span></span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>efa_daily <span class="ot">&lt;-</span> efa_data[[<span class="st">"Time Series (Daily)"</span>]]</span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert to a data frame</span></span>
+<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a>efa_df <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(<span class="fu">names</span>(efa_daily), <span class="cf">function</span>(date) {</span>
+<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
+<span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">date =</span> <span class="fu">as.Date</span>(date),</span>
+<span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">close =</span> <span class="fu">as.numeric</span>(efa_daily[[date]][[<span class="st">"4. close"</span>]])</span>
+<span id="cb23-27"><a href="#cb23-27" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb23-28"><a href="#cb23-28" aria-hidden="true" tabindex="-1"></a>}))</span>
+<span id="cb23-29"><a href="#cb23-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-30"><a href="#cb23-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Sort by date</span></span>
+<span id="cb23-31"><a href="#cb23-31" aria-hidden="true" tabindex="-1"></a>efa_df <span class="ot">&lt;-</span> efa_df[<span class="fu">order</span>(efa_df<span class="sc">$</span>date), ]</span>
+<span id="cb23-32"><a href="#cb23-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-33"><a href="#cb23-33" aria-hidden="true" tabindex="-1"></a><span class="co"># View the resulting data frame</span></span>
+<span id="cb23-34"><a href="#cb23-34" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(efa_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>'data.frame':   100 obs. of  2 variables:
@@ -528,7 +498,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(efa_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(efa_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>          date close
@@ -548,10 +518,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>efa_df <span class="ot">&lt;-</span> efa_df <span class="sc">|&gt;</span></span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transform</span>(<span class="at">return =</span> <span class="fu">c</span>(<span class="cn">NA</span>, <span class="fu">diff</span>(<span class="fu">log</span>(close))))</span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(efa_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>efa_df <span class="ot">&lt;-</span> efa_df <span class="sc">|&gt;</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transform</span>(<span class="at">return =</span> <span class="fu">c</span>(<span class="cn">NA</span>, <span class="fu">diff</span>(<span class="fu">log</span>(close))))</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(efa_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>          date close       return
@@ -567,38 +537,38 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define FRED API base URL</span></span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>fred_base_url <span class="ot">&lt;-</span> <span class="st">"https://api.stlouisfed.org/fred/series/observations"</span></span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="co"># FRED API parameters for the selected international equity index</span></span>
-<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>fred_params_int <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">series_id =</span> <span class="st">"BAMLEMCBPITRIV"</span>,         <span class="co"># International Equity Market Index</span></span>
-<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">api_key =</span> fred_api_key,               <span class="co"># Your FRED API key</span></span>
-<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">file_type =</span> <span class="st">"json"</span>,                   <span class="co"># Response format</span></span>
-<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">observation_start =</span> <span class="st">"2003-01-01"</span>,     <span class="co"># Start date</span></span>
-<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">observation_end =</span> <span class="st">"2023-12-31"</span>        <span class="co"># End date</span></span>
-<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Fetch international equity market data</span></span>
-<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>resp <span class="ot">&lt;-</span> <span class="fu">request</span>(fred_base_url) <span class="sc">|&gt;</span></span>
-<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_url_query</span>(<span class="sc">!!!</span>fred_params_int) <span class="sc">|&gt;</span></span>
-<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_perform</span>()</span>
-<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-18"><a href="#cb30-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Parse the JSON response into a data frame</span></span>
-<span id="cb30-19"><a href="#cb30-19" aria-hidden="true" tabindex="-1"></a>int_equity_data <span class="ot">&lt;-</span> <span class="fu">resp_body_json</span>(resp)</span>
-<span id="cb30-20"><a href="#cb30-20" aria-hidden="true" tabindex="-1"></a>int_equity_df <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(int_equity_data<span class="sc">$</span>observations, as.data.frame)) <span class="sc">|&gt;</span></span>
-<span id="cb30-21"><a href="#cb30-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span></span>
-<span id="cb30-22"><a href="#cb30-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transform</span>(</span>
-<span id="cb30-23"><a href="#cb30-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">date =</span> <span class="fu">as.Date</span>(date),             <span class="co"># Convert 'date' column to Date format</span></span>
-<span id="cb30-24"><a href="#cb30-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">value =</span> <span class="fu">as.numeric</span>(value)        <span class="co"># Convert 'value' column to numeric</span></span>
-<span id="cb30-25"><a href="#cb30-25" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb30-26"><a href="#cb30-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-27"><a href="#cb30-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Drop unnecessary columns and rename</span></span>
-<span id="cb30-28"><a href="#cb30-28" aria-hidden="true" tabindex="-1"></a>int_equity_df <span class="ot">&lt;-</span> int_equity_df[, <span class="fu">c</span>(<span class="st">"date"</span>, <span class="st">"value"</span>)] <span class="sc">|&gt;</span></span>
-<span id="cb30-29"><a href="#cb30-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">int_equity =</span> value)          <span class="co"># Rename 'value' column to 'int_equity'</span></span>
-<span id="cb30-30"><a href="#cb30-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-31"><a href="#cb30-31" aria-hidden="true" tabindex="-1"></a><span class="co"># View the structure of the resulting data frame</span></span>
-<span id="cb30-32"><a href="#cb30-32" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(int_equity_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define FRED API base URL</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>fred_base_url <span class="ot">&lt;-</span> <span class="st">"https://api.stlouisfed.org/fred/series/observations"</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="co"># FRED API parameters for the selected international equity index</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>fred_params_int <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">series_id =</span> <span class="st">"BAMLEMCBPITRIV"</span>,         <span class="co"># International Equity Market Index</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">api_key =</span> fred_api_key,               <span class="co"># Your FRED API key</span></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">file_type =</span> <span class="st">"json"</span>,                   <span class="co"># Response format</span></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">observation_start =</span> <span class="st">"2003-01-01"</span>,     <span class="co"># Start date</span></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">observation_end =</span> <span class="st">"2023-12-31"</span>        <span class="co"># End date</span></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Fetch international equity market data</span></span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>resp <span class="ot">&lt;-</span> <span class="fu">request</span>(fred_base_url) <span class="sc">|&gt;</span></span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_url_query</span>(<span class="sc">!!!</span>fred_params_int) <span class="sc">|&gt;</span></span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_perform</span>()</span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Parse the JSON response into a data frame</span></span>
+<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a>int_equity_data <span class="ot">&lt;-</span> <span class="fu">resp_body_json</span>(resp)</span>
+<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a>int_equity_df <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(int_equity_data<span class="sc">$</span>observations, as.data.frame)) <span class="sc">|&gt;</span></span>
+<span id="cb29-21"><a href="#cb29-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span></span>
+<span id="cb29-22"><a href="#cb29-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transform</span>(</span>
+<span id="cb29-23"><a href="#cb29-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">date =</span> <span class="fu">as.Date</span>(date),             <span class="co"># Convert 'date' column to Date format</span></span>
+<span id="cb29-24"><a href="#cb29-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">value =</span> <span class="fu">as.numeric</span>(value)        <span class="co"># Convert 'value' column to numeric</span></span>
+<span id="cb29-25"><a href="#cb29-25" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb29-26"><a href="#cb29-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-27"><a href="#cb29-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Drop unnecessary columns and rename</span></span>
+<span id="cb29-28"><a href="#cb29-28" aria-hidden="true" tabindex="-1"></a>int_equity_df <span class="ot">&lt;-</span> int_equity_df[, <span class="fu">c</span>(<span class="st">"date"</span>, <span class="st">"value"</span>)] <span class="sc">|&gt;</span></span>
+<span id="cb29-29"><a href="#cb29-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">int_equity =</span> value)          <span class="co"># Rename 'value' column to 'int_equity'</span></span>
+<span id="cb29-30"><a href="#cb29-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-31"><a href="#cb29-31" aria-hidden="true" tabindex="-1"></a><span class="co"># View the structure of the resulting data frame</span></span>
+<span id="cb29-32"><a href="#cb29-32" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(int_equity_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>'data.frame':   5548 obs. of  2 variables:
@@ -607,8 +577,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Display the first few rows of the data frame</span></span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(int_equity_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Display the first few rows of the data frame</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(int_equity_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>        date int_equity
@@ -624,31 +594,31 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>int_equity_df<span class="sc">$</span>int_equity <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">ifelse</span>(int_equity_df<span class="sc">$</span>int_equity <span class="sc">==</span> <span class="st">"."</span>, <span class="cn">NA</span>, int_equity_df<span class="sc">$</span>int_equity))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>int_equity_df<span class="sc">$</span>int_equity <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(<span class="fu">ifelse</span>(int_equity_df<span class="sc">$</span>int_equity <span class="sc">==</span> <span class="st">"."</span>, <span class="cn">NA</span>, int_equity_df<span class="sc">$</span>int_equity))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>This code replaces NA with the last valid observation.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(zoo)</span>
-<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>int_equity_df<span class="sc">$</span>int_equity <span class="ot">&lt;-</span> <span class="fu">na.locf</span>(int_equity_df<span class="sc">$</span>int_equity, <span class="at">na.rm =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(zoo)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>int_equity_df<span class="sc">$</span>int_equity <span class="ot">&lt;-</span> <span class="fu">na.locf</span>(int_equity_df<span class="sc">$</span>int_equity, <span class="at">na.rm =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Aggregating to monthly data -</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>int_equity_monthly <span class="ot">&lt;-</span> int_equity_df <span class="sc">|&gt;</span></span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">month =</span> <span class="fu">format</span>(date, <span class="st">"%Y-%m"</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(month) <span class="sc">|&gt;</span></span>
-<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">int_equity =</span> <span class="fu">mean</span>(int_equity, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
-<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">date =</span> <span class="fu">as.Date</span>(<span class="fu">paste0</span>(month, <span class="st">"-01"</span>), <span class="at">format =</span> <span class="st">"%Y-%m-%d"</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>month)  <span class="co">#dropping month - realized later on we did not need it so modifying this step</span></span>
-<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a><span class="co">#checking the structure of the modified dataset</span></span>
-<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(int_equity_monthly)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>int_equity_monthly <span class="ot">&lt;-</span> int_equity_df <span class="sc">|&gt;</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">month =</span> <span class="fu">format</span>(date, <span class="st">"%Y-%m"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(month) <span class="sc">|&gt;</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">int_equity =</span> <span class="fu">mean</span>(int_equity, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">date =</span> <span class="fu">as.Date</span>(<span class="fu">paste0</span>(month, <span class="st">"-01"</span>), <span class="at">format =</span> <span class="st">"%Y-%m-%d"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>month)  <span class="co">#dropping month - realized later on we did not need it so modifying this step</span></span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a><span class="co">#checking the structure of the modified dataset</span></span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(int_equity_monthly)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>tibble [252 × 2] (S3: tbl_df/tbl/data.frame)
@@ -657,8 +627,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co">#previewing the first few rows</span></span>
-<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(int_equity_monthly)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="co">#previewing the first few rows</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(int_equity_monthly)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 6 × 2
@@ -677,39 +647,39 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the base URL for FRED API</span></span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>fred_base_url <span class="ot">&lt;-</span> <span class="st">"https://api.stlouisfed.org/fred/series/observations"</span></span>
-<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a><span class="co"># FRED API parameters for 10-Year Treasury Rate</span></span>
-<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>fred_params <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">series_id =</span> <span class="st">"GS10"</span>,               <span class="co"># 10-Year Treasury Constant Maturity Rate</span></span>
-<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">api_key =</span> fred_api_key,           <span class="co"># Your FRED API key</span></span>
-<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">file_type =</span> <span class="st">"json"</span>,               <span class="co"># Response format</span></span>
-<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">observation_start =</span> <span class="st">"2003-01-01"</span>, <span class="co"># Start date</span></span>
-<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">observation_end =</span> <span class="st">"2023-12-31"</span>    <span class="co"># End date</span></span>
-<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Send the request</span></span>
-<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a>resp <span class="ot">&lt;-</span> <span class="fu">request</span>(fred_base_url) <span class="sc">|&gt;</span></span>
-<span id="cb40-15"><a href="#cb40-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_url_query</span>(<span class="sc">!!!</span>fred_params) <span class="sc">|&gt;</span></span>
-<span id="cb40-16"><a href="#cb40-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_perform</span>()</span>
-<span id="cb40-17"><a href="#cb40-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-18"><a href="#cb40-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Parse the JSON response</span></span>
-<span id="cb40-19"><a href="#cb40-19" aria-hidden="true" tabindex="-1"></a>bond_data <span class="ot">&lt;-</span> <span class="fu">resp_body_json</span>(resp)</span>
-<span id="cb40-20"><a href="#cb40-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-21"><a href="#cb40-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract and convert the observations into a data frame</span></span>
-<span id="cb40-22"><a href="#cb40-22" aria-hidden="true" tabindex="-1"></a>bond_df <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(bond_data<span class="sc">$</span>observations, as.data.frame)) <span class="sc">|&gt;</span></span>
-<span id="cb40-23"><a href="#cb40-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span></span>
-<span id="cb40-24"><a href="#cb40-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transform</span>(</span>
-<span id="cb40-25"><a href="#cb40-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">date =</span> <span class="fu">as.Date</span>(date),            <span class="co"># Convert 'date' column to Date format</span></span>
-<span id="cb40-26"><a href="#cb40-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">value =</span> <span class="fu">as.numeric</span>(value)        <span class="co"># Convert 'value' column to numeric</span></span>
-<span id="cb40-27"><a href="#cb40-27" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb40-28"><a href="#cb40-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-29"><a href="#cb40-29" aria-hidden="true" tabindex="-1"></a><span class="co"># Drop unnecessary columns</span></span>
-<span id="cb40-30"><a href="#cb40-30" aria-hidden="true" tabindex="-1"></a>bond_df <span class="ot">&lt;-</span> bond_df[, <span class="fu">c</span>(<span class="st">"date"</span>, <span class="st">"value"</span>)]</span>
-<span id="cb40-31"><a href="#cb40-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-32"><a href="#cb40-32" aria-hidden="true" tabindex="-1"></a><span class="co"># View the structure of the resulting data frame</span></span>
-<span id="cb40-33"><a href="#cb40-33" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(bond_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the base URL for FRED API</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>fred_base_url <span class="ot">&lt;-</span> <span class="st">"https://api.stlouisfed.org/fred/series/observations"</span></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a><span class="co"># FRED API parameters for 10-Year Treasury Rate</span></span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>fred_params <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">series_id =</span> <span class="st">"GS10"</span>,               <span class="co"># 10-Year Treasury Constant Maturity Rate</span></span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">api_key =</span> fred_api_key,           <span class="co"># Your FRED API key</span></span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">file_type =</span> <span class="st">"json"</span>,               <span class="co"># Response format</span></span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">observation_start =</span> <span class="st">"2003-01-01"</span>, <span class="co"># Start date</span></span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">observation_end =</span> <span class="st">"2023-12-31"</span>    <span class="co"># End date</span></span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Send the request</span></span>
+<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a>resp <span class="ot">&lt;-</span> <span class="fu">request</span>(fred_base_url) <span class="sc">|&gt;</span></span>
+<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_url_query</span>(<span class="sc">!!!</span>fred_params) <span class="sc">|&gt;</span></span>
+<span id="cb39-16"><a href="#cb39-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_perform</span>()</span>
+<span id="cb39-17"><a href="#cb39-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-18"><a href="#cb39-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Parse the JSON response</span></span>
+<span id="cb39-19"><a href="#cb39-19" aria-hidden="true" tabindex="-1"></a>bond_data <span class="ot">&lt;-</span> <span class="fu">resp_body_json</span>(resp)</span>
+<span id="cb39-20"><a href="#cb39-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-21"><a href="#cb39-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract and convert the observations into a data frame</span></span>
+<span id="cb39-22"><a href="#cb39-22" aria-hidden="true" tabindex="-1"></a>bond_df <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(bond_data<span class="sc">$</span>observations, as.data.frame)) <span class="sc">|&gt;</span></span>
+<span id="cb39-23"><a href="#cb39-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span></span>
+<span id="cb39-24"><a href="#cb39-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transform</span>(</span>
+<span id="cb39-25"><a href="#cb39-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">date =</span> <span class="fu">as.Date</span>(date),            <span class="co"># Convert 'date' column to Date format</span></span>
+<span id="cb39-26"><a href="#cb39-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">value =</span> <span class="fu">as.numeric</span>(value)        <span class="co"># Convert 'value' column to numeric</span></span>
+<span id="cb39-27"><a href="#cb39-27" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb39-28"><a href="#cb39-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-29"><a href="#cb39-29" aria-hidden="true" tabindex="-1"></a><span class="co"># Drop unnecessary columns</span></span>
+<span id="cb39-30"><a href="#cb39-30" aria-hidden="true" tabindex="-1"></a>bond_df <span class="ot">&lt;-</span> bond_df[, <span class="fu">c</span>(<span class="st">"date"</span>, <span class="st">"value"</span>)]</span>
+<span id="cb39-31"><a href="#cb39-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-32"><a href="#cb39-32" aria-hidden="true" tabindex="-1"></a><span class="co"># View the structure of the resulting data frame</span></span>
+<span id="cb39-33"><a href="#cb39-33" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(bond_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>'data.frame':   252 obs. of  2 variables:
@@ -718,8 +688,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Display the first few rows</span></span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(bond_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Display the first few rows</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(bond_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>        date value
@@ -735,11 +705,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>bond_df <span class="ot">&lt;-</span> bond_df <span class="sc">|&gt;</span> </span>
-<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transform</span>(<span class="at">return =</span> <span class="fu">c</span>(<span class="cn">NA</span>, <span class="fu">diff</span>(<span class="fu">log</span>(value))))</span>
-<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a><span class="co"># View the first few rows with returns</span></span>
-<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(bond_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>bond_df <span class="ot">&lt;-</span> bond_df <span class="sc">|&gt;</span> </span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transform</span>(<span class="at">return =</span> <span class="fu">c</span>(<span class="cn">NA</span>, <span class="fu">diff</span>(<span class="fu">log</span>(value))))</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a><span class="co"># View the first few rows with returns</span></span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(bond_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>        date value      return
@@ -756,39 +726,39 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the base URL for FRED API</span></span>
-<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>fred_base_url <span class="ot">&lt;-</span> <span class="st">"https://api.stlouisfed.org/fred/series/observations"</span></span>
-<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a><span class="co"># FRED API parameters for 3-Month Treasury Bill Rate</span></span>
-<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>fred_params <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">series_id =</span> <span class="st">"TB3MS"</span>,               <span class="co"># 3-Month Treasury Bill Rate</span></span>
-<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">api_key =</span> fred_api_key,            <span class="co"># Your FRED API key</span></span>
-<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">file_type =</span> <span class="st">"json"</span>,                <span class="co"># Response format</span></span>
-<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">observation_start =</span> <span class="st">"2003-01-01"</span>,  <span class="co"># Start date</span></span>
-<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">observation_end =</span> <span class="st">"2023-12-31"</span>     <span class="co"># End date</span></span>
-<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Send the request</span></span>
-<span id="cb46-14"><a href="#cb46-14" aria-hidden="true" tabindex="-1"></a>resp <span class="ot">&lt;-</span> <span class="fu">request</span>(fred_base_url) <span class="sc">|&gt;</span></span>
-<span id="cb46-15"><a href="#cb46-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_url_query</span>(<span class="sc">!!!</span>fred_params) <span class="sc">|&gt;</span></span>
-<span id="cb46-16"><a href="#cb46-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_perform</span>()</span>
-<span id="cb46-17"><a href="#cb46-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb46-18"><a href="#cb46-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Parse the JSON response</span></span>
-<span id="cb46-19"><a href="#cb46-19" aria-hidden="true" tabindex="-1"></a>t_bill_data <span class="ot">&lt;-</span> <span class="fu">resp_body_json</span>(resp)</span>
-<span id="cb46-20"><a href="#cb46-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb46-21"><a href="#cb46-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract and convert the observations into a data frame</span></span>
-<span id="cb46-22"><a href="#cb46-22" aria-hidden="true" tabindex="-1"></a>t_bill_df <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(t_bill_data<span class="sc">$</span>observations, as.data.frame)) <span class="sc">|&gt;</span></span>
-<span id="cb46-23"><a href="#cb46-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span></span>
-<span id="cb46-24"><a href="#cb46-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transform</span>(</span>
-<span id="cb46-25"><a href="#cb46-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">date =</span> <span class="fu">as.Date</span>(date),             <span class="co"># Convert 'date' column to Date format</span></span>
-<span id="cb46-26"><a href="#cb46-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">value =</span> <span class="fu">as.numeric</span>(value)         <span class="co"># Convert 'value' column to numeric</span></span>
-<span id="cb46-27"><a href="#cb46-27" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb46-28"><a href="#cb46-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb46-29"><a href="#cb46-29" aria-hidden="true" tabindex="-1"></a><span class="co"># Drop unnecessary columns</span></span>
-<span id="cb46-30"><a href="#cb46-30" aria-hidden="true" tabindex="-1"></a>t_bill_df <span class="ot">&lt;-</span> t_bill_df[, <span class="fu">c</span>(<span class="st">"date"</span>, <span class="st">"value"</span>)]</span>
-<span id="cb46-31"><a href="#cb46-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb46-32"><a href="#cb46-32" aria-hidden="true" tabindex="-1"></a><span class="co"># View the structure of the resulting data frame</span></span>
-<span id="cb46-33"><a href="#cb46-33" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(t_bill_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the base URL for FRED API</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>fred_base_url <span class="ot">&lt;-</span> <span class="st">"https://api.stlouisfed.org/fred/series/observations"</span></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a><span class="co"># FRED API parameters for 3-Month Treasury Bill Rate</span></span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>fred_params <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">series_id =</span> <span class="st">"TB3MS"</span>,               <span class="co"># 3-Month Treasury Bill Rate</span></span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">api_key =</span> fred_api_key,            <span class="co"># Your FRED API key</span></span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">file_type =</span> <span class="st">"json"</span>,                <span class="co"># Response format</span></span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">observation_start =</span> <span class="st">"2003-01-01"</span>,  <span class="co"># Start date</span></span>
+<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">observation_end =</span> <span class="st">"2023-12-31"</span>     <span class="co"># End date</span></span>
+<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-13"><a href="#cb45-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Send the request</span></span>
+<span id="cb45-14"><a href="#cb45-14" aria-hidden="true" tabindex="-1"></a>resp <span class="ot">&lt;-</span> <span class="fu">request</span>(fred_base_url) <span class="sc">|&gt;</span></span>
+<span id="cb45-15"><a href="#cb45-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_url_query</span>(<span class="sc">!!!</span>fred_params) <span class="sc">|&gt;</span></span>
+<span id="cb45-16"><a href="#cb45-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">req_perform</span>()</span>
+<span id="cb45-17"><a href="#cb45-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-18"><a href="#cb45-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Parse the JSON response</span></span>
+<span id="cb45-19"><a href="#cb45-19" aria-hidden="true" tabindex="-1"></a>t_bill_data <span class="ot">&lt;-</span> <span class="fu">resp_body_json</span>(resp)</span>
+<span id="cb45-20"><a href="#cb45-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-21"><a href="#cb45-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract and convert the observations into a data frame</span></span>
+<span id="cb45-22"><a href="#cb45-22" aria-hidden="true" tabindex="-1"></a>t_bill_df <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, <span class="fu">lapply</span>(t_bill_data<span class="sc">$</span>observations, as.data.frame)) <span class="sc">|&gt;</span></span>
+<span id="cb45-23"><a href="#cb45-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span></span>
+<span id="cb45-24"><a href="#cb45-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transform</span>(</span>
+<span id="cb45-25"><a href="#cb45-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">date =</span> <span class="fu">as.Date</span>(date),             <span class="co"># Convert 'date' column to Date format</span></span>
+<span id="cb45-26"><a href="#cb45-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">value =</span> <span class="fu">as.numeric</span>(value)         <span class="co"># Convert 'value' column to numeric</span></span>
+<span id="cb45-27"><a href="#cb45-27" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb45-28"><a href="#cb45-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-29"><a href="#cb45-29" aria-hidden="true" tabindex="-1"></a><span class="co"># Drop unnecessary columns</span></span>
+<span id="cb45-30"><a href="#cb45-30" aria-hidden="true" tabindex="-1"></a>t_bill_df <span class="ot">&lt;-</span> t_bill_df[, <span class="fu">c</span>(<span class="st">"date"</span>, <span class="st">"value"</span>)]</span>
+<span id="cb45-31"><a href="#cb45-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-32"><a href="#cb45-32" aria-hidden="true" tabindex="-1"></a><span class="co"># View the structure of the resulting data frame</span></span>
+<span id="cb45-33"><a href="#cb45-33" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(t_bill_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>'data.frame':   252 obs. of  2 variables:
@@ -797,8 +767,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Display the first few rows</span></span>
-<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(t_bill_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Display the first few rows</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(t_bill_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>        date value
@@ -815,11 +785,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>t_bill_df <span class="ot">&lt;-</span> t_bill_df <span class="sc">|&gt;</span> </span>
-<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transform</span>(<span class="at">return =</span> <span class="fu">c</span>(<span class="cn">NA</span>, <span class="fu">diff</span>(<span class="fu">log</span>(value))))</span>
-<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a><span class="co">#view the first few rows with returns</span></span>
-<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(t_bill_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>t_bill_df <span class="ot">&lt;-</span> t_bill_df <span class="sc">|&gt;</span> </span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transform</span>(<span class="at">return =</span> <span class="fu">c</span>(<span class="cn">NA</span>, <span class="fu">diff</span>(<span class="fu">log</span>(value))))</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a><span class="co">#view the first few rows with returns</span></span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(t_bill_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>        date value      return
@@ -832,57 +802,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <p>Before moving on to the next task, we filter all (applicable) data sets to reflect the time frame of 2007-2023, keeping in mind our wage growth data was only able to go back to mid-2006. This adjustment aligns our data for further analysis.</p>
-<div class="cell">
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="co">#defining the date range</span></span>
-<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>start_date <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(<span class="st">"2007-01-01"</span>)</span>
-<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>end_date <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(<span class="st">"2023-12-31"</span>)</span>
-<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a><span class="co">#adjusting wage growth dataframe</span></span>
-<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a>wage_growth_df <span class="ot">&lt;-</span> <span class="fu">subset</span>(wage_growth_df, date <span class="sc">&gt;=</span> start_date <span class="sc">&amp;</span> date <span class="sc">&lt;=</span> end_date)</span>
-<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a><span class="co">#adjusting CPI dataframe</span></span>
-<span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a>cpi_df <span class="ot">&lt;-</span> <span class="fu">subset</span>(cpi_df, date <span class="sc">&gt;=</span> start_date <span class="sc">&amp;</span> date <span class="sc">&lt;=</span> end_date)</span>
-<span id="cb52-10"><a href="#cb52-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb52-11"><a href="#cb52-11" aria-hidden="true" tabindex="-1"></a><span class="co">#adjusting bond dataframe</span></span>
-<span id="cb52-12"><a href="#cb52-12" aria-hidden="true" tabindex="-1"></a>bond_df <span class="ot">&lt;-</span> <span class="fu">subset</span>(bond_df, date <span class="sc">&gt;=</span> start_date <span class="sc">&amp;</span> date <span class="sc">&lt;=</span> end_date)</span>
-<span id="cb52-13"><a href="#cb52-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb52-14"><a href="#cb52-14" aria-hidden="true" tabindex="-1"></a><span class="co">#adjusting T-bill dataframe</span></span>
-<span id="cb52-15"><a href="#cb52-15" aria-hidden="true" tabindex="-1"></a>t_bill_df <span class="ot">&lt;-</span> <span class="fu">subset</span>(t_bill_df, date <span class="sc">&gt;=</span> start_date <span class="sc">&amp;</span> date <span class="sc">&lt;=</span> end_date)</span>
-<span id="cb52-16"><a href="#cb52-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb52-17"><a href="#cb52-17" aria-hidden="true" tabindex="-1"></a><span class="co">#adjusting international equity dataframe</span></span>
-<span id="cb52-18"><a href="#cb52-18" aria-hidden="true" tabindex="-1"></a>int_equity_monthly <span class="ot">&lt;-</span> <span class="fu">subset</span>(</span>
-<span id="cb52-19"><a href="#cb52-19" aria-hidden="true" tabindex="-1"></a>    int_equity_monthly,</span>
-<span id="cb52-20"><a href="#cb52-20" aria-hidden="true" tabindex="-1"></a>    date <span class="sc">&gt;=</span> start_date <span class="sc">&amp;</span> date <span class="sc">&lt;=</span> end_date</span>
-<span id="cb52-21"><a href="#cb52-21" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb52-22"><a href="#cb52-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb52-23"><a href="#cb52-23" aria-hidden="true" tabindex="-1"></a><span class="co">#verify each dataframe</span></span>
-<span id="cb52-24"><a href="#cb52-24" aria-hidden="true" tabindex="-1"></a><span class="fu">list</span>(</span>
-<span id="cb52-25"><a href="#cb52-25" aria-hidden="true" tabindex="-1"></a>  <span class="at">wage_growth =</span> <span class="fu">range</span>(wage_growth_df<span class="sc">$</span>date),</span>
-<span id="cb52-26"><a href="#cb52-26" aria-hidden="true" tabindex="-1"></a>  <span class="at">cpi =</span> <span class="fu">range</span>(cpi_df<span class="sc">$</span>date),</span>
-<span id="cb52-27"><a href="#cb52-27" aria-hidden="true" tabindex="-1"></a>  <span class="at">bond =</span> <span class="fu">range</span>(bond_df<span class="sc">$</span>date),</span>
-<span id="cb52-28"><a href="#cb52-28" aria-hidden="true" tabindex="-1"></a>  <span class="at">t_bill =</span> <span class="fu">range</span>(t_bill_df<span class="sc">$</span>date),</span>
-<span id="cb52-29"><a href="#cb52-29" aria-hidden="true" tabindex="-1"></a>  <span class="at">int_equity =</span> <span class="fu">range</span>(int_equity_monthly<span class="sc">$</span>date)</span>
-<span id="cb52-30"><a href="#cb52-30" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>$wage_growth
-[1] "2007-01-01" "2023-12-01"
-
-$cpi
-[1] "2007-01-01" "2023-12-01"
-
-$bond
-[1] "2007-01-01" "2023-12-01"
-
-$t_bill
-[1] "2007-01-01" "2023-12-01"
-
-$int_equity
-[1] "2007-01-01" "2023-12-01"</code></pre>
-</div>
-</div>
 </section>
 <section id="task-4-initial-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="task-4-initial-analysis">Task 4: Initial Analysis</h2>
@@ -895,16 +814,16 @@ $int_equity
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a> <span class="co"># Renaming and preparing datasets for alignment</span></span>
-<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>wage_growth_prepared <span class="ot">&lt;-</span> wage_growth_df <span class="sc">|&gt;</span> <span class="fu">rename</span>(<span class="at">wage_growth =</span> value)</span>
-<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>cpi_prepared <span class="ot">&lt;-</span> cpi_df <span class="sc">|&gt;</span> <span class="fu">rename</span>(<span class="at">cpi =</span> value)</span>
-<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>bond_prepared <span class="ot">&lt;-</span> bond_df <span class="sc">|&gt;</span> <span class="fu">rename</span>(<span class="at">bond_return =</span> return) <span class="sc">|&gt;</span> <span class="fu">select</span>(date, bond_return)</span>
-<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>t_bill_prepared <span class="ot">&lt;-</span> t_bill_df <span class="sc">|&gt;</span> <span class="fu">rename</span>(<span class="at">t_bill_return =</span> return) <span class="sc">|&gt;</span> <span class="fu">select</span>(date, t_bill_return)</span>
-<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Ensure int_equity_monthly has the correct structure</span></span>
-<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a>int_equity_prepared <span class="ot">&lt;-</span> int_equity_monthly </span>
-<span id="cb54-9"><a href="#cb54-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb54-10"><a href="#cb54-10" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">head</span>(int_equity_monthly))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a> <span class="co"># Renaming and preparing datasets for alignment</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>wage_growth_prepared <span class="ot">&lt;-</span> wage_growth_df <span class="sc">|&gt;</span> <span class="fu">rename</span>(<span class="at">wage_growth =</span> value)</span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>cpi_prepared <span class="ot">&lt;-</span> cpi_df <span class="sc">|&gt;</span> <span class="fu">rename</span>(<span class="at">cpi =</span> value)</span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>bond_prepared <span class="ot">&lt;-</span> bond_df <span class="sc">|&gt;</span> <span class="fu">rename</span>(<span class="at">bond_return =</span> return) <span class="sc">|&gt;</span> <span class="fu">select</span>(date, bond_return)</span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>t_bill_prepared <span class="ot">&lt;-</span> t_bill_df <span class="sc">|&gt;</span> <span class="fu">rename</span>(<span class="at">t_bill_return =</span> return) <span class="sc">|&gt;</span> <span class="fu">select</span>(date, t_bill_return)</span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Ensure int_equity_monthly has the correct structure</span></span>
+<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a>int_equity_prepared <span class="ot">&lt;-</span> int_equity_monthly </span>
+<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-10"><a href="#cb51-10" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">head</span>(int_equity_monthly))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 6 × 2
@@ -919,18 +838,18 @@ $int_equity
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Combine all datasets by date using a full join</span></span>
-<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>aligned_data <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>  wage_growth_prepared,</span>
-<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a>  cpi_prepared,</span>
-<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a>  bond_prepared,</span>
-<span id="cb56-6"><a href="#cb56-6" aria-hidden="true" tabindex="-1"></a>  t_bill_prepared,</span>
-<span id="cb56-7"><a href="#cb56-7" aria-hidden="true" tabindex="-1"></a>  int_equity_prepared</span>
-<span id="cb56-8"><a href="#cb56-8" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span> </span>
-<span id="cb56-9"><a href="#cb56-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">reduce</span>(full_join, <span class="at">by =</span> <span class="st">"date"</span>)</span>
-<span id="cb56-10"><a href="#cb56-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb56-11"><a href="#cb56-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Check structure and preview</span></span>
-<span id="cb56-12"><a href="#cb56-12" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(aligned_data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Combine all datasets by date using a full join</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>aligned_data <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>  wage_growth_prepared,</span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>  cpi_prepared,</span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>  bond_prepared,</span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>  t_bill_prepared,</span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a>  int_equity_prepared</span>
+<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span> </span>
+<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">reduce</span>(full_join, <span class="at">by =</span> <span class="st">"date"</span>)</span>
+<span id="cb53-10"><a href="#cb53-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-11"><a href="#cb53-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Check structure and preview</span></span>
+<span id="cb53-12"><a href="#cb53-12" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(aligned_data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>'data.frame':   204 obs. of  6 variables:
@@ -943,7 +862,7 @@ $int_equity
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(aligned_data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(aligned_data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>        date wage_growth     cpi  bond_return t_bill_return int_equity
@@ -958,70 +877,69 @@ $int_equity
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Recompute summary statistics for aligned data</span></span>
-<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>mean_stats <span class="ot">&lt;-</span> aligned_data <span class="sc">|&gt;</span></span>
-<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
-<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">Wage Growth</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">mean</span>(wage_growth, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">CPI</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">mean</span>(cpi, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb60-6"><a href="#cb60-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">Bond Returns</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">mean</span>(bond_return, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb60-7"><a href="#cb60-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">T-Bill Returns</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">mean</span>(t_bill_return, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb60-8"><a href="#cb60-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">International Equity</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">mean</span>(int_equity, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb60-9"><a href="#cb60-9" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb60-10"><a href="#cb60-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(</span>
-<span id="cb60-11"><a href="#cb60-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">cols =</span> <span class="fu">everything</span>(),</span>
-<span id="cb60-12"><a href="#cb60-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_to =</span> <span class="st">"Data Metric"</span>,</span>
-<span id="cb60-13"><a href="#cb60-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">values_to =</span> <span class="st">"Mean Value"</span></span>
-<span id="cb60-14"><a href="#cb60-14" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb60-15"><a href="#cb60-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-16"><a href="#cb60-16" aria-hidden="true" tabindex="-1"></a>variance_stats <span class="ot">&lt;-</span> aligned_data <span class="sc">|&gt;</span></span>
-<span id="cb60-17"><a href="#cb60-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
-<span id="cb60-18"><a href="#cb60-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">Wage Growth</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">var</span>(wage_growth, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb60-19"><a href="#cb60-19" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">CPI</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">var</span>(cpi, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb60-20"><a href="#cb60-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">Bond Returns</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">var</span>(bond_return, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb60-21"><a href="#cb60-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">T-Bill Returns</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">var</span>(t_bill_return, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb60-22"><a href="#cb60-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">International Equity</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">var</span>(int_equity, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb60-23"><a href="#cb60-23" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb60-24"><a href="#cb60-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(</span>
-<span id="cb60-25"><a href="#cb60-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">cols =</span> <span class="fu">everything</span>(),</span>
-<span id="cb60-26"><a href="#cb60-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_to =</span> <span class="st">"Data Metric"</span>,</span>
-<span id="cb60-27"><a href="#cb60-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">values_to =</span> <span class="st">"Variance"</span></span>
-<span id="cb60-28"><a href="#cb60-28" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb60-29"><a href="#cb60-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-30"><a href="#cb60-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Combine means and variances</span></span>
-<span id="cb60-31"><a href="#cb60-31" aria-hidden="true" tabindex="-1"></a>summary_stats_aligned <span class="ot">&lt;-</span> mean_stats <span class="sc">|&gt;</span></span>
-<span id="cb60-32"><a href="#cb60-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(variance_stats, <span class="at">by =</span> <span class="st">"Data Metric"</span>)</span>
-<span id="cb60-33"><a href="#cb60-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-34"><a href="#cb60-34" aria-hidden="true" tabindex="-1"></a><span class="co"># Display the summary statistics using the gt package</span></span>
-<span id="cb60-35"><a href="#cb60-35" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gt)</span>
-<span id="cb60-36"><a href="#cb60-36" aria-hidden="true" tabindex="-1"></a>summary_stats_aligned <span class="sc">|&gt;</span></span>
-<span id="cb60-37"><a href="#cb60-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gt</span>() <span class="sc">|&gt;</span></span>
-<span id="cb60-38"><a href="#cb60-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tab_header</span>(</span>
-<span id="cb60-39"><a href="#cb60-39" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Updated Summary Statistics for Aligned Data"</span>,</span>
-<span id="cb60-40"><a href="#cb60-40" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Averages and Variances from 2007 to 2023"</span></span>
-<span id="cb60-41"><a href="#cb60-41" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb60-42"><a href="#cb60-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fmt_number</span>(</span>
-<span id="cb60-43"><a href="#cb60-43" aria-hidden="true" tabindex="-1"></a>    <span class="at">columns =</span> <span class="fu">vars</span>(<span class="st">`</span><span class="at">Mean Value</span><span class="st">`</span>, Variance),</span>
-<span id="cb60-44"><a href="#cb60-44" aria-hidden="true" tabindex="-1"></a>    <span class="at">decimals =</span> <span class="dv">2</span></span>
-<span id="cb60-45"><a href="#cb60-45" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Recompute summary statistics for aligned data</span></span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>mean_stats <span class="ot">&lt;-</span> aligned_data <span class="sc">|&gt;</span></span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">Wage Growth</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">mean</span>(wage_growth, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">CPI</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">mean</span>(cpi, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">Bond Returns</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">mean</span>(bond_return, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb57-7"><a href="#cb57-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">T-Bill Returns</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">mean</span>(t_bill_return, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb57-8"><a href="#cb57-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">International Equity</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">mean</span>(int_equity, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb57-9"><a href="#cb57-9" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb57-10"><a href="#cb57-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(</span>
+<span id="cb57-11"><a href="#cb57-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">cols =</span> <span class="fu">everything</span>(),</span>
+<span id="cb57-12"><a href="#cb57-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_to =</span> <span class="st">"Data Metric"</span>,</span>
+<span id="cb57-13"><a href="#cb57-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">values_to =</span> <span class="st">"Mean Value"</span></span>
+<span id="cb57-14"><a href="#cb57-14" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb57-15"><a href="#cb57-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-16"><a href="#cb57-16" aria-hidden="true" tabindex="-1"></a>variance_stats <span class="ot">&lt;-</span> aligned_data <span class="sc">|&gt;</span></span>
+<span id="cb57-17"><a href="#cb57-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb57-18"><a href="#cb57-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">Wage Growth</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">var</span>(wage_growth, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb57-19"><a href="#cb57-19" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">CPI</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">var</span>(cpi, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb57-20"><a href="#cb57-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">Bond Returns</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">var</span>(bond_return, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb57-21"><a href="#cb57-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">T-Bill Returns</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">var</span>(t_bill_return, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb57-22"><a href="#cb57-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">International Equity</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">var</span>(int_equity, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb57-23"><a href="#cb57-23" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb57-24"><a href="#cb57-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(</span>
+<span id="cb57-25"><a href="#cb57-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">cols =</span> <span class="fu">everything</span>(),</span>
+<span id="cb57-26"><a href="#cb57-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_to =</span> <span class="st">"Data Metric"</span>,</span>
+<span id="cb57-27"><a href="#cb57-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">values_to =</span> <span class="st">"Variance"</span></span>
+<span id="cb57-28"><a href="#cb57-28" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb57-29"><a href="#cb57-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-30"><a href="#cb57-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Combine means and variances</span></span>
+<span id="cb57-31"><a href="#cb57-31" aria-hidden="true" tabindex="-1"></a>summary_stats_aligned <span class="ot">&lt;-</span> mean_stats <span class="sc">|&gt;</span></span>
+<span id="cb57-32"><a href="#cb57-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(variance_stats, <span class="at">by =</span> <span class="st">"Data Metric"</span>)</span>
+<span id="cb57-33"><a href="#cb57-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-34"><a href="#cb57-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-35"><a href="#cb57-35" aria-hidden="true" tabindex="-1"></a>summary_stats_aligned <span class="sc">|&gt;</span></span>
+<span id="cb57-36"><a href="#cb57-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gt</span>() <span class="sc">|&gt;</span></span>
+<span id="cb57-37"><a href="#cb57-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tab_header</span>(</span>
+<span id="cb57-38"><a href="#cb57-38" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Updated Summary Statistics for Aligned Data"</span>,</span>
+<span id="cb57-39"><a href="#cb57-39" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Averages and Variances from 2007 to 2023"</span></span>
+<span id="cb57-40"><a href="#cb57-40" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb57-41"><a href="#cb57-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fmt_number</span>(</span>
+<span id="cb57-42"><a href="#cb57-42" aria-hidden="true" tabindex="-1"></a>    <span class="at">columns =</span> <span class="fu">vars</span>(<span class="st">`</span><span class="at">Mean Value</span><span class="st">`</span>, Variance),</span>
+<span id="cb57-43"><a href="#cb57-43" aria-hidden="true" tabindex="-1"></a>    <span class="at">decimals =</span> <span class="dv">2</span></span>
+<span id="cb57-44"><a href="#cb57-44" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<div id="uloqyimiyz" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#uloqyimiyz table {
+<div id="enmmkowber" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#enmmkowber table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#uloqyimiyz thead, #uloqyimiyz tbody, #uloqyimiyz tfoot, #uloqyimiyz tr, #uloqyimiyz td, #uloqyimiyz th {
+#enmmkowber thead, #enmmkowber tbody, #enmmkowber tfoot, #enmmkowber tr, #enmmkowber td, #enmmkowber th {
   border-style: none;
 }
 
-#uloqyimiyz p {
+#enmmkowber p {
   margin: 0;
   padding: 0;
 }
 
-#uloqyimiyz .gt_table {
+#enmmkowber .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -1047,12 +965,12 @@ $int_equity
   border-left-color: #D3D3D3;
 }
 
-#uloqyimiyz .gt_caption {
+#enmmkowber .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#uloqyimiyz .gt_title {
+#enmmkowber .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -1064,7 +982,7 @@ $int_equity
   border-bottom-width: 0;
 }
 
-#uloqyimiyz .gt_subtitle {
+#enmmkowber .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -1076,7 +994,7 @@ $int_equity
   border-top-width: 0;
 }
 
-#uloqyimiyz .gt_heading {
+#enmmkowber .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -1088,13 +1006,13 @@ $int_equity
   border-right-color: #D3D3D3;
 }
 
-#uloqyimiyz .gt_bottom_border {
+#enmmkowber .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#uloqyimiyz .gt_col_headings {
+#enmmkowber .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1109,7 +1027,7 @@ $int_equity
   border-right-color: #D3D3D3;
 }
 
-#uloqyimiyz .gt_col_heading {
+#enmmkowber .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1129,7 +1047,7 @@ $int_equity
   overflow-x: hidden;
 }
 
-#uloqyimiyz .gt_column_spanner_outer {
+#enmmkowber .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1141,15 +1059,15 @@ $int_equity
   padding-right: 4px;
 }
 
-#uloqyimiyz .gt_column_spanner_outer:first-child {
+#enmmkowber .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#uloqyimiyz .gt_column_spanner_outer:last-child {
+#enmmkowber .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#uloqyimiyz .gt_column_spanner {
+#enmmkowber .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -1161,11 +1079,11 @@ $int_equity
   width: 100%;
 }
 
-#uloqyimiyz .gt_spanner_row {
+#enmmkowber .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#uloqyimiyz .gt_group_heading {
+#enmmkowber .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1191,7 +1109,7 @@ $int_equity
   text-align: left;
 }
 
-#uloqyimiyz .gt_empty_group_heading {
+#enmmkowber .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1206,15 +1124,15 @@ $int_equity
   vertical-align: middle;
 }
 
-#uloqyimiyz .gt_from_md > :first-child {
+#enmmkowber .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#uloqyimiyz .gt_from_md > :last-child {
+#enmmkowber .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#uloqyimiyz .gt_row {
+#enmmkowber .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1233,7 +1151,7 @@ $int_equity
   overflow-x: hidden;
 }
 
-#uloqyimiyz .gt_stub {
+#enmmkowber .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1246,7 +1164,7 @@ $int_equity
   padding-right: 5px;
 }
 
-#uloqyimiyz .gt_stub_row_group {
+#enmmkowber .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1260,15 +1178,15 @@ $int_equity
   vertical-align: top;
 }
 
-#uloqyimiyz .gt_row_group_first td {
+#enmmkowber .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#uloqyimiyz .gt_row_group_first th {
+#enmmkowber .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#uloqyimiyz .gt_summary_row {
+#enmmkowber .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1278,16 +1196,16 @@ $int_equity
   padding-right: 5px;
 }
 
-#uloqyimiyz .gt_first_summary_row {
+#enmmkowber .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#uloqyimiyz .gt_first_summary_row.thick {
+#enmmkowber .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#uloqyimiyz .gt_last_summary_row {
+#enmmkowber .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1297,7 +1215,7 @@ $int_equity
   border-bottom-color: #D3D3D3;
 }
 
-#uloqyimiyz .gt_grand_summary_row {
+#enmmkowber .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1307,7 +1225,7 @@ $int_equity
   padding-right: 5px;
 }
 
-#uloqyimiyz .gt_first_grand_summary_row {
+#enmmkowber .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1317,7 +1235,7 @@ $int_equity
   border-top-color: #D3D3D3;
 }
 
-#uloqyimiyz .gt_last_grand_summary_row_top {
+#enmmkowber .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1327,11 +1245,11 @@ $int_equity
   border-bottom-color: #D3D3D3;
 }
 
-#uloqyimiyz .gt_striped {
+#enmmkowber .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#uloqyimiyz .gt_table_body {
+#enmmkowber .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1340,7 +1258,7 @@ $int_equity
   border-bottom-color: #D3D3D3;
 }
 
-#uloqyimiyz .gt_footnotes {
+#enmmkowber .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1354,7 +1272,7 @@ $int_equity
   border-right-color: #D3D3D3;
 }
 
-#uloqyimiyz .gt_footnote {
+#enmmkowber .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -1363,7 +1281,7 @@ $int_equity
   padding-right: 5px;
 }
 
-#uloqyimiyz .gt_sourcenotes {
+#enmmkowber .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1377,7 +1295,7 @@ $int_equity
   border-right-color: #D3D3D3;
 }
 
-#uloqyimiyz .gt_sourcenote {
+#enmmkowber .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -1385,72 +1303,72 @@ $int_equity
   padding-right: 5px;
 }
 
-#uloqyimiyz .gt_left {
+#enmmkowber .gt_left {
   text-align: left;
 }
 
-#uloqyimiyz .gt_center {
+#enmmkowber .gt_center {
   text-align: center;
 }
 
-#uloqyimiyz .gt_right {
+#enmmkowber .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#uloqyimiyz .gt_font_normal {
+#enmmkowber .gt_font_normal {
   font-weight: normal;
 }
 
-#uloqyimiyz .gt_font_bold {
+#enmmkowber .gt_font_bold {
   font-weight: bold;
 }
 
-#uloqyimiyz .gt_font_italic {
+#enmmkowber .gt_font_italic {
   font-style: italic;
 }
 
-#uloqyimiyz .gt_super {
+#enmmkowber .gt_super {
   font-size: 65%;
 }
 
-#uloqyimiyz .gt_footnote_marks {
+#enmmkowber .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#uloqyimiyz .gt_asterisk {
+#enmmkowber .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#uloqyimiyz .gt_indent_1 {
+#enmmkowber .gt_indent_1 {
   text-indent: 5px;
 }
 
-#uloqyimiyz .gt_indent_2 {
+#enmmkowber .gt_indent_2 {
   text-indent: 10px;
 }
 
-#uloqyimiyz .gt_indent_3 {
+#enmmkowber .gt_indent_3 {
   text-indent: 15px;
 }
 
-#uloqyimiyz .gt_indent_4 {
+#enmmkowber .gt_indent_4 {
   text-indent: 20px;
 }
 
-#uloqyimiyz .gt_indent_5 {
+#enmmkowber .gt_indent_5 {
   text-indent: 25px;
 }
 
-#uloqyimiyz .katex-display {
+#enmmkowber .katex-display {
   display: inline-flex !important;
   margin-bottom: 0.75em !important;
 }
 
-#uloqyimiyz div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#enmmkowber div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
   height: 0px !important;
 }
 </style>
@@ -1505,30 +1423,30 @@ $int_equity
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="co">#compute correlation matrix</span></span>
-<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a>cor_matrix <span class="ot">&lt;-</span> <span class="fu">cor</span>(aligned_data[, <span class="sc">-</span><span class="dv">1</span>], <span class="at">use =</span> <span class="st">"complete.obs"</span>)</span>
-<span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb61-4"><a href="#cb61-4" aria-hidden="true" tabindex="-1"></a><span class="co">#reshape correlation matrix into long format for ggplot</span></span>
-<span id="cb61-5"><a href="#cb61-5" aria-hidden="true" tabindex="-1"></a>cor_long <span class="ot">&lt;-</span> <span class="fu">melt</span>(cor_matrix)</span>
-<span id="cb61-6"><a href="#cb61-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb61-7"><a href="#cb61-7" aria-hidden="true" tabindex="-1"></a><span class="co"># creating heatmap </span></span>
-<span id="cb61-8"><a href="#cb61-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(cor_long, <span class="fu">aes</span>(<span class="at">x =</span> Var1, <span class="at">y =</span> Var2, <span class="at">fill =</span> value)) <span class="sc">+</span></span>
-<span id="cb61-9"><a href="#cb61-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>(<span class="at">color =</span> <span class="st">"white"</span>) <span class="sc">+</span> <span class="co"># Add gridlines for better separation</span></span>
-<span id="cb61-10"><a href="#cb61-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradient2</span>(</span>
-<span id="cb61-11"><a href="#cb61-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">low =</span> <span class="st">"blue"</span>, <span class="at">high =</span> <span class="st">"red"</span>, <span class="at">mid =</span> <span class="st">"white"</span>,</span>
-<span id="cb61-12"><a href="#cb61-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">midpoint =</span> <span class="dv">0</span>, <span class="at">limit =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>), <span class="at">space =</span> <span class="st">"Lab"</span>,</span>
-<span id="cb61-13"><a href="#cb61-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Correlation"</span></span>
-<span id="cb61-14"><a href="#cb61-14" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb61-15"><a href="#cb61-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb61-16"><a href="#cb61-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
-<span id="cb61-17"><a href="#cb61-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>),</span>
-<span id="cb61-18"><a href="#cb61-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.title.x =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb61-19"><a href="#cb61-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.title.y =</span> <span class="fu">element_blank</span>()</span>
-<span id="cb61-20"><a href="#cb61-20" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb61-21"><a href="#cb61-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(</span>
-<span id="cb61-22"><a href="#cb61-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Correlation Matrix Heatmap"</span>,</span>
-<span id="cb61-23"><a href="#cb61-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Relationships Between Economic Indicators"</span></span>
-<span id="cb61-24"><a href="#cb61-24" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="co">#compute correlation matrix</span></span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>cor_matrix <span class="ot">&lt;-</span> <span class="fu">cor</span>(aligned_data[, <span class="sc">-</span><span class="dv">1</span>], <span class="at">use =</span> <span class="st">"complete.obs"</span>)</span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a><span class="co">#reshape correlation matrix into long format for ggplot</span></span>
+<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a>cor_long <span class="ot">&lt;-</span> <span class="fu">melt</span>(cor_matrix)</span>
+<span id="cb58-6"><a href="#cb58-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-7"><a href="#cb58-7" aria-hidden="true" tabindex="-1"></a><span class="co"># creating heatmap </span></span>
+<span id="cb58-8"><a href="#cb58-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(cor_long, <span class="fu">aes</span>(<span class="at">x =</span> Var1, <span class="at">y =</span> Var2, <span class="at">fill =</span> value)) <span class="sc">+</span></span>
+<span id="cb58-9"><a href="#cb58-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>(<span class="at">color =</span> <span class="st">"white"</span>) <span class="sc">+</span> <span class="co"># Add gridlines for better separation</span></span>
+<span id="cb58-10"><a href="#cb58-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradient2</span>(</span>
+<span id="cb58-11"><a href="#cb58-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">low =</span> <span class="st">"blue"</span>, <span class="at">high =</span> <span class="st">"red"</span>, <span class="at">mid =</span> <span class="st">"white"</span>,</span>
+<span id="cb58-12"><a href="#cb58-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">midpoint =</span> <span class="dv">0</span>, <span class="at">limit =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>), <span class="at">space =</span> <span class="st">"Lab"</span>,</span>
+<span id="cb58-13"><a href="#cb58-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Correlation"</span></span>
+<span id="cb58-14"><a href="#cb58-14" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb58-15"><a href="#cb58-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb58-16"><a href="#cb58-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb58-17"><a href="#cb58-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>),</span>
+<span id="cb58-18"><a href="#cb58-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.title.x =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb58-19"><a href="#cb58-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.title.y =</span> <span class="fu">element_blank</span>()</span>
+<span id="cb58-20"><a href="#cb58-20" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb58-21"><a href="#cb58-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(</span>
+<span id="cb58-22"><a href="#cb58-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Correlation Matrix Heatmap"</span>,</span>
+<span id="cb58-23"><a href="#cb58-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Relationships Between Economic Indicators"</span></span>
+<span id="cb58-24"><a href="#cb58-24" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
@@ -1542,6 +1460,627 @@ $int_equity
 </section>
 <section id="task-5-historical-comparison" class="level2">
 <h2 class="anchored" data-anchor-id="task-5-historical-comparison">Task 5: Historical Comparison</h2>
+<p>In this step, we implement the TRS and OPR retirement formulas and compare the value of each of them for the first month of retirement.</p>
+<p>The following <strong>assumptions</strong> are made for every employee:</p>
+<ul>
+<li><p>They joined CUNY in the first month of the historical data (January 2007)</p></li>
+<li><p>They retired from CUNY in the last month of the historical data (December 2023)</p></li>
+</ul>
+<p>Our steps include:</p>
+<blockquote class="blockquote">
+<ol type="1">
+<li>Define Assumptions</li>
+<li>Simulate Career Earnings</li>
+<li>Implement TRS</li>
+<li>Implement ORP</li>
+<li>Compare Outcomes</li>
+</ol>
+</blockquote>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Define assumptions</span></span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a>starting_salary <span class="ot">&lt;-</span> <span class="dv">50000</span></span>
+<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a>working_years <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(<span class="fu">difftime</span>(<span class="fu">max</span>(aligned_data<span class="sc">$</span>date), <span class="fu">min</span>(aligned_data<span class="sc">$</span>date), <span class="at">units =</span> <span class="st">"days"</span>) <span class="sc">/</span> <span class="fl">365.25</span>)</span>
+<span id="cb59-4"><a href="#cb59-4" aria-hidden="true" tabindex="-1"></a>retirement_age <span class="ot">&lt;-</span> <span class="dv">65</span></span>
+<span id="cb59-5"><a href="#cb59-5" aria-hidden="true" tabindex="-1"></a>retirement_month <span class="ot">&lt;-</span> <span class="fu">max</span>(aligned_data<span class="sc">$</span>date)</span>
+<span id="cb59-6"><a href="#cb59-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-7"><a href="#cb59-7" aria-hidden="true" tabindex="-1"></a><span class="co"># TRS Monthly Pension Calculation</span></span>
+<span id="cb59-8"><a href="#cb59-8" aria-hidden="true" tabindex="-1"></a>calculate_trs <span class="ot">&lt;-</span> <span class="cf">function</span>(starting_salary, wage_growth_data, inflation_data, years_worked) {</span>
+<span id="cb59-9"><a href="#cb59-9" aria-hidden="true" tabindex="-1"></a>  salary <span class="ot">&lt;-</span> starting_salary</span>
+<span id="cb59-10"><a href="#cb59-10" aria-hidden="true" tabindex="-1"></a>  salaries <span class="ot">&lt;-</span> <span class="fu">numeric</span>(years_worked)</span>
+<span id="cb59-11"><a href="#cb59-11" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb59-12"><a href="#cb59-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>years_worked) {</span>
+<span id="cb59-13"><a href="#cb59-13" aria-hidden="true" tabindex="-1"></a>    growth_rate <span class="ot">&lt;-</span> wage_growth_data<span class="sc">$</span>wage_growth[i <span class="sc">%%</span> <span class="fu">nrow</span>(wage_growth_data) <span class="sc">+</span> <span class="dv">1</span>] <span class="sc">/</span> <span class="dv">1000</span>  <span class="co"># Dividing by 1000 for scaling</span></span>
+<span id="cb59-14"><a href="#cb59-14" aria-hidden="true" tabindex="-1"></a>    inflation_rate <span class="ot">&lt;-</span> inflation_data<span class="sc">$</span>cpi[i <span class="sc">%%</span> <span class="fu">nrow</span>(inflation_data) <span class="sc">+</span> <span class="dv">1</span>] <span class="sc">/</span> <span class="dv">1000</span>  <span class="co"># Dividing by 1000 for scaling</span></span>
+<span id="cb59-15"><a href="#cb59-15" aria-hidden="true" tabindex="-1"></a>    salary <span class="ot">&lt;-</span> salary <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">+</span> growth_rate <span class="sc">+</span> inflation_rate)</span>
+<span id="cb59-16"><a href="#cb59-16" aria-hidden="true" tabindex="-1"></a>    salaries[i] <span class="ot">&lt;-</span> salary</span>
+<span id="cb59-17"><a href="#cb59-17" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb59-18"><a href="#cb59-18" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb59-19"><a href="#cb59-19" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Final Average Salary (last 3 years)</span></span>
+<span id="cb59-20"><a href="#cb59-20" aria-hidden="true" tabindex="-1"></a>  final_average_salary <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">tail</span>(salaries, <span class="dv">3</span>))</span>
+<span id="cb59-21"><a href="#cb59-21" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb59-22"><a href="#cb59-22" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Calculate pension based on years worked</span></span>
+<span id="cb59-23"><a href="#cb59-23" aria-hidden="true" tabindex="-1"></a>  pension <span class="ot">&lt;-</span> <span class="cf">if</span> (years_worked <span class="sc">&lt;=</span> <span class="dv">20</span>) {</span>
+<span id="cb59-24"><a href="#cb59-24" aria-hidden="true" tabindex="-1"></a>    <span class="fl">0.015</span> <span class="sc">*</span> final_average_salary <span class="sc">*</span> years_worked</span>
+<span id="cb59-25"><a href="#cb59-25" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (years_worked <span class="sc">&lt;=</span> <span class="dv">30</span>) {</span>
+<span id="cb59-26"><a href="#cb59-26" aria-hidden="true" tabindex="-1"></a>    <span class="fl">0.02</span> <span class="sc">*</span> final_average_salary <span class="sc">*</span> years_worked</span>
+<span id="cb59-27"><a href="#cb59-27" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
+<span id="cb59-28"><a href="#cb59-28" aria-hidden="true" tabindex="-1"></a>    <span class="fl">0.6</span> <span class="sc">*</span> final_average_salary</span>
+<span id="cb59-29"><a href="#cb59-29" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb59-30"><a href="#cb59-30" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb59-31"><a href="#cb59-31" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Convert to monthly pension and scale down</span></span>
+<span id="cb59-32"><a href="#cb59-32" aria-hidden="true" tabindex="-1"></a>  monthly_pension <span class="ot">&lt;-</span> pension <span class="sc">/</span> <span class="dv">60</span>  <span class="co">#Dividing by 60 for additional scaling</span></span>
+<span id="cb59-33"><a href="#cb59-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(monthly_pension)</span>
+<span id="cb59-34"><a href="#cb59-34" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb59-35"><a href="#cb59-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-36"><a href="#cb59-36" aria-hidden="true" tabindex="-1"></a><span class="co"># ORP Monthly Income Calculation</span></span>
+<span id="cb59-37"><a href="#cb59-37" aria-hidden="true" tabindex="-1"></a>calculate_orp <span class="ot">&lt;-</span> <span class="cf">function</span>(starting_salary, wage_growth_data, equity_data, bond_data, years_worked, <span class="at">employer_contribution_rate =</span> <span class="fl">0.08</span>, <span class="at">withdrawal_rate =</span> <span class="fl">0.04</span>) {</span>
+<span id="cb59-38"><a href="#cb59-38" aria-hidden="true" tabindex="-1"></a>  salary <span class="ot">&lt;-</span> starting_salary</span>
+<span id="cb59-39"><a href="#cb59-39" aria-hidden="true" tabindex="-1"></a>  account_balance <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb59-40"><a href="#cb59-40" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb59-41"><a href="#cb59-41" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>years_worked) {</span>
+<span id="cb59-42"><a href="#cb59-42" aria-hidden="true" tabindex="-1"></a>    growth_rate <span class="ot">&lt;-</span> wage_growth_data<span class="sc">$</span>wage_growth[i <span class="sc">%%</span> <span class="fu">nrow</span>(wage_growth_data) <span class="sc">+</span> <span class="dv">1</span>] <span class="sc">/</span> <span class="dv">10000</span>  <span class="co"># Dividing by 10000 for scaling</span></span>
+<span id="cb59-43"><a href="#cb59-43" aria-hidden="true" tabindex="-1"></a>    equity_return <span class="ot">&lt;-</span> equity_data<span class="sc">$</span>int_equity[i <span class="sc">%%</span> <span class="fu">nrow</span>(equity_data) <span class="sc">+</span> <span class="dv">1</span>] <span class="sc">/</span> <span class="dv">1000</span>  <span class="co"># Dividing by 1000 for scaling</span></span>
+<span id="cb59-44"><a href="#cb59-44" aria-hidden="true" tabindex="-1"></a>    bond_return <span class="ot">&lt;-</span> bond_data<span class="sc">$</span>bond_return[i <span class="sc">%%</span> <span class="fu">nrow</span>(bond_data) <span class="sc">+</span> <span class="dv">1</span>] <span class="sc">/</span> <span class="dv">1000</span>  <span class="co"># Dividing by 1000 for scaling</span></span>
+<span id="cb59-45"><a href="#cb59-45" aria-hidden="true" tabindex="-1"></a>    market_return <span class="ot">&lt;-</span> <span class="fl">0.6</span> <span class="sc">*</span> equity_return <span class="sc">+</span> <span class="fl">0.4</span> <span class="sc">*</span> bond_return</span>
+<span id="cb59-46"><a href="#cb59-46" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb59-47"><a href="#cb59-47" aria-hidden="true" tabindex="-1"></a>    salary <span class="ot">&lt;-</span> salary <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">+</span> growth_rate)</span>
+<span id="cb59-48"><a href="#cb59-48" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb59-49"><a href="#cb59-49" aria-hidden="true" tabindex="-1"></a>    employee_contribution <span class="ot">&lt;-</span> salary <span class="sc">*</span> <span class="fl">0.06</span></span>
+<span id="cb59-50"><a href="#cb59-50" aria-hidden="true" tabindex="-1"></a>    employer_contribution <span class="ot">&lt;-</span> salary <span class="sc">*</span> employer_contribution_rate</span>
+<span id="cb59-51"><a href="#cb59-51" aria-hidden="true" tabindex="-1"></a>    total_contribution <span class="ot">&lt;-</span> employee_contribution <span class="sc">+</span> employer_contribution</span>
+<span id="cb59-52"><a href="#cb59-52" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb59-53"><a href="#cb59-53" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Update account balance with contributions and market return</span></span>
+<span id="cb59-54"><a href="#cb59-54" aria-hidden="true" tabindex="-1"></a>    account_balance <span class="ot">&lt;-</span> account_balance <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">+</span> market_return) <span class="sc">+</span> total_contribution</span>
+<span id="cb59-55"><a href="#cb59-55" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb59-56"><a href="#cb59-56" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb59-57"><a href="#cb59-57" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Calculate monthly withdrawal and scale down</span></span>
+<span id="cb59-58"><a href="#cb59-58" aria-hidden="true" tabindex="-1"></a>  monthly_withdrawal <span class="ot">&lt;-</span> (account_balance <span class="sc">*</span> withdrawal_rate) <span class="sc">/</span> <span class="dv">60</span>  <span class="co"># Dividing by 60 for additional scaling</span></span>
+<span id="cb59-59"><a href="#cb59-59" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(monthly_withdrawal)</span>
+<span id="cb59-60"><a href="#cb59-60" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb59-61"><a href="#cb59-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-62"><a href="#cb59-62" aria-hidden="true" tabindex="-1"></a><span class="co"># Simulate TRS and ORP income</span></span>
+<span id="cb59-63"><a href="#cb59-63" aria-hidden="true" tabindex="-1"></a>trs_income <span class="ot">&lt;-</span> <span class="fu">calculate_trs</span>(</span>
+<span id="cb59-64"><a href="#cb59-64" aria-hidden="true" tabindex="-1"></a>  <span class="at">starting_salary =</span> starting_salary,</span>
+<span id="cb59-65"><a href="#cb59-65" aria-hidden="true" tabindex="-1"></a>  <span class="at">wage_growth_data =</span> aligned_data,</span>
+<span id="cb59-66"><a href="#cb59-66" aria-hidden="true" tabindex="-1"></a>  <span class="at">inflation_data =</span> aligned_data,</span>
+<span id="cb59-67"><a href="#cb59-67" aria-hidden="true" tabindex="-1"></a>  <span class="at">years_worked =</span> working_years</span>
+<span id="cb59-68"><a href="#cb59-68" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb59-69"><a href="#cb59-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-70"><a href="#cb59-70" aria-hidden="true" tabindex="-1"></a>orp_income <span class="ot">&lt;-</span> <span class="fu">calculate_orp</span>(</span>
+<span id="cb59-71"><a href="#cb59-71" aria-hidden="true" tabindex="-1"></a>  <span class="at">starting_salary =</span> starting_salary,</span>
+<span id="cb59-72"><a href="#cb59-72" aria-hidden="true" tabindex="-1"></a>  <span class="at">wage_growth_data =</span> aligned_data,</span>
+<span id="cb59-73"><a href="#cb59-73" aria-hidden="true" tabindex="-1"></a>  <span class="at">equity_data =</span> aligned_data,</span>
+<span id="cb59-74"><a href="#cb59-74" aria-hidden="true" tabindex="-1"></a>  <span class="at">bond_data =</span> aligned_data,</span>
+<span id="cb59-75"><a href="#cb59-75" aria-hidden="true" tabindex="-1"></a>  <span class="at">years_worked =</span> working_years</span>
+<span id="cb59-76"><a href="#cb59-76" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb59-77"><a href="#cb59-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-78"><a href="#cb59-78" aria-hidden="true" tabindex="-1"></a>results_table <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb59-79"><a href="#cb59-79" aria-hidden="true" tabindex="-1"></a>  <span class="at">Plan =</span> <span class="fu">c</span>(<span class="st">"TRS"</span>, <span class="st">"ORP"</span>),</span>
+<span id="cb59-80"><a href="#cb59-80" aria-hidden="true" tabindex="-1"></a>  <span class="at">First_Month_Income =</span> <span class="fu">c</span>(<span class="fu">round</span>(trs_income, <span class="dv">2</span>), <span class="fu">round</span>(orp_income, <span class="dv">2</span>))</span>
+<span id="cb59-81"><a href="#cb59-81" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb59-82"><a href="#cb59-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-83"><a href="#cb59-83" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate the gt table</span></span>
+<span id="cb59-84"><a href="#cb59-84" aria-hidden="true" tabindex="-1"></a>results_table <span class="sc">|&gt;</span> </span>
+<span id="cb59-85"><a href="#cb59-85" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gt</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb59-86"><a href="#cb59-86" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tab_header</span>(</span>
+<span id="cb59-87"><a href="#cb59-87" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Comparison of First-Month Retirement Income"</span>,</span>
+<span id="cb59-88"><a href="#cb59-88" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"TRS vs. ORP for CUNY Employees"</span></span>
+<span id="cb59-89"><a href="#cb59-89" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb59-90"><a href="#cb59-90" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fmt_number</span>(</span>
+<span id="cb59-91"><a href="#cb59-91" aria-hidden="true" tabindex="-1"></a>    <span class="at">columns =</span> <span class="fu">c</span>(First_Month_Income), <span class="co"># Use c() for the column selection</span></span>
+<span id="cb59-92"><a href="#cb59-92" aria-hidden="true" tabindex="-1"></a>    <span class="at">decimals =</span> <span class="dv">2</span></span>
+<span id="cb59-93"><a href="#cb59-93" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="mfulubdhct" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#mfulubdhct table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#mfulubdhct thead, #mfulubdhct tbody, #mfulubdhct tfoot, #mfulubdhct tr, #mfulubdhct td, #mfulubdhct th {
+  border-style: none;
+}
+
+#mfulubdhct p {
+  margin: 0;
+  padding: 0;
+}
+
+#mfulubdhct .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#mfulubdhct .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#mfulubdhct .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#mfulubdhct .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#mfulubdhct .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#mfulubdhct .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#mfulubdhct .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#mfulubdhct .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#mfulubdhct .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#mfulubdhct .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#mfulubdhct .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#mfulubdhct .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#mfulubdhct .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#mfulubdhct .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#mfulubdhct .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#mfulubdhct .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#mfulubdhct .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#mfulubdhct .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#mfulubdhct .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#mfulubdhct .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#mfulubdhct .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#mfulubdhct .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#mfulubdhct .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#mfulubdhct .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#mfulubdhct .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#mfulubdhct .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#mfulubdhct .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#mfulubdhct .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#mfulubdhct .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#mfulubdhct .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#mfulubdhct .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#mfulubdhct .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#mfulubdhct .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#mfulubdhct .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#mfulubdhct .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#mfulubdhct .gt_left {
+  text-align: left;
+}
+
+#mfulubdhct .gt_center {
+  text-align: center;
+}
+
+#mfulubdhct .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#mfulubdhct .gt_font_normal {
+  font-weight: normal;
+}
+
+#mfulubdhct .gt_font_bold {
+  font-weight: bold;
+}
+
+#mfulubdhct .gt_font_italic {
+  font-style: italic;
+}
+
+#mfulubdhct .gt_super {
+  font-size: 65%;
+}
+
+#mfulubdhct .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#mfulubdhct .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#mfulubdhct .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#mfulubdhct .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#mfulubdhct .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#mfulubdhct .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#mfulubdhct .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#mfulubdhct .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#mfulubdhct div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+
+<table class="gt_table caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead>
+<tr class="header gt_heading">
+<th colspan="2" class="gt_heading gt_title gt_font_normal">Comparison of First-Month Retirement Income</th>
+</tr>
+<tr class="odd gt_heading">
+<th colspan="2" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border">TRS vs. ORP for CUNY Employees</th>
+</tr>
+<tr class="header gt_col_headings">
+<th id="Plan" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Plan</th>
+<th id="First_Month_Income" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">First_Month_Income</th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="odd">
+<td class="gt_row gt_left" headers="Plan">TRS</td>
+<td class="gt_row gt_right" headers="First_Month_Income">4,540.35</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="Plan">ORP</td>
+<td class="gt_row gt_right" headers="First_Month_Income">213.33</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Data for the chart</span></span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>comparison_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">Plan =</span> <span class="fu">c</span>(<span class="st">"TRS"</span>, <span class="st">"ORP"</span>),</span>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">Income =</span> <span class="fu">c</span>(trs_income, orp_income)</span>
+<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb60-6"><a href="#cb60-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-7"><a href="#cb60-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate bar chart</span></span>
+<span id="cb60-8"><a href="#cb60-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(comparison_data, <span class="fu">aes</span>(<span class="at">x =</span> Plan, <span class="at">y =</span> Income, <span class="at">fill =</span> Plan)) <span class="sc">+</span></span>
+<span id="cb60-9"><a href="#cb60-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>, <span class="at">width =</span> <span class="fl">0.6</span>) <span class="sc">+</span></span>
+<span id="cb60-10"><a href="#cb60-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb60-11"><a href="#cb60-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Comparison of First-Month Retirement Income"</span>,</span>
+<span id="cb60-12"><a href="#cb60-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Retirement Plan"</span>,</span>
+<span id="cb60-13"><a href="#cb60-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Monthly Income ($)"</span></span>
+<span id="cb60-14"><a href="#cb60-14" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb60-15"><a href="#cb60-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb60-16"><a href="#cb60-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb60-17"><a href="#cb60-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"TRS"</span> <span class="ot">=</span> <span class="st">"blue"</span>, <span class="st">"ORP"</span> <span class="ot">=</span> <span class="st">"red"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="mp04_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>You may see the comparison above displaying the different projected first-month reitrement incomes from each of the two retirement plans offered to CUNY employees (TRS and ORP).</p>
+<p>The TRS offers a monthly income of <strong>$4540.35</strong> while OPR offers a monthly income of <strong>$213.33</strong>. These figures highlight the significant differences between a defined-benefit plan like TRS, which guarantees a pension based on years worked and final average salary, compared to a defined-contribution plan like ORP, which depends on investment returns and contribution levels.</p>
 </section>
 <section id="task-6-fixed-rate-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="task-6-fixed-rate-analysis">Task 6: Fixed-Rate Analysis</h2>
