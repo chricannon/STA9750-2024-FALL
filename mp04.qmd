@@ -1,0 +1,687 @@
+---
+title: "mp04"
+editor: visual
+format:
+  html:
+    code-fold: true
+output-dir: docs
+---
+
+# Mini-Project #04: Monte Carlo Informed Selection of CUNY Retirement Plans
+
+[Abstract]{.underline}
+
+This project evaluates two retirement plans offered to CUNY faculty: the Teachers Retirement System (TRS) and the Optional Retirement Plan (ORP). Through the use of historical financial data, bootstrap inference techniques, and actuarial assumptions, the analysis estimates the probability that one plan outperforms the other, under various scenarios. Key considerations include salary growth, market performance, inflation, and individual risk tolerance. The findings aim to support faculty in making an informed and data-driven decision when choosing between the two retirement plans.
+
+[Background]{.underline}
+
+CUNY offers tow distinct retirement plans for its employees. The first is the Teachers Retirement System (TRS). This plan is a "defined-benefit" plan pension plan, due to the fixed retirement payments guaranteed by the employer, based on the employee's final average salary and years of service. Once retired, the retiree receives annual cost of living adjustments, based on inflation, capped at 3%. The contribution rates for TRS vary by salary tier.
+
+The second retirement plan option is called the Optional Retirement Plan (ORP). This plan most closely resembles a 401(k) retirement plan, in that is a defined-contribution plan. Employee and employer contributions are invested in mutual funds with age-based asset allocations. Retirement income depends on both market performance and withdrawal strategies. This plan offers the potential for higher returns through compounded growth, but market volatility becomes a risk.
+
+The analysis below evaluates these plans in detail, incorporating data from AlphaVantage and FRED to simulate market returns and inflation trends, and uses computational models to project outcomes over an employee's career.
+
+```{r}
+library(dplyr)
+library(gt)
+library(purrr)
+library(tidyr)
+library(ggplot2)
+library(reshape2)
+```
+
+## Task 1: Register for AlphaVantage API Key
+
+First, we access [AlphaVantage](,https://www.alphavantage.co/), a commercial stock market data provider. This step involves creating an AlphaVantage free API key. Ir is important to keep this key secure, so the key itself was saved separately in `alphavantage_key.txt`.
+
+```{r}
+#reading API key in 
+api_key_file <- "alphavantage_key.txt"
+
+alpha_api_key <- readLines(api_key_file)
+```
+
+Next, we downloaded the package and loaded library `httr2`, which is a tool for making HTTP requests in R, which was designed to simplify interactions with APIs.
+
+```{r}
+library(httr2)
+```
+
+## Task 2: Register for FRED API Key
+
+We then access our next data source, [FRED](https://fred.stlouisfed.org/): the Federal Reserve Economic Data repository. The FRED api key is accessed in the same fashion as AlphaVantage, the key itself was saved separately in `fred_key.txt`.
+
+```{r}
+#reading FRED key in 
+fred_key_file <- "fred_key.txt"
+
+fred_api_key <- readLines(fred_key_file)
+```
+
+## Task 3: Data Acquisition
+
+Before beginning the Monte Carlo analysis, we identify and download historical data series for each of the following:
+
+-   **Wage growth** - this metric is necessary as wage growth determines how an individual's income evolves over time. We first attempted to access the **Average Hourly Earnings of State and Local Government Employees (***series ID: CES9091000003),* given CUNY employees are New York State employees, but it was no longer available in the `FRED` repository.
+
+    Instead, we accessed the **Average Hourly Earnings of Production and Nonsupervisory Employees: Total Private** (*series ID: CES050000003)*. This gives us an alternative to understand wage growth patterns over time, within the private sector, given we were unable to find a puclic sector match. The `httr2` packages allows us to send the request to the the API and parse the JSON response directly into R. We use a 20 year time period, starting 1/1/2003 and ending 12/31/2003.
+
+    ```{r}
+
+    #FRED API base URL
+    fred_base_url <- "https://api.stlouisfed.org/fred/series/observations"
+
+    #FRED API parameters for wage growth data
+    fred_params <- list(
+      series_id = "CES0500000003",  #average Hourly Earnings (Private Sector)
+      api_key = fred_api_key,       
+      file_type = "json",           # Response format
+      observation_start = "2003-01-01",  # Start date
+      observation_end = "2023-12-31"     # End date
+    )
+
+    #fetch data
+    resp <- request(fred_base_url) |>
+      req_url_query(!!!fred_params) |>
+      req_perform()
+
+    #parse the JSON response into a data frame
+    wage_growth_data <- resp_body_json(resp)
+    wage_growth_df <- wage_growth_data$observations |>
+      as.data.frame() |>
+      transform(date = as.Date(date), value = as.numeric(value))
+
+    # Display the first few rows of the data frame
+    print(head(wage_growth_df))
+
+    ```
+
+    After completing this step and viewing the dataframe in the R environment, it appeared as a list. The below code converts the `wage_growth_df` to a proper dataframe.
+
+    ```{r}
+    #extract and convert the observations into a data frame
+    wage_growth_df <- do.call(rbind, lapply(wage_growth_data$observations, as.data.frame)) |>
+      as.data.frame() |>
+      transform(
+        date = as.Date(date),            # Convert 'date' column to Date format
+        value = as.numeric(value)        # Convert 'value' column to numeric
+      )
+
+    #drop unnecessary columns
+    wage_growth_df <- wage_growth_df[, c("date", "value")]
+
+    #view the structure of the resulting data frame
+    str(wage_growth_df)
+
+    #display the first few rows
+    head(wage_growth_df)
+
+
+    ```
+
+-   **Inflation -** we access the **CPI for All Urban Consumers: All Items** (*series ID:* *CPIAUCSL*) from FRED, which measures the monthly changes in the price of goods and services purchased by urban customers. The resulting dataframe includes monthly observations of the CPI, formatted into a clean data frame for later analysis.
+
+    ```{r}
+
+    #FRED API base URL
+    fred_base_url <- "https://api.stlouisfed.org/fred/series/observations"
+
+    #FRED API parameters for CPI data
+    fred_params <- list(
+      series_id = "CPIAUCSL",            # CPI for All Urban Consumers: All Items
+      api_key = fred_api_key,            # Your API key
+      file_type = "json",                # Response format
+      observation_start = "2003-01-01",  # Start date
+      observation_end = "2023-12-31"     # End date
+    )
+
+    #fetch CPI data
+    resp <- request(fred_base_url) |>
+      req_url_query(!!!fred_params) |>
+      req_perform()
+
+    #parse the JSON response into a data frame
+    cpi_data <- resp_body_json(resp)
+    cpi_df <- do.call(rbind, lapply(cpi_data$observations, as.data.frame)) |>
+      as.data.frame() |>
+      transform(
+        date = as.Date(date),            # Convert 'date' column to Date format
+        value = as.numeric(value)        # Convert 'value' column to numeric
+      )
+
+    #drop unnecessary columns 
+    cpi_df <- cpi_df[, c("date", "value")]
+
+    #view the structure of the resulting data frame
+    str(cpi_df)
+
+    #display the first few rows of the data frame
+    head(cpi_df)
+
+    ```
+
+    -   **US Equity Market total returns** - this metric reflects the overall performance of the US stock market, which includes:
+
+        -   Capital Gains: Price appreciation of stocks or an index
+
+        -   Dividends: Payments made to shareholders, reinvested for total returns
+
+        We access AlphaVantage's `TIME_SERIES_DAILY_ADJUSTED` function which gives us access to the daily stock prices (open, close, high, low), adjusted close prices (adjusted for dividends and stock splits, representing total returns) , and volume.
+
+        We use the following code to access **S&P 500 Total Returns (`SPY`**) -
+
+    ```{r}
+
+    #base URL for AlphaVantage API
+    alpha_base_url <- "https://www.alphavantage.co/query"
+
+    #API parameters for SPY
+    test_params <- list(
+      `function` = "TIME_SERIES_DAILY_ADJUSTED",  
+      symbol = "SPY",                          
+      apikey = alpha_api_key                 
+    )
+
+    #test request
+    resp <- request(alpha_base_url) |>
+      req_url_query(!!!test_params) |>
+      req_perform()
+
+    print(resp_body_string(resp))
+
+    ```
+
+    Given the output above, we ran into a **premium endpoint**, meaning the TIME_SERIES_DAILY_ADJUSTED function is not available using the free version of AlphaVantage. It is important to note this step involved a bit of trial and error.
+
+    We instead access the `TIME_SERIES_DAILY` data, which gives the *unadjusted* daily prices. This is not ideal, but will suffice for approximate analysis.
+
+    ```{r}
+
+    #define the base URL for AlphaVantage API
+    alpha_base_url <- "https://www.alphavantage.co/query"
+
+    #minimal API parameters for SPY
+    test_params <- list(
+      `function` = "TIME_SERIES_DAILY",  # Function to fetch daily prices
+      symbol = "SPY",                          # S&P 500 ETF
+      apikey = alpha_api_key                    # Your AlphaVantage API key
+    )
+
+    #send the test request
+    resp <- request(alpha_base_url) |>
+      req_url_query(!!!test_params) |>
+      req_perform()
+
+    #parse the JSON response
+    spy_data <- resp_body_json(resp)
+
+    #extract the daily time series data
+    spy_daily <- spy_data[["Time Series (Daily)"]]
+
+    #convert to a data frame
+    spy_df <- do.call(rbind, lapply(names(spy_daily), function(date) {
+      data.frame(
+        date = as.Date(date),
+        close = as.numeric(spy_daily[[date]][["4. close"]])
+      )
+    }))
+
+    #sort by date
+    spy_df <- spy_df[order(spy_df$date), ]
+
+    #view the resulting data frame
+    str(spy_df)
+    head(spy_df)
+
+    ```
+
+    We also access the **S&P 500 Index** time seriesfrom FRED, which provides daily index values from 2003 to 2023.
+
+    ```{r}
+    # Define the base URL for the FRED API
+    fred_base_url <- "https://api.stlouisfed.org/fred/series/observations"
+
+    # Define API parameters for US equity market (S&P 500 Index as an alternative to Wilshire 5000)
+    fred_params_us <- list(
+      series_id = "SP500",              # S&P 500 Index series ID
+      api_key = fred_api_key,           # Your FRED API key
+      file_type = "json",               # Response format
+      observation_start = "2003-01-01", # Start date
+      observation_end = "2023-12-31"    # End date
+    )
+
+    # Fetch the data from FRED API
+    resp <- request(fred_base_url) |>
+      req_url_query(!!!fred_params_us) |>
+      req_perform()
+
+    # Parse the JSON response
+    us_equity_data <- resp_body_json(resp)
+
+    # Convert the observations list into a clean dataframe
+    us_equity_df <- do.call(rbind, lapply(us_equity_data$observations, function(x) {
+      data.frame(
+        date = as.Date(x$date),                  # Convert 'date' to Date format
+        us_equity = as.numeric(ifelse(x$value == ".", NA, x$value)), # Handle "." as NA
+        stringsAsFactors = FALSE                # Avoid unnecessary factor conversion
+      )
+    }))
+
+    # Drop rows with NA values if necessary
+    us_equity_df <- us_equity_df[!is.na(us_equity_df$us_equity), ]
+
+    # Verify the structure and content of the dataframe
+    str(us_equity_df)
+    head(us_equity_df)
+
+    ```
+
+-   **International Equity Market total returns** - this metric provides insight into the benefits of global diversification. Investing outside of the US allows for exposure into different economies and sectors, which reduces dependency on the domestic market. One popular index for markets outside of North America is the **MSCI EAFE**, which is tracked by the **EFA** (MSCI EAFE) ETF.
+
+    By analyzing international equity market returns, we can model how investments in global stocks could impact long-term retirement outcomes, especially when paired with US data.
+
+    We run the following code to access International Equity Data using AlphaVantage.
+
+    ```{r}
+    # Define the base URL for AlphaVantage API
+    alpha_base_url <- "https://www.alphavantage.co/query"
+
+    # Minimal API parameters for EFA (MSCI EAFE ETF)
+    efa_params <- list(
+      `function` = "TIME_SERIES_DAILY",  # Function to fetch daily prices
+      symbol = "EFA",                   # MSCI EAFE ETF
+      apikey = alpha_api_key             # Your AlphaVantage API key
+    )
+
+    # Send the request
+    resp <- request(alpha_base_url) |>
+      req_url_query(!!!efa_params) |>
+      req_perform()
+
+    # Parse the JSON response
+    efa_data <- resp_body_json(resp)
+
+    # Extract the daily time series data
+    efa_daily <- efa_data[["Time Series (Daily)"]]
+
+    # Convert to a data frame
+    efa_df <- do.call(rbind, lapply(names(efa_daily), function(date) {
+      data.frame(
+        date = as.Date(date),
+        close = as.numeric(efa_daily[[date]][["4. close"]])
+      )
+    }))
+
+    # Sort by date
+    efa_df <- efa_df[order(efa_df$date), ]
+
+    # View the resulting data frame
+    str(efa_df)
+    head(efa_df)
+
+    ```
+
+    The code above proceeds to use the TIME_SERIES_DAILY endpoint to grab daily prices for the EFA ETF, parameters are specified and the request is sent to the AlphaVantage API, the Time Series (Daily) section of the JSON response is extracted, a data frame is created with the date and closing price columns, sorted by date.
+
+    > Note: One limitation of using AlphaVantage's free content is we cannot go back 15-20 years in every sector, as we might hope, as find easier when using FRED.
+
+    US equity data typically calculates logarithmic returns. To transform this data so it may be compared against US equity returns, or incorporated into Monte Carlo simulations, we calculate the logarithmic returns as follows:
+
+    ```{r}
+    efa_df <- efa_df |>
+      transform(return = c(NA, diff(log(close))))
+
+    head(efa_df)
+    ```
+
+    We can also use FRED to access the **ICE BofA Emerging Markets Corporate Plus Index Total Return Index Value**. This index measures the total returns of emerging market corporate bonds. We use this dataset as a proxy for international equity market performance because it captures returns in emerging markets, which, similar to equity investments, have hgiher risk and growth potential.
+
+    ```{r}
+    # Define FRED API base URL
+    fred_base_url <- "https://api.stlouisfed.org/fred/series/observations"
+
+    # FRED API parameters for the selected international equity index
+    fred_params_int <- list(
+      series_id = "BAMLEMCBPITRIV",         # International Equity Market Index
+      api_key = fred_api_key,               # Your FRED API key
+      file_type = "json",                   # Response format
+      observation_start = "2003-01-01",     # Start date
+      observation_end = "2023-12-31"        # End date
+    )
+
+    # Fetch international equity market data
+    resp <- request(fred_base_url) |>
+      req_url_query(!!!fred_params_int) |>
+      req_perform()
+
+    # Parse the JSON response into a data frame
+    int_equity_data <- resp_body_json(resp)
+    int_equity_df <- do.call(rbind, lapply(int_equity_data$observations, as.data.frame)) |>
+      as.data.frame() |>
+      transform(
+        date = as.Date(date),             # Convert 'date' column to Date format
+        value = as.numeric(value)        # Convert 'value' column to numeric
+      )
+
+    # Drop unnecessary columns and rename
+    int_equity_df <- int_equity_df[, c("date", "value")] |>
+      rename(int_equity = value)          # Rename 'value' column to 'int_equity'
+
+    # View the structure of the resulting data frame
+    str(int_equity_df)
+
+    # Display the first few rows of the data frame
+    head(int_equity_df)
+    ```
+
+    The code below replaces missing values with `NA`
+
+    ```{r}
+    int_equity_df$int_equity <- as.numeric(ifelse(int_equity_df$int_equity == ".", NA, int_equity_df$int_equity))
+    ```
+
+    This code replaces NA with the last valid observation.
+
+    ```{r}
+    library(zoo)
+    int_equity_df$int_equity <- na.locf(int_equity_df$int_equity, na.rm = FALSE)
+    ```
+
+    Aggregating to monthly data -
+
+    ```{r}
+
+    int_equity_monthly <- int_equity_df |>
+      mutate(month = format(date, "%Y-%m")) |>
+      group_by(month) |>
+      summarize(int_equity = mean(int_equity, na.rm = TRUE)) |>
+      ungroup() |>
+      mutate(date = as.Date(paste0(month, "-01"), format = "%Y-%m-%d")) |>
+      select(-month)  #dropping month - realized later on we did not need it so modifying this step
+
+    #checking the structure of the modified dataset
+    str(int_equity_monthly)
+
+    #previewing the first few rows
+    head(int_equity_monthly)
+
+
+    ```
+
+-   **Bond market total returns** - this financial metric provides insight into fixed-income investments. These are typically less volatile compared to equities, and serve as a method to stabilize a portfolio. Bonds offer a predictable income stream and can hedge against stock market downturns. Bonds serve as a safe and stable portion of a portfolio as one plans for retirement.
+
+    We access FRED's `10-Year Treasury Constant Maturity Rate`, for 2003-2023.
+
+    ```{r}
+    # Define the base URL for FRED API
+    fred_base_url <- "https://api.stlouisfed.org/fred/series/observations"
+
+    # FRED API parameters for 10-Year Treasury Rate
+    fred_params <- list(
+      series_id = "GS10",               # 10-Year Treasury Constant Maturity Rate
+      api_key = fred_api_key,           # Your FRED API key
+      file_type = "json",               # Response format
+      observation_start = "2003-01-01", # Start date
+      observation_end = "2023-12-31"    # End date
+    )
+
+    # Send the request
+    resp <- request(fred_base_url) |>
+      req_url_query(!!!fred_params) |>
+      req_perform()
+
+    # Parse the JSON response
+    bond_data <- resp_body_json(resp)
+
+    # Extract and convert the observations into a data frame
+    bond_df <- do.call(rbind, lapply(bond_data$observations, as.data.frame)) |>
+      as.data.frame() |>
+      transform(
+        date = as.Date(date),            # Convert 'date' column to Date format
+        value = as.numeric(value)        # Convert 'value' column to numeric
+      )
+
+    # Drop unnecessary columns
+    bond_df <- bond_df[, c("date", "value")]
+
+    # View the structure of the resulting data frame
+    str(bond_df)
+
+    # Display the first few rows
+    head(bond_df)
+    ```
+
+    With the hope to later analyze returns, we can calculate **monthly percentage changes**.
+
+    ```{r}
+    bond_df <- bond_df |> 
+      transform(return = c(NA, diff(log(value))))
+
+    # View the first few rows with returns
+    head(bond_df)
+
+    ```
+
+-   **Short-term debt returns** - reflect the interest earned on safe, short-term fixed-income securities. One commonly used financial instrument here is the **Treasury Bill**. When planning for retirement, short-term debt can serve as a buffer for market volatility.
+
+    Below we access FRED's **3-Month Treasury Bill Rate**, with a resulting data frame, `t_bill_df`, which contains short-term debt rate data from 2003-2023.
+
+    ```{r}
+    # Define the base URL for FRED API
+    fred_base_url <- "https://api.stlouisfed.org/fred/series/observations"
+
+    # FRED API parameters for 3-Month Treasury Bill Rate
+    fred_params <- list(
+      series_id = "TB3MS",               # 3-Month Treasury Bill Rate
+      api_key = fred_api_key,            # Your FRED API key
+      file_type = "json",                # Response format
+      observation_start = "2003-01-01",  # Start date
+      observation_end = "2023-12-31"     # End date
+    )
+
+    # Send the request
+    resp <- request(fred_base_url) |>
+      req_url_query(!!!fred_params) |>
+      req_perform()
+
+    # Parse the JSON response
+    t_bill_data <- resp_body_json(resp)
+
+    # Extract and convert the observations into a data frame
+    t_bill_df <- do.call(rbind, lapply(t_bill_data$observations, as.data.frame)) |>
+      as.data.frame() |>
+      transform(
+        date = as.Date(date),             # Convert 'date' column to Date format
+        value = as.numeric(value)         # Convert 'value' column to numeric
+      )
+
+    # Drop unnecessary columns
+    t_bill_df <- t_bill_df[, c("date", "value")]
+
+    # View the structure of the resulting data frame
+    str(t_bill_df)
+
+    # Display the first few rows
+    head(t_bill_df)
+
+    ```
+
+We once again include the monthly logarithmic return rates to our data frame:
+
+```{r}
+t_bill_df <- t_bill_df |> 
+  transform(return = c(NA, diff(log(value))))
+
+#view the first few rows with returns
+head(t_bill_df)
+```
+
+Before moving on to the next task, we filter all (applicable) data sets to reflect the time frame of 2007-2023, keeping in mind our wage growth data was only able to go back to mid-2006. This adjustment aligns our data for further analysis.
+
+```{r}
+#defining the date range
+start_date <- as.Date("2007-01-01")
+end_date <- as.Date("2023-12-31")
+
+#adjusting wage growth dataframe
+wage_growth_df <- subset(wage_growth_df, date >= start_date & date <= end_date)
+
+#adjusting CPI dataframe
+cpi_df <- subset(cpi_df, date >= start_date & date <= end_date)
+
+#adjusting bond dataframe
+bond_df <- subset(bond_df, date >= start_date & date <= end_date)
+
+#adjusting T-bill dataframe
+t_bill_df <- subset(t_bill_df, date >= start_date & date <= end_date)
+
+#adjusting international equity dataframe
+int_equity_monthly <- subset(
+    int_equity_monthly,
+    date >= start_date & date <= end_date
+)
+
+#verify each dataframe
+list(
+  wage_growth = range(wage_growth_df$date),
+  cpi = range(cpi_df$date),
+  bond = range(bond_df$date),
+  t_bill = range(t_bill_df$date),
+  int_equity = range(int_equity_monthly$date)
+)
+
+```
+
+## Task 4: Initial Analysis
+
+This step involves conducting exploratory data analysis to identify key properties of the data historical data acquired.
+
+The code below calculates the long-run monthly averages and variances for each data series.
+
+The table above summarizes the key statistical properties, the long-run monthly averages, and the variability of each series over the 2007-2023 time period.
+
+The **wage growth** shows a mean value of **25.89** and variance of **13.74.** This indicates a relatively stable upward trend over time.
+
+The **CPI** exhibits the highest variance at **697.58**, indicates there were significant fluctuations in inflation from 2007 to 2023. This impacts our [retirement planning]{.underline}, emphasizing the importance of considering inflation-indexed returns (like in our two retirement plan options).
+
+Next, we generate the correlation matrix table through the code below. We first combine our data into a single data frame, `aligned_data`.
+
+```{r}
+ # Renaming and preparing datasets for alignment
+wage_growth_prepared <- wage_growth_df |> rename(wage_growth = value)
+cpi_prepared <- cpi_df |> rename(cpi = value)
+bond_prepared <- bond_df |> rename(bond_return = return) |> select(date, bond_return)
+t_bill_prepared <- t_bill_df |> rename(t_bill_return = return) |> select(date, t_bill_return)
+
+# Ensure int_equity_monthly has the correct structure
+int_equity_prepared <- int_equity_monthly 
+
+print(head(int_equity_monthly))
+
+# Combine all datasets by date using a full join
+aligned_data <- list(
+  wage_growth_prepared,
+  cpi_prepared,
+  bond_prepared,
+  t_bill_prepared,
+  int_equity_prepared
+) |> 
+  reduce(full_join, by = "date")
+
+# Check structure and preview
+str(aligned_data)
+head(aligned_data)
+
+
+
+```
+
+```{r}
+# Recompute summary statistics for aligned data
+mean_stats <- aligned_data |>
+  summarize(
+    `Wage Growth` = mean(wage_growth, na.rm = TRUE),
+    `CPI` = mean(cpi, na.rm = TRUE),
+    `Bond Returns` = mean(bond_return, na.rm = TRUE),
+    `T-Bill Returns` = mean(t_bill_return, na.rm = TRUE),
+    `International Equity` = mean(int_equity, na.rm = TRUE)
+  ) |>
+  pivot_longer(
+    cols = everything(),
+    names_to = "Data Metric",
+    values_to = "Mean Value"
+  )
+
+variance_stats <- aligned_data |>
+  summarize(
+    `Wage Growth` = var(wage_growth, na.rm = TRUE),
+    `CPI` = var(cpi, na.rm = TRUE),
+    `Bond Returns` = var(bond_return, na.rm = TRUE),
+    `T-Bill Returns` = var(t_bill_return, na.rm = TRUE),
+    `International Equity` = var(int_equity, na.rm = TRUE)
+  ) |>
+  pivot_longer(
+    cols = everything(),
+    names_to = "Data Metric",
+    values_to = "Variance"
+  )
+
+# Combine means and variances
+summary_stats_aligned <- mean_stats |>
+  left_join(variance_stats, by = "Data Metric")
+
+# Display the summary statistics using the gt package
+library(gt)
+summary_stats_aligned |>
+  gt() |>
+  tab_header(
+    title = "Updated Summary Statistics for Aligned Data",
+    subtitle = "Averages and Variances from 2007 to 2023"
+  ) |>
+  fmt_number(
+    columns = vars(`Mean Value`, Variance),
+    decimals = 2
+  )
+
+```
+
+Next, to analyze the relationships between the various economic indicators in our dataset, we compute a correlation matrix and visualize it using a heatmap. The correlation matrix tells us the strength and direction of linear relationship between each variable pair.
+
+```{r}
+
+#compute correlation matrix
+cor_matrix <- cor(aligned_data[, -1], use = "complete.obs")
+
+#reshape correlation matrix into long format for ggplot
+cor_long <- melt(cor_matrix)
+
+# creating heatmap 
+ggplot(cor_long, aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile(color = "white") + # Add gridlines for better separation
+  scale_fill_gradient2(
+    low = "blue", high = "red", mid = "white",
+    midpoint = 0, limit = c(-1, 1), space = "Lab",
+    name = "Correlation"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank()
+  ) +
+  ggtitle(
+    "Correlation Matrix Heatmap",
+    subtitle = "Relationships Between Economic Indicators"
+  )
+
+```
+
+The heatmap visualizes the correlations among the economic indicators. We see a **strong positive correlation** between wage growth and CIP, indicating that as wages increase, consumer prices tend to rise, which aligns with inflationary trends. Differently, we find a **weak positive correlation** between T-bill returns and other indicators like bond returns and international equities. This highlights the more stable and less market-sensitive nature of these economic indicators.
+
+## Task 5: Historical Comparison
+
+## Task 6: Fixed-Rate Analysis
+
+## Task 7: Monte Carlo Analysis
+
+### [Recommendation]{.underline}
