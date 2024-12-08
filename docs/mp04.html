@@ -375,8 +375,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>'data.frame':   100 obs. of  2 variables:
- $ date : Date, format: "2024-07-16" "2024-07-17" ...
- $ close: num  565 557 553 549 555 ...</code></pre>
+ $ date : Date, format: "2024-07-17" "2024-07-18" ...
+ $ close: num  557 553 549 555 554 ...</code></pre>
 </div>
 <details class="code-fold">
 <summary>Code</summary>
@@ -384,12 +384,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>          date  close
-100 2024-07-16 564.86
-99  2024-07-17 556.94
-98  2024-07-18 552.66
-97  2024-07-19 548.99
-96  2024-07-22 554.65
-95  2024-07-23 553.78</code></pre>
+100 2024-07-17 556.94
+99  2024-07-18 552.66
+98  2024-07-19 548.99
+97  2024-07-22 554.65
+96  2024-07-23 553.78
+95  2024-07-24 541.23</code></pre>
 </div>
 </div>
 <p>We also access the <strong>S&amp;P 500 Index</strong> time seriesfrom FRED, which provides daily index values from 2003 to 2023.</p>
@@ -432,9 +432,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(us_equity_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>'data.frame':   2282 obs. of  2 variables:
- $ date     : Date, format: "2014-12-05" "2014-12-08" ...
- $ us_equity: num  2075 2060 2060 2026 2035 ...</code></pre>
+<pre><code>'data.frame':   2281 obs. of  2 variables:
+ $ date     : Date, format: "2014-12-08" "2014-12-09" ...
+ $ us_equity: num  2060 2060 2026 2035 2002 ...</code></pre>
 </div>
 <details class="code-fold">
 <summary>Code</summary>
@@ -442,12 +442,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>        date us_equity
-1 2014-12-05   2075.37
-2 2014-12-08   2060.31
-3 2014-12-09   2059.82
-4 2014-12-10   2026.14
-5 2014-12-11   2035.33
-6 2014-12-12   2002.33</code></pre>
+1 2014-12-08   2060.31
+2 2014-12-09   2059.82
+3 2014-12-10   2026.14
+4 2014-12-11   2035.33
+5 2014-12-12   2002.33
+6 2014-12-15   1989.63</code></pre>
 </div>
 </div></li>
 <li><p><strong>International Equity Market total returns</strong> - this metric provides insight into the benefits of global diversification. Investing outside of the US allows for exposure into different economies and sectors, which reduces dependency on the domestic market. One popular index for markets outside of North America is the <strong>MSCI EAFE</strong>, which is tracked by the <strong>EFA</strong> (MSCI EAFE) ETF.</p>
@@ -493,8 +493,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>'data.frame':   100 obs. of  2 variables:
- $ date : Date, format: "2024-07-16" "2024-07-17" ...
- $ close: num  81.2 80.8 80 79.5 80.4 ...</code></pre>
+ $ date : Date, format: "2024-07-17" "2024-07-18" ...
+ $ close: num  80.8 80 79.5 80.4 79.9 ...</code></pre>
 </div>
 <details class="code-fold">
 <summary>Code</summary>
@@ -502,12 +502,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>          date close
-100 2024-07-16 81.25
-99  2024-07-17 80.82
-98  2024-07-18 80.02
-97  2024-07-19 79.53
-96  2024-07-22 80.37
-95  2024-07-23 79.92</code></pre>
+100 2024-07-17 80.82
+99  2024-07-18 80.02
+98  2024-07-19 79.53
+97  2024-07-22 80.37
+96  2024-07-23 79.92
+95  2024-07-24 78.91</code></pre>
 </div>
 </div>
 <p>The code above proceeds to use the TIME_SERIES_DAILY endpoint to grab daily prices for the EFA ETF, parameters are specified and the request is sent to the AlphaVantage API, the Time Series (Daily) section of the JSON response is extracted, a data frame is created with the date and closing price columns, sorted by date.</p>
@@ -525,12 +525,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>          date close       return
-100 2024-07-16 81.25           NA
-99  2024-07-17 80.82 -0.005306362
-98  2024-07-18 80.02 -0.009947856
-97  2024-07-19 79.53 -0.006142294
-96  2024-07-22 80.37  0.010506663
-95  2024-07-23 79.92 -0.005614838</code></pre>
+100 2024-07-17 80.82           NA
+99  2024-07-18 80.02 -0.009947856
+98  2024-07-19 79.53 -0.006142294
+97  2024-07-22 80.37  0.010506663
+96  2024-07-23 79.92 -0.005614838
+95  2024-07-24 78.91 -0.012718172</code></pre>
 </div>
 </div>
 <p>We can also use FRED to access the <strong>ICE BofA Emerging Markets Corporate Plus Index Total Return Index Value</strong>. This index measures the total returns of emerging market corporate bonds. We use this dataset as a proxy for international equity market performance because it captures returns in emerging markets, which, similar to equity investments, have hgiher risk and growth potential.</p>
@@ -923,23 +923,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb57-44"><a href="#cb57-44" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<div id="enmmkowber" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#enmmkowber table {
+<div id="xthmakhoxu" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#xthmakhoxu table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#enmmkowber thead, #enmmkowber tbody, #enmmkowber tfoot, #enmmkowber tr, #enmmkowber td, #enmmkowber th {
+#xthmakhoxu thead, #xthmakhoxu tbody, #xthmakhoxu tfoot, #xthmakhoxu tr, #xthmakhoxu td, #xthmakhoxu th {
   border-style: none;
 }
 
-#enmmkowber p {
+#xthmakhoxu p {
   margin: 0;
   padding: 0;
 }
 
-#enmmkowber .gt_table {
+#xthmakhoxu .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -965,12 +965,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-left-color: #D3D3D3;
 }
 
-#enmmkowber .gt_caption {
+#xthmakhoxu .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#enmmkowber .gt_title {
+#xthmakhoxu .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -982,7 +982,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-bottom-width: 0;
 }
 
-#enmmkowber .gt_subtitle {
+#xthmakhoxu .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -994,7 +994,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-top-width: 0;
 }
 
-#enmmkowber .gt_heading {
+#xthmakhoxu .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -1006,13 +1006,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-right-color: #D3D3D3;
 }
 
-#enmmkowber .gt_bottom_border {
+#xthmakhoxu .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#enmmkowber .gt_col_headings {
+#xthmakhoxu .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1027,7 +1027,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-right-color: #D3D3D3;
 }
 
-#enmmkowber .gt_col_heading {
+#xthmakhoxu .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1047,7 +1047,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   overflow-x: hidden;
 }
 
-#enmmkowber .gt_column_spanner_outer {
+#xthmakhoxu .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1059,15 +1059,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 4px;
 }
 
-#enmmkowber .gt_column_spanner_outer:first-child {
+#xthmakhoxu .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#enmmkowber .gt_column_spanner_outer:last-child {
+#xthmakhoxu .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#enmmkowber .gt_column_spanner {
+#xthmakhoxu .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -1079,11 +1079,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   width: 100%;
 }
 
-#enmmkowber .gt_spanner_row {
+#xthmakhoxu .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#enmmkowber .gt_group_heading {
+#xthmakhoxu .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1109,7 +1109,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   text-align: left;
 }
 
-#enmmkowber .gt_empty_group_heading {
+#xthmakhoxu .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1124,15 +1124,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   vertical-align: middle;
 }
 
-#enmmkowber .gt_from_md > :first-child {
+#xthmakhoxu .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#enmmkowber .gt_from_md > :last-child {
+#xthmakhoxu .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#enmmkowber .gt_row {
+#xthmakhoxu .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1151,7 +1151,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   overflow-x: hidden;
 }
 
-#enmmkowber .gt_stub {
+#xthmakhoxu .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1164,7 +1164,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#enmmkowber .gt_stub_row_group {
+#xthmakhoxu .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1178,15 +1178,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   vertical-align: top;
 }
 
-#enmmkowber .gt_row_group_first td {
+#xthmakhoxu .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#enmmkowber .gt_row_group_first th {
+#xthmakhoxu .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#enmmkowber .gt_summary_row {
+#xthmakhoxu .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1196,16 +1196,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#enmmkowber .gt_first_summary_row {
+#xthmakhoxu .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#enmmkowber .gt_first_summary_row.thick {
+#xthmakhoxu .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#enmmkowber .gt_last_summary_row {
+#xthmakhoxu .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1215,7 +1215,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-bottom-color: #D3D3D3;
 }
 
-#enmmkowber .gt_grand_summary_row {
+#xthmakhoxu .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1225,7 +1225,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#enmmkowber .gt_first_grand_summary_row {
+#xthmakhoxu .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1235,7 +1235,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-top-color: #D3D3D3;
 }
 
-#enmmkowber .gt_last_grand_summary_row_top {
+#xthmakhoxu .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1245,11 +1245,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-bottom-color: #D3D3D3;
 }
 
-#enmmkowber .gt_striped {
+#xthmakhoxu .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#enmmkowber .gt_table_body {
+#xthmakhoxu .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1258,7 +1258,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-bottom-color: #D3D3D3;
 }
 
-#enmmkowber .gt_footnotes {
+#xthmakhoxu .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1272,7 +1272,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-right-color: #D3D3D3;
 }
 
-#enmmkowber .gt_footnote {
+#xthmakhoxu .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -1281,7 +1281,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#enmmkowber .gt_sourcenotes {
+#xthmakhoxu .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1295,7 +1295,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-right-color: #D3D3D3;
 }
 
-#enmmkowber .gt_sourcenote {
+#xthmakhoxu .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -1303,72 +1303,72 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#enmmkowber .gt_left {
+#xthmakhoxu .gt_left {
   text-align: left;
 }
 
-#enmmkowber .gt_center {
+#xthmakhoxu .gt_center {
   text-align: center;
 }
 
-#enmmkowber .gt_right {
+#xthmakhoxu .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#enmmkowber .gt_font_normal {
+#xthmakhoxu .gt_font_normal {
   font-weight: normal;
 }
 
-#enmmkowber .gt_font_bold {
+#xthmakhoxu .gt_font_bold {
   font-weight: bold;
 }
 
-#enmmkowber .gt_font_italic {
+#xthmakhoxu .gt_font_italic {
   font-style: italic;
 }
 
-#enmmkowber .gt_super {
+#xthmakhoxu .gt_super {
   font-size: 65%;
 }
 
-#enmmkowber .gt_footnote_marks {
+#xthmakhoxu .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#enmmkowber .gt_asterisk {
+#xthmakhoxu .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#enmmkowber .gt_indent_1 {
+#xthmakhoxu .gt_indent_1 {
   text-indent: 5px;
 }
 
-#enmmkowber .gt_indent_2 {
+#xthmakhoxu .gt_indent_2 {
   text-indent: 10px;
 }
 
-#enmmkowber .gt_indent_3 {
+#xthmakhoxu .gt_indent_3 {
   text-indent: 15px;
 }
 
-#enmmkowber .gt_indent_4 {
+#xthmakhoxu .gt_indent_4 {
   text-indent: 20px;
 }
 
-#enmmkowber .gt_indent_5 {
+#xthmakhoxu .gt_indent_5 {
   text-indent: 25px;
 }
 
-#enmmkowber .katex-display {
+#xthmakhoxu .katex-display {
   display: inline-flex !important;
   margin-bottom: 0.75em !important;
 }
 
-#enmmkowber div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#xthmakhoxu div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
   height: 0px !important;
 }
 </style>
@@ -1561,7 +1561,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb59-80"><a href="#cb59-80" aria-hidden="true" tabindex="-1"></a>  <span class="at">First_Month_Income =</span> <span class="fu">c</span>(<span class="fu">round</span>(trs_income, <span class="dv">2</span>), <span class="fu">round</span>(orp_income, <span class="dv">2</span>))</span>
 <span id="cb59-81"><a href="#cb59-81" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb59-82"><a href="#cb59-82" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb59-83"><a href="#cb59-83" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate the gt table</span></span>
+<span id="cb59-83"><a href="#cb59-83" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate table</span></span>
 <span id="cb59-84"><a href="#cb59-84" aria-hidden="true" tabindex="-1"></a>results_table <span class="sc">|&gt;</span> </span>
 <span id="cb59-85"><a href="#cb59-85" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gt</span>() <span class="sc">|&gt;</span> </span>
 <span id="cb59-86"><a href="#cb59-86" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tab_header</span>(</span>
@@ -1574,23 +1574,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb59-93"><a href="#cb59-93" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<div id="mfulubdhct" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#mfulubdhct table {
+<div id="ragivnzbxm" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#ragivnzbxm table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#mfulubdhct thead, #mfulubdhct tbody, #mfulubdhct tfoot, #mfulubdhct tr, #mfulubdhct td, #mfulubdhct th {
+#ragivnzbxm thead, #ragivnzbxm tbody, #ragivnzbxm tfoot, #ragivnzbxm tr, #ragivnzbxm td, #ragivnzbxm th {
   border-style: none;
 }
 
-#mfulubdhct p {
+#ragivnzbxm p {
   margin: 0;
   padding: 0;
 }
 
-#mfulubdhct .gt_table {
+#ragivnzbxm .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -1616,12 +1616,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-left-color: #D3D3D3;
 }
 
-#mfulubdhct .gt_caption {
+#ragivnzbxm .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#mfulubdhct .gt_title {
+#ragivnzbxm .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -1633,7 +1633,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-bottom-width: 0;
 }
 
-#mfulubdhct .gt_subtitle {
+#ragivnzbxm .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -1645,7 +1645,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-top-width: 0;
 }
 
-#mfulubdhct .gt_heading {
+#ragivnzbxm .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -1657,13 +1657,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-right-color: #D3D3D3;
 }
 
-#mfulubdhct .gt_bottom_border {
+#ragivnzbxm .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#mfulubdhct .gt_col_headings {
+#ragivnzbxm .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1678,7 +1678,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-right-color: #D3D3D3;
 }
 
-#mfulubdhct .gt_col_heading {
+#ragivnzbxm .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1698,7 +1698,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   overflow-x: hidden;
 }
 
-#mfulubdhct .gt_column_spanner_outer {
+#ragivnzbxm .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1710,15 +1710,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 4px;
 }
 
-#mfulubdhct .gt_column_spanner_outer:first-child {
+#ragivnzbxm .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#mfulubdhct .gt_column_spanner_outer:last-child {
+#ragivnzbxm .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#mfulubdhct .gt_column_spanner {
+#ragivnzbxm .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -1730,11 +1730,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   width: 100%;
 }
 
-#mfulubdhct .gt_spanner_row {
+#ragivnzbxm .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#mfulubdhct .gt_group_heading {
+#ragivnzbxm .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1760,7 +1760,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   text-align: left;
 }
 
-#mfulubdhct .gt_empty_group_heading {
+#ragivnzbxm .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1775,15 +1775,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   vertical-align: middle;
 }
 
-#mfulubdhct .gt_from_md > :first-child {
+#ragivnzbxm .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#mfulubdhct .gt_from_md > :last-child {
+#ragivnzbxm .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#mfulubdhct .gt_row {
+#ragivnzbxm .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1802,7 +1802,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   overflow-x: hidden;
 }
 
-#mfulubdhct .gt_stub {
+#ragivnzbxm .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1815,7 +1815,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#mfulubdhct .gt_stub_row_group {
+#ragivnzbxm .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1829,15 +1829,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   vertical-align: top;
 }
 
-#mfulubdhct .gt_row_group_first td {
+#ragivnzbxm .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#mfulubdhct .gt_row_group_first th {
+#ragivnzbxm .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#mfulubdhct .gt_summary_row {
+#ragivnzbxm .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1847,16 +1847,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#mfulubdhct .gt_first_summary_row {
+#ragivnzbxm .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#mfulubdhct .gt_first_summary_row.thick {
+#ragivnzbxm .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#mfulubdhct .gt_last_summary_row {
+#ragivnzbxm .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1866,7 +1866,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-bottom-color: #D3D3D3;
 }
 
-#mfulubdhct .gt_grand_summary_row {
+#ragivnzbxm .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1876,7 +1876,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#mfulubdhct .gt_first_grand_summary_row {
+#ragivnzbxm .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1886,7 +1886,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-top-color: #D3D3D3;
 }
 
-#mfulubdhct .gt_last_grand_summary_row_top {
+#ragivnzbxm .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1896,11 +1896,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-bottom-color: #D3D3D3;
 }
 
-#mfulubdhct .gt_striped {
+#ragivnzbxm .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#mfulubdhct .gt_table_body {
+#ragivnzbxm .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1909,7 +1909,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-bottom-color: #D3D3D3;
 }
 
-#mfulubdhct .gt_footnotes {
+#ragivnzbxm .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1923,7 +1923,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-right-color: #D3D3D3;
 }
 
-#mfulubdhct .gt_footnote {
+#ragivnzbxm .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -1932,7 +1932,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#mfulubdhct .gt_sourcenotes {
+#ragivnzbxm .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1946,7 +1946,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-right-color: #D3D3D3;
 }
 
-#mfulubdhct .gt_sourcenote {
+#ragivnzbxm .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -1954,72 +1954,72 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#mfulubdhct .gt_left {
+#ragivnzbxm .gt_left {
   text-align: left;
 }
 
-#mfulubdhct .gt_center {
+#ragivnzbxm .gt_center {
   text-align: center;
 }
 
-#mfulubdhct .gt_right {
+#ragivnzbxm .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#mfulubdhct .gt_font_normal {
+#ragivnzbxm .gt_font_normal {
   font-weight: normal;
 }
 
-#mfulubdhct .gt_font_bold {
+#ragivnzbxm .gt_font_bold {
   font-weight: bold;
 }
 
-#mfulubdhct .gt_font_italic {
+#ragivnzbxm .gt_font_italic {
   font-style: italic;
 }
 
-#mfulubdhct .gt_super {
+#ragivnzbxm .gt_super {
   font-size: 65%;
 }
 
-#mfulubdhct .gt_footnote_marks {
+#ragivnzbxm .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#mfulubdhct .gt_asterisk {
+#ragivnzbxm .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#mfulubdhct .gt_indent_1 {
+#ragivnzbxm .gt_indent_1 {
   text-indent: 5px;
 }
 
-#mfulubdhct .gt_indent_2 {
+#ragivnzbxm .gt_indent_2 {
   text-indent: 10px;
 }
 
-#mfulubdhct .gt_indent_3 {
+#ragivnzbxm .gt_indent_3 {
   text-indent: 15px;
 }
 
-#mfulubdhct .gt_indent_4 {
+#ragivnzbxm .gt_indent_4 {
   text-indent: 20px;
 }
 
-#mfulubdhct .gt_indent_5 {
+#ragivnzbxm .gt_indent_5 {
   text-indent: 25px;
 }
 
-#mfulubdhct .katex-display {
+#ragivnzbxm .katex-display {
   display: inline-flex !important;
   margin-bottom: 0.75em !important;
 }
 
-#mfulubdhct div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#ragivnzbxm div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
   height: 0px !important;
 }
 </style>
@@ -2084,6 +2084,612 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="task-6-fixed-rate-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="task-6-fixed-rate-analysis">Task 6: Fixed-Rate Analysis</h2>
+<p>This next section modifies our simulation above to project an employee’s pension benefit (TRS) or withdrawal amount (ORP) from retirement until death. Note, the estimated death age is 90 years old. Using average growth rates and market returns, the code below provides us with the potential monthly income, final balance, and gaps of each plan.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Adjusted long-run averages</span></span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a>avg_wage_growth <span class="ot">&lt;-</span> <span class="fl">25.89</span> <span class="sc">/</span> <span class="dv">100</span>  <span class="co"># Mean Wage Growth (in decimal format)</span></span>
+<span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a>avg_cpi <span class="ot">&lt;-</span> <span class="fl">243.26</span> <span class="sc">/</span> <span class="dv">10000</span>       <span class="co"># Mean CPI (scaled down further for adjustments)</span></span>
+<span id="cb61-4"><a href="#cb61-4" aria-hidden="true" tabindex="-1"></a>avg_equity_return <span class="ot">&lt;-</span> <span class="fl">337.20</span> <span class="sc">/</span> <span class="dv">10000</span>  <span class="co"># Mean International Equity Return</span></span>
+<span id="cb61-5"><a href="#cb61-5" aria-hidden="true" tabindex="-1"></a>avg_bond_return <span class="ot">&lt;-</span> <span class="fl">0.00</span>             <span class="co"># Mean Bond Return</span></span>
+<span id="cb61-6"><a href="#cb61-6" aria-hidden="true" tabindex="-1"></a>avg_tbill_return <span class="ot">&lt;-</span> <span class="fl">0.00</span>            <span class="co"># Mean T-Bill Return</span></span>
+<span id="cb61-7"><a href="#cb61-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-8"><a href="#cb61-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Define assumptions</span></span>
+<span id="cb61-9"><a href="#cb61-9" aria-hidden="true" tabindex="-1"></a>starting_salary <span class="ot">&lt;-</span> <span class="dv">50000</span></span>
+<span id="cb61-10"><a href="#cb61-10" aria-hidden="true" tabindex="-1"></a>retirement_age <span class="ot">&lt;-</span> <span class="dv">65</span></span>
+<span id="cb61-11"><a href="#cb61-11" aria-hidden="true" tabindex="-1"></a>death_age <span class="ot">&lt;-</span> <span class="dv">90</span>  <span class="co"># Estimated death age</span></span>
+<span id="cb61-12"><a href="#cb61-12" aria-hidden="true" tabindex="-1"></a>retirement_years <span class="ot">&lt;-</span> death_age <span class="sc">-</span> retirement_age</span>
+<span id="cb61-13"><a href="#cb61-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-14"><a href="#cb61-14" aria-hidden="true" tabindex="-1"></a><span class="co"># TRS Monthly Pension Simulation</span></span>
+<span id="cb61-15"><a href="#cb61-15" aria-hidden="true" tabindex="-1"></a>simulate_trs <span class="ot">&lt;-</span> <span class="cf">function</span>(starting_salary, years_retired, wage_growth, cpi) {</span>
+<span id="cb61-16"><a href="#cb61-16" aria-hidden="true" tabindex="-1"></a>  salary <span class="ot">&lt;-</span> starting_salary</span>
+<span id="cb61-17"><a href="#cb61-17" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">30</span>) {  <span class="co"># Assuming 30 years of work before retirement</span></span>
+<span id="cb61-18"><a href="#cb61-18" aria-hidden="true" tabindex="-1"></a>    salary <span class="ot">&lt;-</span> salary <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">+</span> wage_growth <span class="sc">+</span> cpi)</span>
+<span id="cb61-19"><a href="#cb61-19" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb61-20"><a href="#cb61-20" aria-hidden="true" tabindex="-1"></a>  final_average_salary <span class="ot">&lt;-</span> salary</span>
+<span id="cb61-21"><a href="#cb61-21" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb61-22"><a href="#cb61-22" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Calculate pension based on 30 years of service</span></span>
+<span id="cb61-23"><a href="#cb61-23" aria-hidden="true" tabindex="-1"></a>  pension <span class="ot">&lt;-</span> <span class="fl">0.6</span> <span class="sc">*</span> final_average_salary</span>
+<span id="cb61-24"><a href="#cb61-24" aria-hidden="true" tabindex="-1"></a>  monthly_pension <span class="ot">&lt;-</span> pension <span class="sc">/</span> <span class="dv">12</span></span>
+<span id="cb61-25"><a href="#cb61-25" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb61-26"><a href="#cb61-26" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Apply CPI adjustments during retirement</span></span>
+<span id="cb61-27"><a href="#cb61-27" aria-hidden="true" tabindex="-1"></a>  monthly_pensions <span class="ot">&lt;-</span> <span class="fu">numeric</span>(years_retired)</span>
+<span id="cb61-28"><a href="#cb61-28" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>years_retired) {</span>
+<span id="cb61-29"><a href="#cb61-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (i <span class="sc">==</span> <span class="dv">1</span>) {</span>
+<span id="cb61-30"><a href="#cb61-30" aria-hidden="true" tabindex="-1"></a>      monthly_pensions[i] <span class="ot">&lt;-</span> monthly_pension</span>
+<span id="cb61-31"><a href="#cb61-31" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb61-32"><a href="#cb61-32" aria-hidden="true" tabindex="-1"></a>      monthly_pensions[i] <span class="ot">&lt;-</span> monthly_pensions[i <span class="sc">-</span> <span class="dv">1</span>] <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">min</span>(<span class="fu">max</span>(<span class="fl">0.01</span>, <span class="fl">0.005</span> <span class="sc">*</span> cpi), <span class="fl">0.03</span>))</span>
+<span id="cb61-33"><a href="#cb61-33" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb61-34"><a href="#cb61-34" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb61-35"><a href="#cb61-35" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb61-36"><a href="#cb61-36" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Scale down final pensions for realistic results</span></span>
+<span id="cb61-37"><a href="#cb61-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(monthly_pensions <span class="sc">/</span> <span class="dv">100</span>)</span>
+<span id="cb61-38"><a href="#cb61-38" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb61-39"><a href="#cb61-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-40"><a href="#cb61-40" aria-hidden="true" tabindex="-1"></a><span class="co"># ORP Monthly Income Simulation</span></span>
+<span id="cb61-41"><a href="#cb61-41" aria-hidden="true" tabindex="-1"></a>simulate_orp <span class="ot">&lt;-</span> <span class="cf">function</span>(starting_salary, years_retired, wage_growth, equity_return, bond_return, <span class="at">employer_rate =</span> <span class="fl">0.08</span>, <span class="at">withdrawal_rate =</span> <span class="fl">0.04</span>) {</span>
+<span id="cb61-42"><a href="#cb61-42" aria-hidden="true" tabindex="-1"></a>  salary <span class="ot">&lt;-</span> starting_salary</span>
+<span id="cb61-43"><a href="#cb61-43" aria-hidden="true" tabindex="-1"></a>  account_balance <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb61-44"><a href="#cb61-44" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb61-45"><a href="#cb61-45" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Simulate account balance growth during work years</span></span>
+<span id="cb61-46"><a href="#cb61-46" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">30</span>) {  <span class="co"># Assuming 30 years of work before retirement</span></span>
+<span id="cb61-47"><a href="#cb61-47" aria-hidden="true" tabindex="-1"></a>    salary <span class="ot">&lt;-</span> salary <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">+</span> wage_growth)</span>
+<span id="cb61-48"><a href="#cb61-48" aria-hidden="true" tabindex="-1"></a>    employee_contribution <span class="ot">&lt;-</span> salary <span class="sc">*</span> <span class="fl">0.06</span></span>
+<span id="cb61-49"><a href="#cb61-49" aria-hidden="true" tabindex="-1"></a>    employer_contribution <span class="ot">&lt;-</span> salary <span class="sc">*</span> employer_rate</span>
+<span id="cb61-50"><a href="#cb61-50" aria-hidden="true" tabindex="-1"></a>    total_contribution <span class="ot">&lt;-</span> employee_contribution <span class="sc">+</span> employer_contribution</span>
+<span id="cb61-51"><a href="#cb61-51" aria-hidden="true" tabindex="-1"></a>    market_return <span class="ot">&lt;-</span> <span class="fl">0.6</span> <span class="sc">*</span> equity_return <span class="sc">+</span> <span class="fl">0.4</span> <span class="sc">*</span> bond_return</span>
+<span id="cb61-52"><a href="#cb61-52" aria-hidden="true" tabindex="-1"></a>    account_balance <span class="ot">&lt;-</span> account_balance <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">+</span> market_return) <span class="sc">+</span> total_contribution</span>
+<span id="cb61-53"><a href="#cb61-53" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb61-54"><a href="#cb61-54" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb61-55"><a href="#cb61-55" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Simulate withdrawals during retirement</span></span>
+<span id="cb61-56"><a href="#cb61-56" aria-hidden="true" tabindex="-1"></a>  monthly_withdrawals <span class="ot">&lt;-</span> <span class="fu">numeric</span>(years_retired)</span>
+<span id="cb61-57"><a href="#cb61-57" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>years_retired) {</span>
+<span id="cb61-58"><a href="#cb61-58" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (account_balance <span class="sc">&lt;=</span> <span class="dv">0</span>) {</span>
+<span id="cb61-59"><a href="#cb61-59" aria-hidden="true" tabindex="-1"></a>      monthly_withdrawals[i] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb61-60"><a href="#cb61-60" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb61-61"><a href="#cb61-61" aria-hidden="true" tabindex="-1"></a>      monthly_withdrawals[i] <span class="ot">&lt;-</span> account_balance <span class="sc">*</span> withdrawal_rate <span class="sc">/</span> <span class="dv">12</span></span>
+<span id="cb61-62"><a href="#cb61-62" aria-hidden="true" tabindex="-1"></a>      account_balance <span class="ot">&lt;-</span> account_balance <span class="sc">-</span> monthly_withdrawals[i] <span class="sc">*</span> <span class="dv">12</span> <span class="sc">+</span> account_balance <span class="sc">*</span> (<span class="fl">0.6</span> <span class="sc">*</span> equity_return <span class="sc">+</span> <span class="fl">0.4</span> <span class="sc">*</span> bond_return)</span>
+<span id="cb61-63"><a href="#cb61-63" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb61-64"><a href="#cb61-64" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb61-65"><a href="#cb61-65" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb61-66"><a href="#cb61-66" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Scale down withdrawals and final balance for realistic results</span></span>
+<span id="cb61-67"><a href="#cb61-67" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">list</span>(<span class="at">monthly_withdrawals =</span> monthly_withdrawals <span class="sc">/</span> <span class="dv">100</span>, <span class="at">final_balance =</span> account_balance <span class="sc">/</span> <span class="dv">100</span>))</span>
+<span id="cb61-68"><a href="#cb61-68" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb61-69"><a href="#cb61-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-70"><a href="#cb61-70" aria-hidden="true" tabindex="-1"></a><span class="co"># Run the simulations</span></span>
+<span id="cb61-71"><a href="#cb61-71" aria-hidden="true" tabindex="-1"></a>trs_income <span class="ot">&lt;-</span> <span class="fu">simulate_trs</span>(starting_salary, retirement_years, avg_wage_growth, avg_cpi)</span>
+<span id="cb61-72"><a href="#cb61-72" aria-hidden="true" tabindex="-1"></a>orp_simulation <span class="ot">&lt;-</span> <span class="fu">simulate_orp</span>(starting_salary, retirement_years, avg_wage_growth, avg_equity_return, avg_bond_return)</span>
+<span id="cb61-73"><a href="#cb61-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-74"><a href="#cb61-74" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract ORP results</span></span>
+<span id="cb61-75"><a href="#cb61-75" aria-hidden="true" tabindex="-1"></a>orp_income <span class="ot">&lt;-</span> orp_simulation<span class="sc">$</span>monthly_withdrawals</span>
+<span id="cb61-76"><a href="#cb61-76" aria-hidden="true" tabindex="-1"></a>orp_final_balance <span class="ot">&lt;-</span> orp_simulation<span class="sc">$</span>final_balance</span>
+<span id="cb61-77"><a href="#cb61-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-78"><a href="#cb61-78" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate additional metrics</span></span>
+<span id="cb61-79"><a href="#cb61-79" aria-hidden="true" tabindex="-1"></a>income_gap <span class="ot">&lt;-</span> trs_income <span class="sc">-</span> orp_income</span>
+<span id="cb61-80"><a href="#cb61-80" aria-hidden="true" tabindex="-1"></a>max_gap <span class="ot">&lt;-</span> <span class="fu">max</span>(income_gap, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb61-81"><a href="#cb61-81" aria-hidden="true" tabindex="-1"></a>min_gap <span class="ot">&lt;-</span> <span class="fu">min</span>(income_gap, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb61-82"><a href="#cb61-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-83"><a href="#cb61-83" aria-hidden="true" tabindex="-1"></a><span class="co"># Summarize Results</span></span>
+<span id="cb61-84"><a href="#cb61-84" aria-hidden="true" tabindex="-1"></a>comparison_table <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb61-85"><a href="#cb61-85" aria-hidden="true" tabindex="-1"></a>  <span class="at">Plan =</span> <span class="fu">c</span>(<span class="st">"TRS"</span>, <span class="st">"ORP"</span>),</span>
+<span id="cb61-86"><a href="#cb61-86" aria-hidden="true" tabindex="-1"></a>  <span class="at">Avg_Monthly_Income =</span> <span class="fu">c</span>(<span class="fu">mean</span>(trs_income, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="fu">mean</span>(orp_income, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)),</span>
+<span id="cb61-87"><a href="#cb61-87" aria-hidden="true" tabindex="-1"></a>  <span class="at">Final_Balance =</span> <span class="fu">c</span>(<span class="st">"N/A"</span>, <span class="fu">round</span>(orp_final_balance, <span class="dv">2</span>)),</span>
+<span id="cb61-88"><a href="#cb61-88" aria-hidden="true" tabindex="-1"></a>  <span class="at">Max_Income_Gap =</span> <span class="fu">c</span>(max_gap, max_gap),</span>
+<span id="cb61-89"><a href="#cb61-89" aria-hidden="true" tabindex="-1"></a>  <span class="at">Min_Income_Gap =</span> <span class="fu">c</span>(min_gap, min_gap)</span>
+<span id="cb61-90"><a href="#cb61-90" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb61-91"><a href="#cb61-91" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-92"><a href="#cb61-92" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate gt Table</span></span>
+<span id="cb61-93"><a href="#cb61-93" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gt)</span>
+<span id="cb61-94"><a href="#cb61-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-95"><a href="#cb61-95" aria-hidden="true" tabindex="-1"></a>comparison_table <span class="sc">|&gt;</span></span>
+<span id="cb61-96"><a href="#cb61-96" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gt</span>() <span class="sc">|&gt;</span></span>
+<span id="cb61-97"><a href="#cb61-97" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tab_header</span>(</span>
+<span id="cb61-98"><a href="#cb61-98" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Comparison of TRS and ORP Retirement Outcomes"</span>,</span>
+<span id="cb61-99"><a href="#cb61-99" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Long-Term Fixed-Rate Analysis"</span></span>
+<span id="cb61-100"><a href="#cb61-100" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb61-101"><a href="#cb61-101" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fmt_number</span>(</span>
+<span id="cb61-102"><a href="#cb61-102" aria-hidden="true" tabindex="-1"></a>    <span class="at">columns =</span> <span class="fu">c</span>(Avg_Monthly_Income, Max_Income_Gap, Min_Income_Gap),</span>
+<span id="cb61-103"><a href="#cb61-103" aria-hidden="true" tabindex="-1"></a>    <span class="at">decimals =</span> <span class="dv">2</span></span>
+<span id="cb61-104"><a href="#cb61-104" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb61-105"><a href="#cb61-105" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cols_label</span>(</span>
+<span id="cb61-106"><a href="#cb61-106" aria-hidden="true" tabindex="-1"></a>    <span class="at">Avg_Monthly_Income =</span> <span class="st">"Average Monthly Income ($)"</span>,</span>
+<span id="cb61-107"><a href="#cb61-107" aria-hidden="true" tabindex="-1"></a>    <span class="at">Final_Balance =</span> <span class="st">"Final Balance ($)"</span>,</span>
+<span id="cb61-108"><a href="#cb61-108" aria-hidden="true" tabindex="-1"></a>    <span class="at">Max_Income_Gap =</span> <span class="st">"Max Income Gap ($)"</span>,</span>
+<span id="cb61-109"><a href="#cb61-109" aria-hidden="true" tabindex="-1"></a>    <span class="at">Min_Income_Gap =</span> <span class="st">"Min Income Gap ($)"</span></span>
+<span id="cb61-110"><a href="#cb61-110" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="tleelofghq" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#tleelofghq table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#tleelofghq thead, #tleelofghq tbody, #tleelofghq tfoot, #tleelofghq tr, #tleelofghq td, #tleelofghq th {
+  border-style: none;
+}
+
+#tleelofghq p {
+  margin: 0;
+  padding: 0;
+}
+
+#tleelofghq .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#tleelofghq .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#tleelofghq .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#tleelofghq .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#tleelofghq .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#tleelofghq .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#tleelofghq .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#tleelofghq .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#tleelofghq .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#tleelofghq .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#tleelofghq .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#tleelofghq .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#tleelofghq .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#tleelofghq .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#tleelofghq .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#tleelofghq .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#tleelofghq .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#tleelofghq .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#tleelofghq .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#tleelofghq .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#tleelofghq .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#tleelofghq .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#tleelofghq .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#tleelofghq .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#tleelofghq .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#tleelofghq .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#tleelofghq .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#tleelofghq .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#tleelofghq .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#tleelofghq .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#tleelofghq .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#tleelofghq .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#tleelofghq .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#tleelofghq .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#tleelofghq .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#tleelofghq .gt_left {
+  text-align: left;
+}
+
+#tleelofghq .gt_center {
+  text-align: center;
+}
+
+#tleelofghq .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#tleelofghq .gt_font_normal {
+  font-weight: normal;
+}
+
+#tleelofghq .gt_font_bold {
+  font-weight: bold;
+}
+
+#tleelofghq .gt_font_italic {
+  font-style: italic;
+}
+
+#tleelofghq .gt_super {
+  font-size: 65%;
+}
+
+#tleelofghq .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#tleelofghq .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#tleelofghq .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#tleelofghq .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#tleelofghq .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#tleelofghq .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#tleelofghq .gt_indent_5 {
+  text-indent: 25px;
+}
+
+#tleelofghq .katex-display {
+  display: inline-flex !important;
+  margin-bottom: 0.75em !important;
+}
+
+#tleelofghq div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+  height: 0px !important;
+}
+</style>
+
+<table class="gt_table caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<thead>
+<tr class="header gt_heading">
+<th colspan="5" class="gt_heading gt_title gt_font_normal">Comparison of TRS and ORP Retirement Outcomes</th>
+</tr>
+<tr class="odd gt_heading">
+<th colspan="5" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border">Long-Term Fixed-Rate Analysis</th>
+</tr>
+<tr class="header gt_col_headings">
+<th id="Plan" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Plan</th>
+<th id="Avg_Monthly_Income" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Average Monthly Income ($)</th>
+<th id="Final_Balance" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Final Balance ($)</th>
+<th id="Max_Income_Gap" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Max Income Gap ($)</th>
+<th id="Min_Income_Gap" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">Min Income Gap ($)</th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="odd">
+<td class="gt_row gt_left" headers="Plan">TRS</td>
+<td class="gt_row gt_right" headers="Avg_Monthly_Income">50,119.69</td>
+<td class="gt_row gt_left" headers="Final_Balance">N/A</td>
+<td class="gt_row gt_right" headers="Max_Income_Gap">55,570.66</td>
+<td class="gt_row gt_right" headers="Min_Income_Gap">43,136.62</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="Plan">ORP</td>
+<td class="gt_row gt_right" headers="Avg_Monthly_Income">976.24</td>
+<td class="gt_row gt_left" headers="Final_Balance">223594.3</td>
+<td class="gt_row gt_right" headers="Max_Income_Gap">55,570.66</td>
+<td class="gt_row gt_right" headers="Min_Income_Gap">43,136.62</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>The TRS provides a significantly higher average monthly income of <strong>$50,119.69</strong> compared to the ORP, which generates <strong>$976.24</strong>. This gap is quite significant, and with more time to dig into the issue, one may have uncovered more computational errors to lead to such a gap, despite some of the gap being explained by the guaranteed nature of the TRS benefit. The ORP maintains a positive final account balance of <strong>$223,594.30</strong>, indicating funds available for heirs at death, a feature not present in the TRS. The analysis also reveals that the maximum income gap between the plans is <strong>$55,570.66</strong>, with a minimum gap of <strong>$43,136.62</strong>, consistently favoring the TRS for monthly income.</p>
+<p><u>Shortcoming of this Analysis</u> -</p>
+<p>While these results provide a starting point for comparing the plans, there are several limitations in the assumptions and calculations. For example, wage growth, CPI, and market return rates were modeled as fixed averages, which likely oversimplifies the volatility and variability in actual economic conditions. Additionally, scaling factors and intermediate calculations may have introduced inconsistencies into the projections. With more time, this analysis would have benefited from refining these assumptions and performing validations to lead to more realistic outputs.</p>
 </section>
 <section id="task-7-monte-carlo-analysis" class="level2">
 <h2 class="anchored" data-anchor-id="task-7-monte-carlo-analysis">Task 7: Monte Carlo Analysis</h2>
