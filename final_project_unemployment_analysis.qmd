@@ -1,0 +1,499 @@
+---
+title: "Final Project - Individual Report"
+editor: visual
+format: 
+  html:
+    code-fold: true
+execute:
+  warning: false
+  message: false
+output-dir: docs
+---
+
+```{r}
+options(repos = c(CRAN = "https://cloud.r-project.org"))
+
+```
+
+```{r}
+install.packages("fredr")
+library(fredr)
+```
+
+```{r}
+fredr_set_key("eb19c6daa01e5e21da01a78d9dff470d")
+```
+
+Accessing Countrywide Unemployment Rates.
+
+The series ID for the nationwide unemployment rate is "UNRATE". This is the Civilian Unemployment Rate.
+
+The unemployment rate represents the number of unemployed as a percentage of the labor force. Labor force data are restricted to people 16 years of age and older, who currently reside in 1 of the 50 states or the District of Columbia, who do not reside in institutions (e.g., penal and mental facilities, homes for the aged), and who are not on active duty in the Armed Forces.
+
+```{r}
+# Retrieve monthly U.S. unemployment rate data
+unemployment_data <- fredr_series_observations(series_id = "UNRATE")
+
+```
+
+```{r}
+head(unemployment_data)
+
+```
+
+```{r}
+library(dplyr)
+
+unemployment_data <- fredr_series_observations(series_id = "UNRATE")
+
+# Filter the data for the desired range
+unemployment_data_filtered <- unemployment_data |>
+  filter(date >= as.Date("2011-01-01") & date < as.Date("2023-01-01"))
+
+# Preview the filtered data
+head(unemployment_data_filtered)
+
+```
+
+> U.S. Bureau of Labor Statistics, Unemployment Rate \[UNRATE\], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/UNRATE, December 8, 2024.
+
+```{r}
+library(ggplot2)
+
+ggplot(unemployment_data_filtered, aes(x = date, y = value)) +
+    geom_line() +
+    labs(title = "U.S. Unemployment Rate Over Time (2011-2022)",
+         x = "Year",
+         y = "Unemployment Rate (%)") +
+    theme_minimal()
+
+```
+
+```{r}
+# Retrieve U.S. recession indicator data
+recession_data <- fredr_series_observations(series_id = "USREC")
+
+# Merge with unemployment data
+unemployment_recession <- merge(unemployment_data_filtered, recession_data, by = "date", suffixes = c("_unemp", "_rec"))
+
+ggplot(unemployment_recession, aes(x = date, y = value_unemp)) +
+    geom_line(color = "blue") +
+    geom_rect(data = unemployment_recession |> filter(value_rec == 1), 
+              aes(xmin = date, xmax = lead(date), ymin = -Inf, ymax = Inf), 
+              fill = "red", alpha = 0.2) +
+    labs(title = "U.S. Unemployment Rate with Recession Periods (2011-Present)",
+         x = "Year",
+         y = "Unemployment Rate (%)") +
+    theme_minimal()
+
+```
+
+Aggregate unemployment rates yearly by average rate
+
+```{r}
+unemployment_yearly <- unemployment_data_filtered |>
+    mutate(year = lubridate::year(date)) |>
+    group_by(year) |>
+    summarize(average_unemployment = mean(value))
+
+```
+
+```{r}
+avg_unemployment_plot <- ggplot(unemployment_yearly, aes(x = year, y = average_unemployment)) +
+    geom_line() +
+    labs(title = "Average Yearly U.S. Unemployment Rate (2011-2023)",
+         x = "Year",
+         y = "Average Unemployment Rate (%)") +
+    theme_minimal()
+
+#ggsave("average_yearly_US_unemployment_rate.png", plot=avg_unemployment_plot, width =6, height=4)
+
+avg_unemployment_plot
+```
+
+```{r}
+library(sf)
+if(!file.exists("cb_2018_us_state_500k.zip")){
+  download.file("https://www2.census.gov/geo/tiger/GENZ2018/shp/cb_2018_us_state_500k.zip", 
+                destfile="states.zip",
+                method="curl")
+}
+
+##-
+td <- tempdir(); 
+zip_contents <- unzip("states.zip", 
+                      exdir = td)
+
+fname_shp <- zip_contents[grepl("shp$", zip_contents)]
+zip_sf <- read_sf(fname_shp)
+```
+
+Code to fetch statewide unemployment rates:
+
+Search for series containing "unemployment rate"
+
+```{r}
+# Search for unemployment rate-related series
+unemployment_search <- fredr_series_search_text("unemployment rate")
+
+# View the first few results
+head(unemployment_search)
+
+```
+
+Filter for state-level unemployment rates
+
+```{r}
+# Filter for state-level unemployment rate series
+state_unemployment_series <- unemployment_search |>
+  filter(grepl("unemployment rate", title, ignore.case = TRUE)) |>
+  filter(grepl("state", title, ignore.case = TRUE))
+
+# View possible state-specific series
+state_unemployment_series
+
+```
+
+From looking through this list, realized we need all the ids that start with the state abbreviation followed by "UR" - each of these series id's gives us the unemployment for each state over time. THe next step does additional filtering.
+
+```{r}
+# List of state abbreviations
+state_abbreviations <- c(
+  "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA",
+  "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD",
+  "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ",
+  "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC",
+  "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"
+)
+
+# Filter for state unemployment series (e.g., CAUR)
+state_unemployment_series <- unemployment_search |>
+  filter(id %in% paste0(state_abbreviations, "UR"))
+
+# View the filtered series
+state_unemployment_series
+
+```
+
+Using the filtered list of series IDs (as shown above) to fetch unemployment data for each state.
+
+```{r}
+# Fetch unemployment data for all states
+state_unemployment_data <- lapply(state_unemployment_series$id, function(series_id) {
+  fredr(
+    series_id = series_id,
+    observation_start = as.Date("2011-01-01"),
+    observation_end = as.Date("2022-12-31")
+  )
+})
+
+# Add state abbreviation to each dataframe
+state_unemployment_data <- mapply(
+  function(data, id) {
+    data$state <- substr(id, 1, 2)  # Extract state abbreviation
+    data
+  },
+  state_unemployment_data,
+  state_unemployment_series$id,
+  SIMPLIFY = FALSE
+)
+
+# Combine into a single dataframe
+state_unemployment_df <- do.call(rbind, state_unemployment_data)
+
+# View the combined dataframe
+head(state_unemployment_df)
+
+```
+
+Cleaning up the data to keep only the relevant columns and compute yearly averages for each state from 2011 to 2022 -
+
+```{r}
+library(dplyr)
+
+# Clean and select relevant columns
+state_unemployment_clean <- state_unemployment_df |>
+  select(state, date, value) |>
+  rename(
+    unemployment_rate = value  # Rename value to unemployment_rate
+  ) |>
+  mutate(
+    year = format(as.Date(date), "%Y")  # Extract year from the date
+  )
+
+# Compute yearly averages for each state
+state_unemployment_yearly <- state_unemployment_clean |>
+  filter(year >= 2011 & year <= 2022) |>
+  group_by(state, year) |>
+  summarize(
+    avg_unemployment = mean(unemployment_rate, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# View the cleaned data
+head(state_unemployment_yearly)
+```
+
+Performing a check on the data we create a table showing the number of yearly records for each state. We can group the data by state and count the distinct years.
+
+```{r}
+library(dplyr)
+library(gt)
+
+# Count the number of years for each state
+state_yearly_counts <- state_unemployment_yearly |>
+  group_by(state) |>
+  summarize(
+    year_count = n(),  # Count the number of records (years)
+    .groups = "drop"
+  )
+
+# Create a nicely formatted table with gt
+state_yearly_counts |> 
+  gt() |> 
+  tab_header(
+    title = "Yearly Records Count by State",
+    subtitle = "Number of years with unemployment data (2011-2022)"
+  )
+
+
+
+
+```
+
+Now we create an interactive map using the data. The steps involve the following:
+
+```{r}
+library(sf)
+library(dplyr)
+library(tmap)
+
+#rename existing shapefile
+us_states <- zip_sf  # This is already read in from your code
+
+#adjusting state column to match naming convention of state yearly unemployment table 
+us_states <- us_states |>
+  mutate(state = STUSPS)  # Use the column that contains state abbreviations (adjust as needed)
+
+#merging unemployment data with shapefile 
+map_data <- us_states |>
+  left_join(state_unemployment_yearly, by = "state")
+
+#creating interactive map 
+tmap_mode("view")  # Enable interactive mode for the map
+
+tm <- tm_shape(map_data) +
+  tm_polygons(
+    col = "avg_unemployment",  # Column to use for shading
+    title = "Unemployment Rate (%)",
+    palette = "Blues",  # Color palette for the map
+    style = "quantile",  # Break the shading into quantiles
+    popup.vars = c("State" = "state", "Year" = "year", "Rate" = "avg_unemployment")
+  ) +
+  tm_facets(by = "year") +  # Animate changes over years
+  tm_view(set.view = c(-98, 38, 4))  # Center and zoom the map on the US
+
+# Render the map
+tm
+
+
+```
+
+Exploring neighborhood-level data from the American Community Survey (ACS) through the US Census Bureau
+
+Installing packages for direct access to the Census Bureau's API to allow me to pull ACS data for various geographic levels, in the attempt to get more granular than bureau
+
+```{r}
+install.packages("tidycensus")
+install.packages("tidyverse")
+install.packages("dplyr")
+```
+
+Loading libraries
+
+```{r}
+library(tidycensus)
+library(tidyverse)
+library(dplyr)
+library(gt)
+library(ggplot2)
+```
+
+```{r, eval=FALSE}
+census_api_key("6636b8e0ee8ebbb2edd3e4bfe9ef001572dc79ad", install=TRUE)
+```
+
+Exploring ACS Variables
+
+```{r}
+acs_vars <- load_variables(2022, "acs5", cache =TRUE) #using 2022 as most recent full year available in ACS
+view(acs_vars)
+```
+
+Fetching Neighborhood-Level Data
+
+```{r}
+
+# Variables for analysis
+selected_vars <- c(
+  med_income = "B19013_001E",  # Median household income
+  poverty = "B17001_002E",     # People below poverty level
+  population = "B01003_001E"   # Total population
+)
+
+# Fetch data for NYC at the census tract level
+nyc_neighborhood_data <- get_acs(
+  geography = "tract",
+  variables = selected_vars,
+  state = "NY",
+  county = c("New York", "Kings", "Queens", "Bronx", "Richmond"),
+  year = 2022,
+  survey = "acs5",
+  geometry = TRUE # Include geometry for mapping
+)
+
+# Inspect the data
+head(nyc_neighborhood_data)
+
+```
+
+```{r}
+# Summarize median income across census tracts
+income_summary <- nyc_neighborhood_data |>
+  filter(variable == "B19013_001") |>
+  summarize(
+    mean_income = mean(estimate, na.rm = TRUE),
+    median_income = median(estimate, na.rm = TRUE),
+    min_income = min(estimate, na.rm = TRUE),
+    max_income = max(estimate, na.rm = TRUE)
+  )
+
+print(income_summary)
+
+```
+
+List of neighborhoods with data
+
+```{r}
+
+# Filter data for median income
+median_income_table <- nyc_neighborhood_data |>
+  filter(variable == "B19013_001") |>
+  mutate(
+    borough = case_when(
+      str_detect(NAME, "Bronx") ~ "Bronx",
+      str_detect(NAME, "Kings") ~ "Brooklyn",
+      str_detect(NAME, "New York County") ~ "Manhattan",
+      str_detect(NAME, "Queens") ~ "Queens",
+      str_detect(NAME, "Richmond") ~ "Staten Island",
+      TRUE ~ "Unknown"
+    )
+  )
+
+# Create a table
+median_income_table |>
+  select(borough, NAME, estimate) |>
+  rename(
+    Neighborhood = NAME,
+    `Median Income ($)` = estimate,
+    Borough = borough
+  ) |>
+  gt() |>
+  tab_header(
+    title = "Median Household Income by Neighborhood",
+    subtitle = "Census Tract Data for NYC Boroughs"
+  ) |>
+  fmt_number(
+    columns = `Median Income ($)`,
+    decimals = 0
+  ) |>
+  cols_align(
+    align = "left",
+    columns = everything()
+  )
+
+#remove geometry column 
+median_income_table_clean <- median_income_table |>
+  select(-geometry) |>
+  rename(
+    'Median Income ($)' = estimate
+  )
+
+# Create a cleaner `gt` table
+median_income_table_clean |>
+  gt() |>
+  tab_header(
+    title = "Median Household Income by Neighborhood",
+    subtitle = "Census Tract Data for NYC Boroughs"
+  ) |>
+  fmt_number(
+    columns = `Median Income ($)`,
+    decimals = 0
+  ) |>
+  cols_align(
+    align = "left",
+    columns = everything()
+  )
+```
+
+Creating a map. Grey areas indicate locations where census data is unavailable - such as parks, airports or other non-residential areas
+
+```{r}
+library(ggplot2)
+library(sf)
+
+# Filter for median income data
+median_income_map_data <- median_income_table_clean |>
+  filter(variable == "B19013_001") # Ensure this is the correct variable for median income
+
+# Create the map
+ggplot(median_income_map_data) +
+  geom_sf(aes(fill = `Median Income ($)`), color = "white", size = 0.1) +
+  scale_fill_viridis_c(option = "plasma", na.value = "grey") +
+  labs(
+    title = "Median Household Income by Neighborhood in NYC",
+    subtitle = "Census Tract Data (ACS 2022)",
+    fill = "Median Income ($)"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 16, face = "bold"),
+    plot.subtitle = element_text(size = 12)
+  )
+
+```
+
+The above is a map of all available data for each neighborhood in each of the 5 boroughs in NYC. Now we look at this data borough by borough, to get a better visual of each.
+
+```{r}
+# List of boroughs
+boroughs <- c("Bronx", "Kings", "New York County", "Queens", "Richmond")
+
+# Loop to create and print maps for each borough
+for (borough in boroughs) {
+  borough_data <- median_income_map_data |>
+    filter(str_detect(NAME, borough))
+  
+  # Create map
+  p <- ggplot(borough_data) +
+    geom_sf(aes(fill = `Median Income ($)`), color = "white", size = 0.1) +
+    scale_fill_viridis_c(option = "plasma", na.value = "grey") +
+    labs(
+      title = paste("Median Household Income in", borough),
+      subtitle = "Census Tract Data (ACS 2022)",
+      fill = "Median Income ($)"
+    ) +
+    theme_minimal() +
+    theme(
+      plot.title = element_text(size = 16, face = "bold"),
+      plot.subtitle = element_text(size = 12)
+    )
+  
+  # Explicitly print the plot
+  print(p)
+}
+
+
+```
+
+Race, gender, education for model
