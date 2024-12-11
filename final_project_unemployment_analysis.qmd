@@ -15,12 +15,33 @@ options(repos = c(CRAN = "https://cloud.r-project.org"))
 
 ```
 
-```{r}
+```{r, echo=FALSE}
+#hides code block from being displayed on rendered HTML site
 install.packages("fredr")
 library(fredr)
+library(tidyverse)
 ```
 
-```{r}
+Install necessary libraries
+
+```{r, results="hide", message=FALSE, warning=FALSE}
+library(fredr)
+library(tidyverse)
+library(knitr)
+library(dplyr)
+library(ggplot2)
+library(gt)
+library(sf)
+library(tmap)
+library(tigris)
+library(gifski)
+library(ggrepel)
+library(gganimate)
+library(tools)
+library(kableExtra)
+```
+
+```{r, include=FALSE}
 fredr_set_key("eb19c6daa01e5e21da01a78d9dff470d")
 ```
 
@@ -32,35 +53,25 @@ The unemployment rate represents the number of unemployed as a percentage of the
 
 ```{r}
 # Retrieve monthly U.S. unemployment rate data
-unemployment_data <- fredr_series_observations(series_id = "UNRATE")
-
-```
-
-```{r}
-head(unemployment_data)
-
-```
-
-```{r}
-library(dplyr)
-
-unemployment_data <- fredr_series_observations(series_id = "UNRATE")
+CW_unemployment_data <- fredr_series_observations(series_id = "UNRATE")
 
 # Filter the data for the desired range
-unemployment_data_filtered <- unemployment_data |>
+CW_unemployment_data_filtered <- CW_unemployment_data |>
   filter(date >= as.Date("2011-01-01") & date < as.Date("2023-01-01"))
 
-# Preview the filtered data
-head(unemployment_data_filtered)
+CW_unemployment_yearly <- CW_unemployment_data_filtered |>
+    mutate(year = lubridate::year(date)) |>
+    group_by(year) |>
+    summarize(average_unemployment = mean(value))
 
 ```
 
-> U.S. Bureau of Labor Statistics, Unemployment Rate \[UNRATE\], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/UNRATE, December 8, 2024.
+> U.S. Bureau of Labor Statistics, Unemployment Rate \[UNRATENSA\], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/UNRATENSA, December 10, 2024.
 
 ```{r}
 library(ggplot2)
 
-ggplot(unemployment_data_filtered, aes(x = date, y = value)) +
+ggplot(CW_unemployment_data_filtered, aes(x = date, y = value)) +
     geom_line() +
     labs(title = "U.S. Unemployment Rate Over Time (2011-2022)",
          x = "Year",
@@ -74,7 +85,7 @@ ggplot(unemployment_data_filtered, aes(x = date, y = value)) +
 recession_data <- fredr_series_observations(series_id = "USREC")
 
 # Merge with unemployment data
-unemployment_recession <- merge(unemployment_data_filtered, recession_data, by = "date", suffixes = c("_unemp", "_rec"))
+unemployment_recession <- merge(CW_unemployment_data_filtered, recession_data, by = "date", suffixes = c("_unemp", "_rec"))
 
 ggplot(unemployment_recession, aes(x = date, y = value_unemp)) +
     geom_line(color = "blue") +
@@ -88,18 +99,8 @@ ggplot(unemployment_recession, aes(x = date, y = value_unemp)) +
 
 ```
 
-Aggregate unemployment rates yearly by average rate
-
 ```{r}
-unemployment_yearly <- unemployment_data_filtered |>
-    mutate(year = lubridate::year(date)) |>
-    group_by(year) |>
-    summarize(average_unemployment = mean(value))
-
-```
-
-```{r}
-avg_unemployment_plot <- ggplot(unemployment_yearly, aes(x = year, y = average_unemployment)) +
+avg_unemployment_plot <- ggplot(CW_unemployment_yearly, aes(x = year, y = average_unemployment)) +
     geom_line() +
     labs(title = "Average Yearly U.S. Unemployment Rate (2011-2023)",
          x = "Year",
@@ -113,7 +114,7 @@ avg_unemployment_plot
 
 ```{r}
 library(sf)
-if(!file.exists("cb_2018_us_state_500k.zip")){
+if(!file.exists("states.zip")){
   download.file("https://www2.census.gov/geo/tiger/GENZ2018/shp/cb_2018_us_state_500k.zip", 
                 destfile="states.zip",
                 method="curl")
@@ -128,16 +129,18 @@ fname_shp <- zip_contents[grepl("shp$", zip_contents)]
 zip_sf <- read_sf(fname_shp)
 ```
 
-Code to fetch statewide unemployment rates:
-
 Search for series containing "unemployment rate"
 
 ```{r}
 # Search for unemployment rate-related series
 unemployment_search <- fredr_series_search_text("unemployment rate")
 
-# View the first few results
-head(unemployment_search)
+# Create the table and style it
+kable(head(unemployment_search[,1:5]), format = "html") |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+    full_width = FALSE
+  )
 
 ```
 
@@ -149,8 +152,13 @@ state_unemployment_series <- unemployment_search |>
   filter(grepl("unemployment rate", title, ignore.case = TRUE)) |>
   filter(grepl("state", title, ignore.case = TRUE))
 
-# View possible state-specific series
-state_unemployment_series
+
+# Create the table and style it
+kable(head(state_unemployment_series[,1:5]), format = "html") |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+    full_width = FALSE
+  )
 
 ```
 
@@ -166,12 +174,16 @@ state_abbreviations <- c(
   "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"
 )
 
-# Filter for state unemployment series (e.g., CAUR)
+# Filter for state unemployment series, need UR for seasonally adjusted
 state_unemployment_series <- unemployment_search |>
   filter(id %in% paste0(state_abbreviations, "UR"))
 
-# View the filtered series
-state_unemployment_series
+# Create the table and style it
+kable(head(state_unemployment_series[,1:5]), format = "html") |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+    full_width = FALSE
+  )
 
 ```
 
@@ -201,8 +213,12 @@ state_unemployment_data <- mapply(
 # Combine into a single dataframe
 state_unemployment_df <- do.call(rbind, state_unemployment_data)
 
-# View the combined dataframe
-head(state_unemployment_df)
+# Create the table and style it
+kable(head(state_unemployment_df[,1:5]), format = "html") |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+    full_width = FALSE
+  )
 
 ```
 
@@ -230,8 +246,12 @@ state_unemployment_yearly <- state_unemployment_clean |>
     .groups = "drop"
   )
 
-# View the cleaned data
-head(state_unemployment_yearly)
+# Create the table and style it
+kable(head(state_unemployment_yearly), format = "html") |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+    full_width = FALSE
+  )
 ```
 
 Performing a check on the data we create a table showing the number of yearly records for each state. We can group the data by state and count the distinct years.
@@ -248,7 +268,7 @@ state_yearly_counts <- state_unemployment_yearly |>
     .groups = "drop"
   )
 
-# Create a nicely formatted table with gt
+# Create gt table
 state_yearly_counts |> 
   gt() |> 
   tab_header(
@@ -257,7 +277,12 @@ state_yearly_counts |>
   )
 
 
-
+# Create the table and style it
+kable(head(state_yearly_counts), format = "html") |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+    full_width = FALSE
+  )
 
 ```
 
@@ -267,20 +292,33 @@ Now we create an interactive map using the data. The steps involve the following
 library(sf)
 library(dplyr)
 library(tmap)
+library(tigris)
 
 #rename existing shapefile
 us_states <- zip_sf  # This is already read in from your code
 
 #adjusting state column to match naming convention of state yearly unemployment table 
 us_states <- us_states |>
-  mutate(state = STUSPS)  # Use the column that contains state abbreviations (adjust as needed)
+  mutate(state = STUSPS) 
+
+#adjusting geometry for Alaska and Hawaii
+us_states <- shift_geometry(
+  input_sf = us_states,
+  geoid_column = "GEOID",
+  preserve_area = FALSE, #scales Alaksa and Hawaii proportionately 
+  position = "below" #places below continential US
+)
 
 #merging unemployment data with shapefile 
 map_data <- us_states |>
   left_join(state_unemployment_yearly, by = "state")
 
+#remove rows with missing values in map_data
+map_data <- map_data |>
+  filter(!is.na(year) & !is.na(avg_unemployment))
+
 #creating interactive map 
-tmap_mode("view")  # Enable interactive mode for the map
+#tmap_mode("view")  # Enable interactive mode for the map
 
 tm <- tm_shape(map_data) +
   tm_polygons(
@@ -298,6 +336,733 @@ tm
 
 
 ```
+
+Altering the above code to make one interactive map-
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE, results="hide"}
+library(sf)
+library(dplyr)
+library(tmap)
+library(tools)
+library(gifski) 
+library(tigris)
+
+#rename existing shapefile
+us_states <- zip_sf  # This is already read in from code
+
+#adjusting state column to match naming convention of state yearly unemployment table 
+us_states <- us_states |>
+  mutate(state = STUSPS) 
+
+#adjusting geometry for Alaska and Hawaii
+us_states <- shift_geometry(
+  input_sf = us_states,
+  geoid_column = "GEOID",
+  preserve_area = FALSE, #scales Alaksa and Hawaii proportionately 
+  position = "below" #places below continential US
+)
+
+#merging unemployment data with shapefile 
+map_data <- us_states |>
+  left_join(state_unemployment_yearly, by = "state")
+
+#remove rows with missing values in map_data
+map_data <- map_data |>
+  filter(!is.na(year) & !is.na(avg_unemployment))
+
+#creating interactive map 
+tmap_mode("plot")  # This step is important - switch to static plotting mode
+
+#define color palette
+unemployment_palette <- "Blues"
+
+#create animated map
+anim <- (map_data) |>
+  tm_shape() +
+  tm_polygons(
+    col = "avg_unemployment",         # Column for shading
+    title = "Unemployment Rate (%)", 
+    palette = unemployment_palette,   # Color palette
+    style = "quantile"                # Quantile-based shading
+  ) +
+  tm_facets(along = "year", free.coords = FALSE) +
+  tm_text("state", size = 0.5, col = "white", fontface = "bold")  # Add state labels
+  tm_layout(
+    legend.position = c("left", "bottom"),  # Move legend to the bottom-left
+    legend.frame = TRUE,                    # Add a frame around the legend (optional)
+    legend.outside = TRUE                   # Place the legend outside the map
+  )
+
+
+# Generate the animated GIF
+tmap_animation(anim, delay = 50, filename = "unemployment_animation-dec11.gif")
+
+```
+
+```{r}
+knitr::include_graphics("unemployment_animation-dec11.gif")
+```
+
+Creating an additional visualization where we compare average unemployment rates from 2011 to 2022 statewide against countrywide
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE, results="hide"}
+# Load necessary library
+library(ggplot2)
+library(ggrepel) #for better placement of text labels 
+
+#ensuring year is treated as numeric due to plotting issies 
+state_unemployment_yearly$year <- as.numeric(state_unemployment_yearly$year)
+CW_unemployment_yearly$year <- as.numeric(CW_unemployment_yearly$year)
+
+# Labeling 2 max and 2 min 2011 unemployment states, too much overlap to label all 
+extreme_states_2011 <- state_unemployment_yearly |>
+  filter(year == 2011) |>
+  arrange(avg_unemployment) |>
+  slice(c(1:2, (n() - 1):n())) #2 min and 2 max states 
+
+# Create the plot
+ggplot() +
+  # Add state unemployment lines
+  geom_line(
+    data = state_unemployment_yearly, 
+    aes(x = year, y = avg_unemployment, group = state), 
+    color = "gray", size = 0.5, alpha = 0.7
+  ) +
+  #Adding New York unemployment line in light red 
+  geom_line(
+    data = state_unemployment_yearly |> filter(state == "NY"),
+    aes(x = year, y = avg_unemployment, color = "New York"),
+    size = 0.8
+  ) +
+  # Add countrywide average unemployment line
+  geom_line(
+    data = CW_unemployment_yearly, 
+    aes(x = year, y = average_unemployment), 
+    color = "black", size = 1.5
+  ) +
+  # Add state labels for 2 max and 2 min states in 2011 
+  geom_text_repel(
+    data = extreme_states_2011,
+    aes(x = 2011, y = avg_unemployment, label = state),
+    size = 3, color = "gray", hjust = 1.2, #pushes labels slightly left
+  ) +
+  # Set x-axis to whole years
+  scale_x_continuous(breaks = seq(2011, 2022, by = 1), limits = c(2011, 2023)) +
+  # Adjust y-axis zoom (set appropriate limits as needed)
+  scale_y_continuous(limits = c(2, 14)) + #zooms in on the unemployment range 
+  # Add labels, title and legend
+  labs(
+    title = "Unemployment Rates by State and Countrywide (2011-2022)",
+    x = "Year",
+    y = "Unemployment Rate (%)",
+    color = "Legend"
+  ) +
+  # Define colors for legend
+  scale_color_manual(
+    values = c("Other States" = "gray", "New York" = "red", "Countrywide"="black")
+  ) +
+  # Adjust the theme for clarity
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5),  # Center the title
+    axis.text.x = element_text(angle = 45, hjust = 1),  # Rotate x-axis labels
+    legend.position = "top",                # shows legend at top
+    legend.box = "horizontal",         # Arrange the legend horizontally
+    legend.text = element_text(size=8),
+    legend.title = element_text(size=9),
+    plot.margin = margin(t=30, r =20, l=20, unit="pt") #adding space for the legend
+  )
+```
+
+We now explore different demographics on a countrywide level, keeping in mind our input variables for our predictive model: gender, race, and education.
+
+[**Race**]{.underline}
+
+Unemployment Rate - Black or African American
+
+```{r}
+library(dplyr)
+
+black_unemployment_data <- fredr_series_observations(series_id = "LNS14000006")
+
+# Filter the data for the desired range
+black_unemployment_data_filtered <- black_unemployment_data |>
+  filter(date >= as.Date("2011-01-01") & date < as.Date("2023-01-01"))
+
+black_unemployment_yearly <- black_unemployment_data_filtered |>
+    mutate(year = lubridate::year(date)) |>
+    group_by(year) |>
+    summarize(average_unemployment = mean(value))
+
+# Create the table and style it
+kable(head(black_unemployment_yearly), format = "html") |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+    full_width = FALSE
+  )
+```
+
+> U.S. Bureau of Labor Statistics, Unemployment Rate - Black or African American \[LNS14000006\], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/LNS14000006, December 8, 2024
+
+Creating an area chart as a visually appealing way to emphasize the changing rates of Black and African American unemployment over time.
+
+```{r}
+library(ggplot2)
+ggplot(data = black_unemployment_yearly, aes(x = year, y = average_unemployment)) +
+  geom_area(fill = "lightblue", alpha = 0.6) +
+  geom_line(color = "blue", size = 1) +
+  labs(
+    title = "US Black and African American Unemployment Rates Over Time",
+    x = "Year",
+    y = "Average Unemployment Rate (%)"
+  ) +
+  theme_minimal() + 
+   theme(
+    plot.title = element_text(size = 16, face = "bold"),  # Adjust title size
+    axis.text.x = element_text(size = 10),  # Adjust x-axis label size
+    axis.title.x = element_text(size = 12),  # Adjust x-axis title size
+    axis.text.y = element_text(size = 10),  # Adjust y-axis label size
+    axis.title.y = element_text(size = 12)  # Adjust y-axis title size
+  ) +
+  scale_x_continuous(
+    breaks = seq(2011, 2022, by = 1)  # Display only whole years
+  )
+
+```
+
+The below code involves downloading, extracting and loading a US states shapefile from the US Census Bureau.
+
+```{r, echo=TRUE, message=FALSE, warning=FALSE, results="hide"}
+library(tmap)
+library(sf)
+library(dplyr)
+library(tigris)
+library(tools)
+library(gifski)
+
+
+# Step 2: Merge unemployment data with the shapefile
+# Perform a cartesian join to apply the same rate to all states for each year
+black_unemployment_map_data <- us_states |>
+    mutate(key = 1) |>  # Add a key for the cartesian join
+    left_join(
+        black_unemployment_yearly |> mutate(key = 1), 
+        by = "key"
+    ) |>
+    select(geometry, year, average_unemployment)
+
+#remove rows with missing values in map_data
+black_unemployment_map_data <- black_unemployment_map_data |>
+  filter(!is.na(year) & !is.na(average_unemployment))
+
+# Step 3: Set `tmap` mode to plot (required for animation)
+tmap_mode("plot")
+
+# Step 4: Create the animated map
+us_map <- tm_shape(black_unemployment_map_data) +
+    tm_polygons(
+        col = "average_unemployment",  # Column for shading
+        title = "Unemployment Rate (%)",
+        palette = "YlOrRd",  # Color palette
+        style = "quantile",  # Break into quantiles
+        popup.vars = c(
+            "Year" = "year",
+            "Unemployment Rate" = "average_unemployment"
+        )
+    ) +
+    tm_facets(along = "year") +  # Animate over years
+    tm_layout(
+        title = "Black Unemployment Rates in the US (2011–2022)",
+        legend.outside = TRUE,
+        frame = FALSE
+    ) 
+
+# Step 5: Create animation
+tmap_animation(
+    us_map,
+    delay = 50,  # Delay between frames in milliseconds
+    filename = "black_unemployment.gif",
+    width = 800,
+    height = 600
+)
+
+
+
+```
+
+```{r}
+knitr::include_graphics("black_unemployment.gif")
+```
+
+White unemployment rates
+
+```{r}
+library(dplyr)
+
+white_unemployment_data <- fredr_series_observations(series_id = "LNS14000003")
+
+# Filter the data for the desired range
+white_unemployment_data_filtered <- white_unemployment_data |>
+  filter(date >= as.Date("2011-01-01") & date < as.Date("2023-01-01"))
+
+white_unemployment_yearly <- white_unemployment_data_filtered |>
+    mutate(year = lubridate::year(date)) |>
+    group_by(year) |>
+    summarize(average_unemployment = mean(value))
+```
+
+```{r}
+library(ggplot2)
+
+# Combine both datasets into a single table for easier plotting
+combined_unemployment <- rbind(
+  black_unemployment_yearly |> mutate(group = "Black"),
+  white_unemployment_yearly |> mutate(group = "White")
+)
+
+# Creating bar chart
+ggplot(combined_unemployment, aes(x = factor(year), y = average_unemployment, fill = group)) +
+  geom_bar(stat = "identity", position = "dodge") +  # Side-by-side bars
+  scale_fill_manual(values = c("Black" = "blue", "White" = "red")) +
+  labs(
+    title = "Comparison of Black and White Unemployment Rates by Year (2011–2022)",
+    x = "Year",
+    y = "Average Unemployment Rate (%)",
+    fill = "Group"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(size = 16, face = "bold"),
+    legend.position = "top",
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+
+```
+
+Hispanic or Latino Unemployment Rates
+
+```{r}
+hispanic_unemployment_data <- fredr_series_observations(series_id = "LNS14000009")
+
+# Filter the data for the desired range
+hispanic_unemployment_data_filtered <- hispanic_unemployment_data |>
+  filter(date >= as.Date("2011-01-01") & date < as.Date("2023-01-01"))
+
+hispanic_unemployment_yearly <- hispanic_unemployment_data_filtered |>
+    mutate(year = lubridate::year(date)) |>
+    group_by(year) |>
+    summarize(average_unemployment = mean(value))
+
+# Create the table and style it
+kable(head(hispanic_unemployment_yearly), format = "html") |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+    full_width = FALSE
+  )
+```
+
+Asian Unemployment Rates
+
+```{r}
+library(dplyr)
+
+asian_unemployment_data <- fredr_series_observations(series_id = "LNS14032183")
+
+# Filter the data for the desired range
+asian_unemployment_data_filtered <- asian_unemployment_data |>
+  filter(date >= as.Date("2011-01-01") & date < as.Date("2023-01-01"))
+
+asian_unemployment_yearly <- asian_unemployment_data_filtered |>
+    mutate(year = lubridate::year(date)) |>
+    group_by(year) |>
+    summarize(average_unemployment = mean(value))
+
+# Create the table and style it
+kable(head(asian_unemployment_yearly), format = "html") |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+    full_width = FALSE
+  )
+```
+
+Lets take a look at a faceted line plot to explore the differences in unemployment rates across each race
+
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(dplyr)
+
+# Add a 'group' column to each dataset
+CW_unemployment_yearly$group <- "Countrywide Average"
+black_unemployment_yearly$group <- "Black"
+asian_unemployment_yearly$group <- "Asian"
+hispanic_unemployment_yearly$group <- "Hispanic"
+white_unemployment_yearly$group <- "White"
+
+# Combine all datasets into one
+combined_racial_unemployment <- bind_rows(
+  CW_unemployment_yearly,
+  black_unemployment_yearly,
+  asian_unemployment_yearly,
+  hispanic_unemployment_yearly,
+  white_unemployment_yearly
+)
+
+# Create the faceted line plot
+ggplot(data = combined_racial_unemployment, aes(x = year, y = average_unemployment)) +
+  geom_line(aes(color = group), size = 1) +  # Line for each group
+  scale_color_manual(
+    values = c(
+      "Countrywide Average" = "black",
+      "Black" = "blue",
+      "Asian" = "green",
+      "Hispanic" = "orange",
+      "White" = "red"
+    )
+  ) +
+  facet_wrap(~ group, ncol = 1, scales = "fixed") +  # Facet by group
+  scale_x_continuous(
+    breaks = seq(2011, 2022, by=1), #display each year
+    limits = c(2011,2022)
+  ) +
+  labs(
+    title = "Racial Unemployment Trends (2011-2022)",
+    x = "Year",
+    y = "Unemployment Rate (%)",
+    color = "Group"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16),  # Center and size the title
+    axis.text.x = element_text(angle = 45, hjust = 1),  # Rotate x-axis labels
+    legend.position = "none", #no legend
+    strip.text = element_text(size = 12) #adjusts facet labels 
+  )
+
+```
+
+Facets do not get our point across, so switching over to a line plot.
+
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(dplyr)
+
+# Add a 'group' column to each dataset
+CW_unemployment_yearly$group <- "Countrywide Average"
+black_unemployment_yearly$group <- "Black"
+asian_unemployment_yearly$group <- "Asian"
+hispanic_unemployment_yearly$group <- "Hispanic"
+white_unemployment_yearly$group <- "White"
+
+# Combine all datasets into one
+combined_racial_unemployment <- bind_rows(
+  CW_unemployment_yearly,
+  black_unemployment_yearly,
+  asian_unemployment_yearly,
+  hispanic_unemployment_yearly,
+  white_unemployment_yearly
+)
+
+# Create a single-panel line plot
+ggplot(data = combined_racial_unemployment, aes(x = year, y = average_unemployment, color = group)) +
+  geom_line(data = combined_racial_unemployment |> filter(group == "Countrywide Average"), size = 4) +  # Bold line for countrywide average
+  geom_line(data = combined_racial_unemployment |> filter(group != "Countrywide Average"), size = .6) +  # Normal lines for other groups
+  scale_color_manual(
+    values = c(
+      "Countrywide Average" = "grey",
+      "Black" = "blue",
+      "Asian" = "green",
+      "Hispanic" = "orange",
+      "White" = "red"
+    )
+  ) +
+  scale_x_continuous(
+    breaks = seq(2011, 2022, by = 1),  # Display each year as a tick
+    limits = c(2011, 2022)
+  ) +
+  scale_y_continuous(limits = c(0, 15)) +  # Adjust y-axis range as needed
+  labs(
+    title = "Unemployment Trends by Race (2011-2022)",
+    x = "Year",
+    y = "Unemployment Rate (%)",
+    color = "Group"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16),  # Center the title
+    axis.text.x = element_text(angle = 45, hjust = 1)  # Rotate x-axis labels
+  )
+
+```
+
+[**Gender**]{.underline}
+
+Pulling gender based US historic seasonally adjusted unemployment rates.
+
+Below pulls the seasonally adjusted unemployment percentage for women aged 20 years & older.
+
+```{r}
+library(dplyr)
+
+women_unemployment_data <- fredr_series_observations(series_id = "LNS14000026")
+
+# Filter the data for the desired range
+women_unemployment_data_filtered <- women_unemployment_data |>
+  filter(date >= as.Date("2011-01-01") & date < as.Date("2023-01-01"))
+
+women_unemployment_yearly <- women_unemployment_data_filtered |>
+    mutate(year = lubridate::year(date)) |>
+    group_by(year) |>
+    summarize(average_unemployment = mean(value))
+
+# Create the table and style it
+kable(head(women_unemployment_yearly), format = "html") |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+    full_width = FALSE
+  )
+```
+
+Below pulls the seasonally adjusted unemployment percentage for men aged 20 years & older.
+
+```{r}
+library(dplyr)
+
+men_unemployment_data <- fredr_series_observations(series_id = "LNS14000025")
+
+# Filter the data for the desired range
+men_unemployment_data_filtered <- men_unemployment_data |>
+  filter(date >= as.Date("2011-01-01") & date < as.Date("2023-01-01"))
+
+men_unemployment_yearly <- men_unemployment_data_filtered |>
+    mutate(year = lubridate::year(date)) |>
+    group_by(year) |>
+    summarize(average_unemployment = mean(value))
+
+# Create the table and style it
+kable(head(men_unemployment_yearly), format = "html") |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+    full_width = FALSE
+  )
+```
+
+Now taking a look at the average unemployment by gender compared to the countrywide average from 2011-2022.
+
+First to prepare the data we combine our `women_unemployment_yearly`, `men_unemployment_yearly`, and `CW_unemployment_yearly` into one dataset, to later create visualizations off of.
+
+```{r}
+# Add 'group' column to women and men unemployment datasets
+women_unemployment_yearly <- women_unemployment_yearly |>
+  mutate(group = "Women")
+
+men_unemployment_yearly <- men_unemployment_yearly |>
+  mutate(group = "Men")
+
+# Combine datasets
+combined_gender_unemployment <- bind_rows(
+  women_unemployment_yearly,
+  men_unemployment_yearly,
+  CW_unemployment_yearly
+)
+
+```
+
+Next we create an **Animated Line Plot**, which shows unemployment trends for men, women and countrywide averages over time.
+
+```{r, eval=FALSE, echo=TRUE, message=FALSE, warning=FALSE, results="hide"}
+library(ggplot2)
+library(gganimate)
+library(gifski)
+library(dplyr)
+
+# Create the animation with `transition_reveal()`
+animated_plot <- ggplot(combined_gender_unemployment, aes(x = year, y = average_unemployment, color = group, group = group)) +
+  geom_line(data = combined_gender_unemployment, size = 1.2) +
+  geom_line(data = combined_gender_unemployment |> filter(group == "Countrywide Average"), size=2.5
+  ) +
+  scale_color_manual(values = c("Men" = "blue", "Women" = "red", "Countrywide Average" = "black")) +
+  labs(
+    title = "Unemployment Trends by Gender and Countrywide (2011-2022)",
+    x = "Year",
+    y = "Unemployment Rate (%)",
+    color = "Group"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16),
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  ) +
+  transition_reveal(year)  # Incrementally draw the lines over time
+
+# Render and save the animation
+animate(
+  animated_plot,
+  width = 800,
+  height = 600,
+  duration = 10,  # Duration of the animation in seconds
+  fps = 10,       # Frames per second
+  renderer = gifski_renderer("gender_unemployment_trends_reveal.gif")
+)
+
+
+```
+
+```{r, eval=FALSE}
+knitr::include_graphics("gender_unemployment_trends_reveal.gif")
+```
+
+[**Gender x Race**]{.underline}
+
+Black or African Men, 20 yrs & older
+
+```{r}
+library(dplyr)
+
+black_men_unemployment_data <- fredr_series_observations(series_id = "LNS14000031")
+
+# Filter the data for the desired range
+black_men_unemployment_data_filtered <- black_men_unemployment_data |>
+  filter(date >= as.Date("2011-01-01") & date < as.Date("2023-01-01"))
+
+black_men_unemployment_yearly <- black_men_unemployment_data_filtered |>
+    mutate(year = lubridate::year(date)) |>
+    group_by(year) |>
+    summarize(average_unemployment = mean(value))
+
+# Create the table and style it
+kable(head(black_men_unemployment_yearly), format = "html") |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+    full_width = FALSE
+  )
+```
+
+Black or African American Women, 20 yrs & older
+
+```{r}
+library(dplyr)
+
+black_women_unemployment_data <- fredr_series_observations(series_id = "LNS14000032")
+
+# Filter the data for the desired range
+black_women_unemployment_data_filtered <- black_women_unemployment_data |>
+  filter(date >= as.Date("2011-01-01") & date < as.Date("2023-01-01"))
+
+black_women_unemployment_yearly <- black_women_unemployment_data_filtered |>
+    mutate(year = lubridate::year(date)) |>
+    group_by(year) |>
+    summarize(average_unemployment = mean(value))
+
+# Create the table and style it
+kable(head(black_women_unemployment_yearly), format = "html") |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+    full_width = FALSE
+  )
+
+```
+
+Hispanic or latino men, 20 yrs. & older
+
+```{r}
+library(dplyr)
+
+hispanic_men_unemployment_data <- fredr_series_observations(series_id = "LNU04000034")
+
+# Filter the data for the desired range
+hispanic_men_unemployment_data_filtered <- hispanic_men_unemployment_data |>
+  filter(date >= as.Date("2011-01-01") & date < as.Date("2023-01-01"))
+
+hispanic_men_unemployment_yearly <- hispanic_men_unemployment_data_filtered |>
+    mutate(year = lubridate::year(date)) |>
+    group_by(year) |>
+    summarize(average_unemployment = mean(value))
+
+# Create the table and style it
+kable(head(hispanic_men_unemployment_yearly), format = "html") |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+    full_width = FALSE
+  )
+```
+
+Hispanic or latino women, 20 yrs. & older
+
+```{r}
+library(dplyr)
+
+hispanic_women_unemployment_data <- fredr_series_observations(series_id = "LNU04000035")
+
+# Filter the data for the desired range
+hispanic_women_unemployment_data_filtered <- hispanic_women_unemployment_data |>
+  filter(date >= as.Date("2011-01-01") & date < as.Date("2023-01-01"))
+
+hispanic_women_unemployment_yearly <- hispanic_women_unemployment_data_filtered |>
+    mutate(year = lubridate::year(date)) |>
+    group_by(year) |>
+    summarize(average_unemployment = mean(value))
+
+# Create the table and style it
+kable(head(hispanic_women_unemployment_yearly), format = "html") |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+    full_width = FALSE
+  )
+```
+
+White men, 20 yrs & older
+
+```{r}
+library(dplyr)
+
+white_men_unemployment_data <- fredr_series_observations(series_id = "LNS14000028")
+
+# Filter the data for the desired range
+white_men_unemployment_data_filtered <- white_men_unemployment_data |>
+  filter(date >= as.Date("2011-01-01") & date < as.Date("2023-01-01"))
+
+white_men_unemployment_yearly <- white_men_unemployment_data_filtered |>
+    mutate(year = lubridate::year(date)) |>
+    group_by(year) |>
+    summarize(average_unemployment = mean(value))
+
+# Create the table and style it
+kable(head(white_men_unemployment_yearly), format = "html") |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+    full_width = FALSE
+  )
+```
+
+White women, 20 yrs. & older
+
+```{r}
+library(dplyr)
+
+white_women_unemployment_data <- fredr_series_observations(series_id = "LNS14000029")
+
+# Filter the data for the desired range
+white_women_unemployment_data_filtered <- white_women_unemployment_data |>
+  filter(date >= as.Date("2011-01-01") & date < as.Date("2023-01-01"))
+
+white_women_unemployment_yearly <- white_women_unemployment_data_filtered |>
+    mutate(year = lubridate::year(date)) |>
+    group_by(year) |>
+    summarize(average_unemployment = mean(value))
+
+# Create the table and style it
+kable(head(white_women_unemployment_yearly), format = "html") |>
+  kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+    full_width = FALSE
+  )
+```
+
+Data shortcoming - this not available for Asian x Gender, but available for other races.
+
+## **Appendix**
 
 Exploring neighborhood-level data from the American Community Survey (ACS) through the US Census Bureau
 
