@@ -11,6 +11,7 @@ output-dir: docs
 ---
 
 ```{r}
+#sets repository for downloading packages
 options(repos = c(CRAN = "https://cloud.r-project.org"))
 
 ```
@@ -896,15 +897,17 @@ animated_plot <- ggplot(combined_gender_unemployment, aes(x = year, y = average_
   ) +
   transition_reveal(year)  # Incrementally draw the lines over time
 
+animated_plot
+
 # Render and save the animation
-animate(
-  animated_plot,
-  width = 800,
-  height = 600,
-  duration = 10,  # Duration of the animation in seconds
-  fps = 10,       # Frames per second
-  renderer = gifski_renderer("gender_unemployment_trends_reveal.gif")
-)
+# animate(
+#   animated_plot,
+#   width = 800,
+#   height = 600,
+#   duration = 10,  # Duration of the animation in seconds
+#   fps = 10,       # Frames per second
+#   renderer = gifski_renderer("gender_unemployment_trends_reveal.gif")
+# )
 
 
 ```
