@@ -1473,7 +1473,7 @@ view(acs_vars)
 
 Fetching Neighborhood-Level Data
 
-```{r, message=FALSE, warning=FALSE, reults='hide'}
+```{r, message=FALSE, warning=FALSE, results='hide'}
 
 # Variables for analysis
 selected_vars <- c(
@@ -1496,7 +1496,7 @@ nyc_neighborhood_data <- suppressMessages(get_acs(
 
 ```
 
-```{r, message=FALSE, warning=FALSE, reults='hide'}
+```{r, message=FALSE, warning=FALSE, results='hide'}
 # Summarize median income across census tracts
 income_summary <- nyc_neighborhood_data |>
   filter(variable == "B19013_001") |>
@@ -1513,7 +1513,7 @@ income_summary <- nyc_neighborhood_data |>
 
 List of neighborhoods with data
 
-```{r, message=FALSE, warning=FALSE, reults='hide'}
+```{r, message=FALSE, warning=FALSE, results='hide'}
 
 # Filter data for median income
 median_income_table <- nyc_neighborhood_data |>
