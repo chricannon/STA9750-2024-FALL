@@ -20,7 +20,7 @@ The focus of this report is to look at unemployment over time, from the years 20
 
 This report will discuss the data acquired, any pre-processing and cleaning done on the data, and how this data was analyzed to draw conclusions on unemployment trends over time.
 
-## Data Acquisition
+### Data Acquisition
 
 The unemployment rate data for this analysis was obtained from the Federal Reserve Economic Data (FRED) API. FRED provides unemployment rates by demographic and geographic categories. Each unemployment rate is associated with a unique series ID, which was used to query the API and retrieve relevant data. Using the API call, we accessed these series programmatically, ensuring automated and consistent data retrieval.
 
@@ -178,7 +178,7 @@ state_unemployment_series <- unemployment_search |>
   filter(grepl("state", title, ignore.case = TRUE))
 
 
-# Create the table and style it
+# Creating and stlying table
 kable(head(state_unemployment_series[,1:5]), format = "html") |>
   kable_styling(
     bootstrap_options = c("striped", "hover", "condensed", "responsive"),
@@ -238,7 +238,7 @@ state_unemployment_data <- mapply(
 # Combine into a single dataframe
 state_unemployment_df <- do.call(rbind, state_unemployment_data)
 
-# Create the table and style it
+# Creating and styling table
 kable(head(state_unemployment_df[,1:5]), format = "html") |>
   kable_styling(
     bootstrap_options = c("striped", "hover", "condensed", "responsive"),
@@ -271,7 +271,7 @@ state_unemployment_yearly <- state_unemployment_clean |>
     .groups = "drop"
   )
 
-# Create the table and style it
+#creating and styling table 
 kable(head(state_unemployment_yearly), format = "html") |>
   kable_styling(
     bootstrap_options = c("striped", "hover", "condensed", "responsive"),
@@ -302,8 +302,8 @@ state_yearly_counts |>
   )
 
 
-# Create the table and style it
-kable(head(state_yearly_counts), format = "html") |>
+# Create the table and style it. trying additional formatting as head function wasnt working correctly 
+kable(state_yearly_counts |> head(5), format = "html") |>
   kable_styling(
     bootstrap_options = c("striped", "hover", "condensed", "responsive"),
     full_width = FALSE
@@ -500,7 +500,7 @@ ggplot() +
   scale_color_manual(
     values = c("Other States" = "gray", "New York" = "red", "Countrywide"="black")
   ) +
-  # Adjust the theme for clarity
+  # Adjusting theme
   theme_minimal() +
   theme(
     plot.title = element_text(
@@ -594,7 +594,7 @@ library(dplyr)
 
 black_unemployment_data <- fredr_series_observations(series_id = "LNS14000006")
 
-# Filter the data for the desired range
+# Filter the data for 2011-2022
 black_unemployment_data_filtered <- black_unemployment_data |>
   filter(date >= as.Date("2011-01-01") & date < as.Date("2023-01-01"))
 
@@ -603,7 +603,7 @@ black_unemployment_yearly <- black_unemployment_data_filtered |>
     group_by(year) |>
     summarize(average_unemployment = mean(value))
 
-# Create the table and style it
+# Creating and styling table
 kable(head(black_unemployment_yearly), format = "html") |>
   kable_styling(
     bootstrap_options = c("striped", "hover", "condensed", "responsive"),
@@ -657,7 +657,7 @@ us_states <- shift_geometry(
   position = "below" #places AK and HI underneath continental US
 )
 
-# Perform a cartesian join to apply the same rate to all states for each year
+#cartesian join to apply the same rate to all states for each year
 black_unemployment_map_data <- us_states |>
     mutate(key = 1) |>  # Add a key for the cartesian join
     left_join(
@@ -670,10 +670,10 @@ black_unemployment_map_data <- us_states |>
 black_unemployment_map_data <- black_unemployment_map_data |>
   filter(!is.na(year) & !is.na(average_unemployment))
 
-# Step 3: Set `tmap` mode to plot (required for animation)
+#set `tmap` mode to plot (required for animation)
 tmap_mode("plot")
 
-# Step 4: Create the animated map
+#create the animated map
 us_map <- tm_shape(black_unemployment_map_data) +
     tm_polygons(
         col = "average_unemployment",  # Column for shading
@@ -692,7 +692,7 @@ us_map <- tm_shape(black_unemployment_map_data) +
         frame = FALSE
     ) 
 
-# Step 5: Create animation
+# Create animation
 tmap_animation(
     us_map,
     delay = 50,  # Delay between frames in milliseconds
@@ -705,6 +705,10 @@ tmap_animation(
 ```{r}
 knitr::include_graphics("black_unemployment.gif")
 ```
+
+The output above displays the change in black unemployment rates over time, from 2011 to 2022. It was determined a different visual would be more useful, in comparing black unemployment rates to the other races, so additional formatting was not input into the code to make the gif more effective.
+
+If displaying this in presentation, the visual would be more useful with resizing and a legend.
 
 White unemployment rates
 
@@ -722,6 +726,8 @@ white_unemployment_yearly <- white_unemployment_data_filtered |>
     group_by(year) |>
     summarize(average_unemployment = mean(value))
 ```
+
+Year-over-year, we see the black unemployment rate surpasses the white unemployment rate by a sizeable amount. We move on later in the report to display these trends differently, taking a look at the difference compared to the countrywide unemployment rate.
 
 ```{r}
 library(ggplot2)
@@ -756,7 +762,7 @@ Hispanic or Latino Unemployment Rates
 ```{r}
 hispanic_unemployment_data <- fredr_series_observations(series_id = "LNS14000009")
 
-# Filter the data for the desired range
+# Filter the data 2011-2022
 hispanic_unemployment_data_filtered <- hispanic_unemployment_data |>
   filter(date >= as.Date("2011-01-01") & date < as.Date("2023-01-01"))
 
@@ -780,7 +786,7 @@ library(dplyr)
 
 asian_unemployment_data <- fredr_series_observations(series_id = "LNS14032183")
 
-# Filter the data for the desired range
+# Filter the data 2011-2022
 asian_unemployment_data_filtered <- asian_unemployment_data |>
   filter(date >= as.Date("2011-01-01") & date < as.Date("2023-01-01"))
 
@@ -789,7 +795,7 @@ asian_unemployment_yearly <- asian_unemployment_data_filtered |>
     group_by(year) |>
     summarize(average_unemployment = mean(value))
 
-# Create the table and style it
+# Creating and styling table
 kable(head(asian_unemployment_yearly), format = "html") |>
   kable_styling(
     bootstrap_options = c("striped", "hover", "condensed", "responsive"),
@@ -800,11 +806,11 @@ kable(head(asian_unemployment_yearly), format = "html") |>
 Lets take a look at a faceted line plot to explore the differences in unemployment rates across each race.
 
 ```{r}
-# Load necessary libraries
+
 library(ggplot2)
 library(dplyr)
 
-# Add a 'group' column to each dataset
+# Adding a 'group' column to each dataset
 CW_unemployment_yearly$group <- "Countrywide Average"
 black_unemployment_yearly$group <- "Black"
 asian_unemployment_yearly$group <- "Asian"
@@ -820,7 +826,7 @@ combined_racial_unemployment <- bind_rows(
   white_unemployment_yearly
 )
 
-# Create the faceted line plot
+# Creating the faceted line plot
 ggplot(data = combined_racial_unemployment, aes(x = year, y = average_unemployment)) +
   geom_line(aes(color = group), size = 1) +  # Line for each group
   scale_color_manual(
@@ -856,7 +862,7 @@ ggplot(data = combined_racial_unemployment, aes(x = year, y = average_unemployme
 Facets do not get our point across, so switching over to a line plot.
 
 ```{r}
-# Load necessary libraries
+
 library(ggplot2)
 library(dplyr)
 
@@ -923,7 +929,7 @@ This gives us our first into race as one of our three demographic factors we con
 Lets look at black vs white specifically, to see if our results line up with the article we used as motivation for our topic. This generates a visualization which shows the difference between black and white specific unemployment rates against the countrywide average over time.
 
 ```{r}
-# Load necessary libraries
+
 library(ggplot2)
 library(dplyr)
 
@@ -962,7 +968,7 @@ This analysis contributes to our overall study by showcasing the persistent impa
 ------------------------------------------------------------------------
 
 ```{r, include=FALSE}
-# Load necessary libraries
+
 library(dplyr)
 library(tidyr)
 library(gt)
@@ -989,7 +995,7 @@ difference_table <- yearly_difference |>
 
 ```
 
-```{r, eval=FALSE}
+```{r, eval=FALSE, include=FALSE}
 # Print the table using gt
 difference_table |>
   gt() |>
@@ -1012,19 +1018,19 @@ difference_table |>
   )
 ```
 
-```{r, eval=FALSE}
-# Step 1: Create the base gt table
+```{r, eval=FALSE, include=FALSE}
+#Create the base gt table
 table <- difference_table |>
   gt()
 
-# Step 2: Add column labels
+# Add column labels
 labeled_table <- table |>
   cols_label(
     year = "Year",
     difference = "Difference (Black - White)"
   )
 
-# Step 3: Add the rest of the styling and formatting
+#Add the rest of the styling and formatting
 final_table <- labeled_table |>
   tab_header(
     title = "Yearly Differences in Unemployment Rates",
@@ -1040,7 +1046,7 @@ final_table <- labeled_table |>
     heading.subtitle.font.size = px(14)
   )
 
-# Print the final table
+# Print final table
 print(final_table)
 
 ```
@@ -1056,7 +1062,7 @@ library(dplyr)
 
 women_unemployment_data <- fredr_series_observations(series_id = "LNS14000026")
 
-# Filter the data for the desired range
+# Filter the data 2011-2022
 women_unemployment_data_filtered <- women_unemployment_data |>
   filter(date >= as.Date("2011-01-01") & date < as.Date("2023-01-01"))
 
@@ -1176,7 +1182,7 @@ library(dplyr)
 
 black_men_unemployment_data <- fredr_series_observations(series_id = "LNS14000031")
 
-# Filter the data for the desired range
+# Filter the data 2011-2022
 black_men_unemployment_data_filtered <- black_men_unemployment_data |>
   filter(date >= as.Date("2011-01-01") & date < as.Date("2023-01-01"))
 
@@ -1200,7 +1206,7 @@ library(dplyr)
 
 black_women_unemployment_data <- fredr_series_observations(series_id = "LNS14000032")
 
-# Filter the data for the desired range
+# Filter the data 2011-2022
 black_women_unemployment_data_filtered <- black_women_unemployment_data |>
   filter(date >= as.Date("2011-01-01") & date < as.Date("2023-01-01"))
 
@@ -1225,7 +1231,7 @@ library(dplyr)
 
 hispanic_men_unemployment_data <- fredr_series_observations(series_id = "LNU04000034")
 
-# Filter the data for the desired range
+# Filter the data 2011-2022
 hispanic_men_unemployment_data_filtered <- hispanic_men_unemployment_data |>
   filter(date >= as.Date("2011-01-01") & date < as.Date("2023-01-01"))
 
@@ -1234,7 +1240,7 @@ hispanic_men_unemployment_yearly <- hispanic_men_unemployment_data_filtered |>
     group_by(year) |>
     summarize(average_unemployment = mean(value))
 
-# Create the table and style it
+# creating and styling table 
 kable(head(hispanic_men_unemployment_yearly), format = "html") |>
   kable_styling(
     bootstrap_options = c("striped", "hover", "condensed", "responsive"),
@@ -1249,7 +1255,7 @@ library(dplyr)
 
 hispanic_women_unemployment_data <- fredr_series_observations(series_id = "LNU04000035")
 
-# Filter the data for the desired range
+# Filter the data 2011-2022
 hispanic_women_unemployment_data_filtered <- hispanic_women_unemployment_data |>
   filter(date >= as.Date("2011-01-01") & date < as.Date("2023-01-01"))
 
@@ -1258,7 +1264,7 @@ hispanic_women_unemployment_yearly <- hispanic_women_unemployment_data_filtered 
     group_by(year) |>
     summarize(average_unemployment = mean(value))
 
-# Create the table and style it
+# Creating and styling table
 kable(head(hispanic_women_unemployment_yearly), format = "html") |>
   kable_styling(
     bootstrap_options = c("striped", "hover", "condensed", "responsive"),
@@ -1273,7 +1279,7 @@ library(dplyr)
 
 white_men_unemployment_data <- fredr_series_observations(series_id = "LNS14000028")
 
-# Filter the data for the desired range
+# Filter the data 2011-2022
 white_men_unemployment_data_filtered <- white_men_unemployment_data |>
   filter(date >= as.Date("2011-01-01") & date < as.Date("2023-01-01"))
 
@@ -1282,7 +1288,7 @@ white_men_unemployment_yearly <- white_men_unemployment_data_filtered |>
     group_by(year) |>
     summarize(average_unemployment = mean(value))
 
-# Create the table and style it
+# Creating and styling table
 kable(head(white_men_unemployment_yearly), format = "html") |>
   kable_styling(
     bootstrap_options = c("striped", "hover", "condensed", "responsive"),
@@ -1290,7 +1296,7 @@ kable(head(white_men_unemployment_yearly), format = "html") |>
   )
 ```
 
-To see which racial groups are most marginally effected by unemployment for men, we create the following heatmap.
+To see which racial groups are most marginally effected by unemployment for men, we create the following line plot.
 
 ```{r}
 # Load necessary libraries
@@ -1359,6 +1365,8 @@ ggplot(combined_unemployment_men, aes(x = factor(year), y = unemployment_rate, f
   scale_x_discrete(breaks = seq(2011, 2022, by = 1))
 ```
 
+We find that, when we take each of the available races (black, hispanic, and white) and compare against the men's countrywide unemployment rate, the exact same trends follow to the racial unemployment rate v countrywide overall (without crossing with gender). Consistently, the black unemployment rate is the highest, followed by hispanic, with the countrywide average falling below, followed by the white unemployment rate falling below the countrywide average.
+
 White women, 20 yrs. & older
 
 ```{r}
@@ -1366,7 +1374,7 @@ library(dplyr)
 
 white_women_unemployment_data <- fredr_series_observations(series_id = "LNS14000029")
 
-# Filter the data for the desired range
+# Filter the data for 2011-2022
 white_women_unemployment_data_filtered <- white_women_unemployment_data |>
   filter(date >= as.Date("2011-01-01") & date < as.Date("2023-01-01"))
 
@@ -1375,7 +1383,7 @@ white_women_unemployment_yearly <- white_women_unemployment_data_filtered |>
     group_by(year) |>
     summarize(average_unemployment = mean(value))
 
-# Create the table and style it
+# Creating and styling table
 kable(head(white_women_unemployment_yearly), format = "html") |>
   kable_styling(
     bootstrap_options = c("striped", "hover", "condensed", "responsive"),
@@ -1436,6 +1444,8 @@ ggplot(combined_unemployment_women, aes(x = factor(year), y = unemployment_rate,
   scale_x_discrete(breaks = seq(2011, 2022, by = 1))
 ```
 
+Again, when looking at the same available race x gender unemployment rates (black, hispanic, and white), women follow the same trend as races in general and men x race. This overwhelmingly displays the racial disparity in unemployment rates, which we continue to look into further throughout the project.
+
 ## **Appendix**
 
 Exploring neighborhood-level data from the American Community Survey (ACS) through the US Census Bureau
@@ -1473,7 +1483,7 @@ selected_vars <- c(
 )
 
 # Fetch data for NYC at the census tract level
-nyc_neighborhood_data <- get_acs(
+nyc_neighborhood_data <- suppressMessages(get_acs(
   geography = "tract",
   variables = selected_vars,
   state = "NY",
@@ -1481,10 +1491,8 @@ nyc_neighborhood_data <- get_acs(
   year = 2022,
   survey = "acs5",
   geometry = TRUE # Include geometry for mapping
-)
+))
 
-# Inspect the data
-head(nyc_neighborhood_data)
 
 ```
 
@@ -1499,7 +1507,7 @@ income_summary <- nyc_neighborhood_data |>
     max_income = max(estimate, na.rm = TRUE)
   )
 
-print(income_summary)
+
 
 ```
 
@@ -1550,7 +1558,7 @@ median_income_table_clean <- median_income_table |>
     'Median Income ($)' = estimate
   )
 
-# Create a cleaner `gt` table
+# Creating a cleaner table
 median_income_table_clean |>
   gt() |>
   tab_header(
@@ -1565,6 +1573,8 @@ median_income_table_clean |>
     align = "left",
     columns = everything()
   )
+
+head(median_income_table_clean)
 ```
 
 Creating a map. Grey areas indicate locations where census data is unavailable - such as parks, airports or other non-residential areas
@@ -1620,7 +1630,7 @@ for (borough in boroughs) {
       plot.subtitle = element_text(size = 12)
     )
   
-  # Explicitly print the plot
+  # print the plot
   print(p)
 }
 
