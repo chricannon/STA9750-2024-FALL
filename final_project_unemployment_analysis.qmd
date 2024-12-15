@@ -1,5 +1,6 @@
 ---
-title: "Final Project - Individual Report"
+title: "What does unemployment look like over time?"
+author: Christie Cannon 
 editor: visual
 format: 
   html:
@@ -7,23 +8,38 @@ format:
 execute:
   warning: false
   message: false
+  tidy: true
 output-dir: docs
 ---
 
-```{r}
+### Abstract
+
+This report walks you through the specific analytical question of **"What does unemployment look like over time?"** supporting the overarching question of **"What demographic factors best explain unemployment trends across NYC?".**
+
+The focus of this report is to look at unemployment over time, from the years 2011 through 2022, on a **countrywide** level. It explores unemployment overall and then hones in on a few demographic specific unemployment rates, which include: unemployment by race, gender, and be race x gender.
+
+This report will discuss the data acquired, any pre-processing and cleaning done on the data, and how this data was analyzed to draw conclusions on unemployment trends over time.
+
+## Data Acquisition
+
+The unemployment rate data for this analysis was obtained from the Federal Reserve Economic Data (FRED) API. FRED provides unemployment rates by demographic and geographic categories. Each unemployment rate is associated with a unique series ID, which was used to query the API and retrieve relevant data. Using the API call, we accessed these series programmatically, ensuring automated and consistent data retrieval.
+
+You will find that for every unemployment data set retrieved, the same pre-processing and cleaning was computed to allow for consistent analysis. This involved using the `filter()` function from the `dplyr` package, which is part of the `tidyverse` collection of R packages, to filter our data to only include data from 2011 to 2022. Within each year, the average unemployment value was computed using the `mean()` function, capturing an aggregated measure representative of the year's unemployment trends. This was done as an effort to remain consistent with the data available to answer the other analytical questions of the project.
+
+```{r, include=FALSE}
 #sets repository for downloading packages
 options(repos = c(CRAN = "https://cloud.r-project.org"))
 
 ```
 
-```{r, echo=FALSE}
+```{r, include=FALSE}
 #hides code block from being displayed on rendered HTML site
 install.packages("fredr")
 library(fredr)
 library(tidyverse)
 ```
 
-Install necessary libraries
+The following libraries are all necessary libraries needed throughout the entire report.
 
 ```{r, results="hide", message=FALSE, warning=FALSE}
 library(fredr)
@@ -46,11 +62,11 @@ library(kableExtra)
 fredr_set_key("eb19c6daa01e5e21da01a78d9dff470d")
 ```
 
-Accessing Countrywide Unemployment Rates.
+The code below retrieves Countrywide Unemployment Rates.
 
 The series ID for the nationwide unemployment rate is "UNRATE". This is the Civilian Unemployment Rate.
 
-The unemployment rate represents the number of unemployed as a percentage of the labor force. Labor force data are restricted to people 16 years of age and older, who currently reside in 1 of the 50 states or the District of Columbia, who do not reside in institutions (e.g., penal and mental facilities, homes for the aged), and who are not on active duty in the Armed Forces.
+> The unemployment rate represents the number of unemployed as a percentage of the labor force. Labor force data are restricted to people 16 years of age and older, who currently reside in 1 of the 50 states or the District of Columbia, who do not reside in institutions (e.g., penal and mental facilities, homes for the aged), and who are not on active duty in the Armed Forces.
 
 ```{r}
 # Retrieve monthly U.S. unemployment rate data
@@ -69,6 +85,10 @@ CW_unemployment_yearly <- CW_unemployment_data_filtered |>
 
 > U.S. Bureau of Labor Statistics, Unemployment Rate \[UNRATENSA\], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/UNRATENSA, December 10, 2024.
 
+To generate the line plot found below, the dataset `CW_unemployment_data_filtered` was used, with use of `ggplot2` to create the visualization. The `geom_line` function was used to connect unemployment rate values along the timeline, and labels were added to provide context for the chart's axes and title.
+
+The output indicates a steady decline in the unemployment rate from 2011 through earliy 2020. The sharp spike in 2020 can be attributed to the COVID-19 pandemic's economnic disruption. Post-2020, the unemployment rate decreased rapidly, which exemplifies the economic recovery efforts taken post-pandemic.
+
 ```{r}
 library(ggplot2)
 
@@ -80,6 +100,8 @@ ggplot(CW_unemployment_data_filtered, aes(x = date, y = value)) +
     theme_minimal()
 
 ```
+
+The series below takes the US unemployment rates and adds a recession indicator to the dataset.
 
 ```{r}
 # Retrieve U.S. recession indicator data
@@ -113,6 +135,8 @@ avg_unemployment_plot <- ggplot(CW_unemployment_yearly, aes(x = year, y = averag
 avg_unemployment_plot
 ```
 
+The code belows involves the single usage of US Census Data in answering this speicifc analytical question of the project. The file obtained is a US states shapfile. The file contains a geometric column which identifies geographic boundaries. These geographic boundaries serve to later be joined with US data to then display the patterns across the US in a map format.
+
 ```{r}
 library(sf)
 if(!file.exists("states.zip")){
@@ -130,7 +154,7 @@ fname_shp <- zip_contents[grepl("shp$", zip_contents)]
 zip_sf <- read_sf(fname_shp)
 ```
 
-Search for series containing "unemployment rate"
+The next few steps involve the searching process that went into the data acquisiton. In order to find all available unemployment data, I made use of the `fred_series_search_text()` function to find the series_ID for datasets involving the unemployment rate.
 
 ```{r}
 # Search for unemployment rate-related series
@@ -163,7 +187,7 @@ kable(head(state_unemployment_series[,1:5]), format = "html") |>
 
 ```
 
-From looking through this list, realized we need all the ids that start with the state abbreviation followed by "UR" - each of these series id's gives us the unemployment for each state over time. THe next step does additional filtering.
+From looking through this list, realized we need all the ids that start with the state abbreviation followed by "UR" - each of these series id's gives us the unemployment for each state over time. The next step does additional filtering.
 
 ```{r}
 # List of state abbreviations
@@ -223,7 +247,7 @@ kable(head(state_unemployment_df[,1:5]), format = "html") |>
 
 ```
 
-Cleaning up the data to keep only the relevant columns and compute yearly averages for each state from 2011 to 2022 -
+Cleaning up the data to keep only the relevant columns and compute yearly averages for each state from 2011 to 2022, which is the same process as outlined above, which we conduct for each dataset.
 
 ```{r}
 library(dplyr)
@@ -338,7 +362,9 @@ tm
 
 ```
 
-Altering the above code to make one interactive map-
+The visualization above helps answer the question of "What does unemployment look like over time?" by presenting a clear and dynamic picture of how unemployment has changed over time across the United States. The map highlights regional trends, such as states with persistently high or low unemployment, and captures national shifts, such as the overall increase in 2020 and decline thereafter.
+
+While this code was effective, I displayed the same results via an animation.
 
 ```{r, echo=TRUE, message=FALSE, warning=FALSE, results="hide"}
 library(sf)
@@ -386,23 +412,35 @@ anim <- (map_data) |>
     palette = unemployment_palette,   # Color palette
     style = "quantile"                # Quantile-based shading
   ) +
-  tm_facets(along = "year", free.coords = FALSE) +
-  tm_text("state", size = 0.5, col = "white", fontface = "bold")  # Add state labels
+   tm_facets(along = "year", free.coords = FALSE) +
+  tm_text("state", size = 0.5, col = "white", fontface = "bold") +  # Add state labels
   tm_layout(
-    legend.position = c("left", "bottom"),  # Move legend to the bottom-left
-    legend.frame = TRUE,                    # Add a frame around the legend (optional)
-    legend.outside = TRUE                   # Place the legend outside the map
-  )
+    legend.outside = TRUE,                  # Place the legend outside the map
+    legend.outside.position = "right",     # Position the legend explicitly to the right
+    legend.text.size = 0.8,                # Adjust legend text size for clarity
+    legend.title.size = 1,                 # Adjust legend title size
+    frame = FALSE,                         # Remove border around the map
+    outer.margins = c(0.01, 0.01, 0.01, 0.08) # Add extra space to the right for the legend
+  ) + 
+  tm_view(bbox = st_bbox(map_data) * c(1.2, 1.2, 1, 1)) 
 
 
 # Generate the animated GIF
-tmap_animation(anim, delay = 50, filename = "unemployment_animation-dec11.gif")
+tmap_animation(anim, delay = 50, filename = "unemployment_animation-dec12.gif")
 
 ```
 
 ```{r}
-knitr::include_graphics("unemployment_animation-dec11.gif")
+knitr::include_graphics("unemployment_animation-dec12.gif")
 ```
+
+This animated map provides a clear and intuitive answer to the question "What does unemployment look like over time?" by offering a visual representation of unemployment trends across the United States from one year to the next. The map uses color shading to show the unemployment rate for each state, with darker shades indicating higher unemployment and lighter shades representing lower rates. By watching the animation, viewers can easily observe how unemployment changes over time, on a national and state level.
+
+The animation highlights major patterns, such as regions that experience persistently high or low unemployment and signifcant countrywide shifts, such as in 2020, which we know can be attributed to the COVID-19 pandemic.
+
+This visual contributes to our overarching question in a fashion of not visually showcasing the "what" of unemployment trends but specifically the "where" and "when".
+
+------------------------------------------------------------------------
 
 Creating an additional visualization where we compare average unemployment rates from 2011 to 2022 statewide against countrywide
 
@@ -465,15 +503,85 @@ ggplot() +
   # Adjust the theme for clarity
   theme_minimal() +
   theme(
-    plot.title = element_text(hjust = 0.5),  # Center the title
+    plot.title = element_text(
+      hjust = 0.5,             # Center the title
+      size = 14,               # Increase title size
+      margin = margin(b = 20)  # Add space below the title
+    ),
     axis.text.x = element_text(angle = 45, hjust = 1),  # Rotate x-axis labels
-    legend.position = "top",                # shows legend at top
-    legend.box = "horizontal",         # Arrange the legend horizontally
-    legend.text = element_text(size=8),
-    legend.title = element_text(size=9),
-    plot.margin = margin(t=30, r =20, l=20, unit="pt") #adding space for the legend
+    legend.position = "right",              # Move the legend to the right
+    legend.box = "vertical",                # Arrange the legend vertically
+    legend.text = element_text(size = 8),
+    legend.title = element_text(size = 9),
+    legend.margin = margin(t = 10, b = 10, unit = "pt"), # Add internal space in the legend
+    legend.spacing.y = unit(5, "pt"),                   # Add vertical spacing between legend items
+    plot.margin = margin(t = 30, r = 50, b = 20, l = 20, unit = "pt") # Adjust margins for spacing
   )
 ```
+
+Due to several issues with the legend displaying each field, we added a few legend override fields to ensure each of the 3 lines and their labels appeared in the legend.
+
+```{r}
+ggplot() +
+  geom_line(
+    data = state_unemployment_yearly, 
+    aes(x = year, y = avg_unemployment, group = state, color = "Other States"), 
+    size = 0.5, alpha = 0.7
+  ) +
+  geom_line(
+    data = state_unemployment_yearly |> filter(state == "NY"), 
+    aes(x = year, y = avg_unemployment, color = "New York"), 
+    size = 0.8
+  ) +
+  geom_line(
+    data = CW_unemployment_yearly, 
+    aes(x = year, y = average_unemployment, color = "Countrywide"), 
+    size = 1.5
+  ) +
+  scale_x_continuous(breaks = seq(2011, 2022, by = 1), limits = c(2011, 2023)) +
+  scale_y_continuous(limits = c(2, 14)) +
+  labs(
+    title = "Unemployment Rates by State and Countrywide (2011-2022)",
+    x = "Year",
+    y = "Unemployment Rate (%)",
+    color = "Legend"
+  ) +
+  scale_color_manual(
+    values = c(
+      "Other States" = "gray",
+      "New York" = "red",
+      "Countrywide" = "black"
+    ),
+    breaks = c("Other States", "New York", "Countrywide"),
+    labels = c("Other States", "New York", "Countrywide")
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 14, margin = margin(b = 10)),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "right",
+    legend.box = "vertical",
+    legend.text = element_text(size = 8),
+    legend.title = element_text(size = 9),
+    plot.margin = margin(t = 30, r = 50, b = 20, l = 20, unit = "pt")
+  ) +
+  guides(
+    color = guide_legend(override.aes = list(
+      linetype = c("solid", "solid", "solid"),
+      size = c(0.5, 0.8, 1.5),
+      color = c("gray", "red", "black")
+    ))
+  )
+
+```
+
+This visualization is the same data as the animated visualization - average yearly unemployment rates for each state and the United States overall from 2011 to 2022. This visualization draws focus to New York and the Countrywide average through the red and black lines, respectively. This layered design makes it easy to compare New York's performance against the broader trends at both the state and national levels.
+
+This chart shows a steady decline in unemployment across most states, including New York, from 2011 until 2020. The sharp spike in 2020 reflects the impact of the COVID-19 pandemic, which we have now seen several times throughout the data.
+
+An interesting result is how closely New York's average unemployment follows to the countrywide unemployment rates up until 2020, when the pandemic took place. Many of us were a part of, or know of, the drastic economic effect the pandemic had on New York City, which encompasses much of the population and economy of New York state. We also see that, since then, New York has still remained above the countrywide unemployment level, which can perhaps be attributed to the post-pandemic continued attempt at economic recovery.
+
+------------------------------------------------------------------------
 
 We now explore different demographics on a countrywide level, keeping in mind our input variables for our predictive model: gender, race, and education.
 
@@ -541,8 +649,14 @@ library(tigris)
 library(tools)
 library(gifski)
 
+#adjusting geometry in us_states for Alaska and Hawaii 
+us_states <- shift_geometry(
+  input_sf = us_states,
+  geoid_column = "GEOID",
+  preserve_area = FALSE, #scales Alaska and Hawaii proportionately
+  position = "below" #places AK and HI underneath continental US
+)
 
-# Step 2: Merge unemployment data with the shapefile
 # Perform a cartesian join to apply the same rate to all states for each year
 black_unemployment_map_data <- us_states |>
     mutate(key = 1) |>  # Add a key for the cartesian join
@@ -582,10 +696,7 @@ us_map <- tm_shape(black_unemployment_map_data) +
 tmap_animation(
     us_map,
     delay = 50,  # Delay between frames in milliseconds
-    filename = "black_unemployment.gif",
-    width = 800,
-    height = 600
-)
+    filename = "black_unemployment.gif")
 
 
 
@@ -686,7 +797,7 @@ kable(head(asian_unemployment_yearly), format = "html") |>
   )
 ```
 
-Lets take a look at a faceted line plot to explore the differences in unemployment rates across each race
+Lets take a look at a faceted line plot to explore the differences in unemployment rates across each race.
 
 ```{r}
 # Load necessary libraries
@@ -797,6 +908,143 @@ ggplot(data = combined_racial_unemployment, aes(x = year, y = average_unemployme
 
 ```
 
+This visualization explores one of the three demographic factors, race, which we chose to explore as an attempt at drawing conclusions to our overarching question of what demographic factors best explain NYC's unemployment trends.
+
+This visual gives us insight into the unemployment trends across racial groups in the United States from 2011 to 2022, and perhaps sheds light to how unemployment disproportionately impacts marginalized groups.
+
+The gray line represents the countrywide average unemployment rate, displayed prominently for context. The colored lines represent unemployment trends for specific racial groups: Black (blue), Hispanic (orange), White (red), and Asian (green).
+
+The chart reveals several insights. First, unemployment rates for Black individuals consistently remain higher than those for other groups and the countrywide average. Hispanic unemployment rates generally follow a similar trajectory but at slightly lower levels. On the other hand, Asian and White unemployment rates tend to stay below the countrywide average, indicating comparitively lower unemployment levels for these groups overall.
+
+This gives us our first into race as one of our three demographic factors we continue to explore through each analytical question.
+
+------------------------------------------------------------------------
+
+Lets look at black vs white specifically, to see if our results line up with the article we used as motivation for our topic. This generates a visualization which shows the difference between black and white specific unemployment rates against the countrywide average over time.
+
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(dplyr)
+
+# Filter the combined_racial_unemployment table
+filtered_unemployment <- combined_racial_unemployment |>
+  filter(group %in% c("Countrywide Average", "Black", "White"))
+
+# Create a new data frame for the segments
+segments_unemployment <- filtered_unemployment |>
+  filter(group != "Countrywide Average") |>
+  left_join(filtered_unemployment |> filter(group == "Countrywide Average"), by = "year", suffix = c("", "_avg")) |>
+  select(year, group, average_unemployment, average_unemployment_avg)
+
+# Create the plot
+ggplot(filtered_unemployment, aes(x = year, y = average_unemployment, color = group)) +
+  geom_line(size = 1.2) +
+  geom_point(size = 2) +
+  geom_segment(data = segments_unemployment, aes(x = year, xend = year, y = average_unemployment, yend = average_unemployment_avg), linetype = "dashed", size = 0.8) +
+  theme_minimal() +
+  labs(title = "Unemployment Rates and Differences from Countrywide Average",
+       x = "Year",
+       y = "Unemployment Rate",
+       color = "Group") +
+  scale_color_manual(values = c("Countrywide Average" = "grey", "Black" = "blue", "White" = "red")) +
+  scale_x_continuous(breaks = seq(2011, 2022, by = 1)) +
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16),  # Center the title
+    axis.text.x = element_text(angle = 45, hjust = 1)  # Rotate x-axis labels
+  )
+```
+
+This visualization highlights unemployment rates over time for black, white and the countrywide average groups, which we find in other visualizations as well. This visual specifically highlights the gaps between each group's rates and the national average with dashed lines. The blue line for Black unemployment rates consistently remains above both the national average (grey line) and White unemployment rates (red line), illustrating a persistent disparity.
+
+This analysis contributes to our overall study by showcasing the persistent impact of race as a key factor in unemployment disparities. While this chart focuses on nationwide data, it provides a framework for understnading how similar trends might manifest within NYC. Identifying such disparities at the national level sets the stage for further analysis to explore whether similar racial gaps exist in NYC's unemployment data, helping to answer the overarching question about the demographic factors driving these trends.
+
+------------------------------------------------------------------------
+
+```{r, include=FALSE}
+# Load necessary libraries
+library(dplyr)
+library(tidyr)
+library(gt)
+
+# Filter the combined_racial_unemployment table to include only Black and White groups
+black_white_unemployment <- combined_racial_unemployment |>
+  filter(group %in% c("Black", "White"))
+
+# Calculate the yearly difference between Black and White unemployment rates
+yearly_difference <- black_white_unemployment |>
+  spread(key = group, value = average_unemployment) |>
+  mutate(difference = Black - White)
+
+# Compute the average difference over time
+average_difference <- yearly_difference |>
+  summarise(year = "Average", difference = mean(difference, na.rm = TRUE)) 
+
+# Combine the yearly differences and the average difference into one table
+difference_table <- yearly_difference |>
+  mutate(year = as.character(year)) |> #converts year to character because "Average" is a character above, avoiding type mismatch 
+  select(year, difference) |>
+  bind_rows(average_difference)
+
+
+```
+
+```{r, eval=FALSE}
+# Print the table using gt
+difference_table |>
+  gt() |>
+  tab_header(
+    title = "Yearly Differences in Unemployment Rates",
+    subtitle = "Black vs. White (2011-2022)"
+  ) 
+  cols_label(
+    year = "Year",
+    difference = "Difference (Black - White)"
+  ) |>
+  fmt_number(
+    columns = difference,
+    decimals = 2
+  ) |>
+  tab_options(
+    table.font.size = px(12),
+    heading.title.font.size = px(16),
+    heading.subtitle.font.size = px(14)
+  )
+```
+
+```{r, eval=FALSE}
+# Step 1: Create the base gt table
+table <- difference_table |>
+  gt()
+
+# Step 2: Add column labels
+labeled_table <- table |>
+  cols_label(
+    year = "Year",
+    difference = "Difference (Black - White)"
+  )
+
+# Step 3: Add the rest of the styling and formatting
+final_table <- labeled_table |>
+  tab_header(
+    title = "Yearly Differences in Unemployment Rates",
+    subtitle = "Black vs. White (2011-2022)"
+  ) |>
+  fmt_number(
+    columns = difference,
+    decimals = 2
+  ) |>
+  tab_options(
+    table.font.size = px(12),
+    heading.title.font.size = px(16),
+    heading.subtitle.font.size = px(14)
+  )
+
+# Print the final table
+print(final_table)
+
+```
+
 [**Gender**]{.underline}
 
 Pulling gender based US historic seasonally adjusted unemployment rates.
@@ -897,24 +1145,27 @@ animated_plot <- ggplot(combined_gender_unemployment, aes(x = year, y = average_
   ) +
   transition_reveal(year)  # Incrementally draw the lines over time
 
-animated_plot
 
 # Render and save the animation
-# animate(
-#   animated_plot,
-#   width = 800,
-#   height = 600,
-#   duration = 10,  # Duration of the animation in seconds
-#   fps = 10,       # Frames per second
-#   renderer = gifski_renderer("gender_unemployment_trends_reveal.gif")
-# )
+animate(
+  animated_plot,
+  width = 800,
+  height = 600,
+  duration = 10,  # Duration of the animation in seconds
+  fps = 10,       # Frames per second
+  renderer = gifski_renderer("gender_unemployment_trends_reveal.gif")
+)
 
 
 ```
 
-```{r, eval=FALSE}
+```{r, echo=FALSE}
 knitr::include_graphics("gender_unemployment_trends_reveal.gif")
 ```
+
+We notice a shortcoming in our data from the results of this plot. You will find the CW average unemployment from 2011-2022 (bold black line) is consistently above both men and women's average unemployment rate, year over year. We would expect to see this line fall in the middle, considering men and women make up the countrywide unemployment rate.
+
+This may be explained by the data which was available in FRED. The countrywide unemployment rate is for all working ages (16 and older), while the gender specific unemployment rates were only available for ages 20 and up.
 
 [**Gender x Race**]{.underline}
 
@@ -1039,6 +1290,75 @@ kable(head(white_men_unemployment_yearly), format = "html") |>
   )
 ```
 
+To see which racial groups are most marginally effected by unemployment for men, we create the following heatmap.
+
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(dplyr)
+
+# Add a 'group' column to each dataset
+men_unemployment_yearly <- men_unemployment_yearly |>
+  rename(unemployment_rate = average_unemployment) |>
+  mutate(group = "Men Overall")
+
+black_men_unemployment_yearly <- black_men_unemployment_yearly |>
+  rename(unemployment_rate = average_unemployment) |>
+  mutate(group = "Black Men")
+
+hispanic_men_unemployment_yearly <- hispanic_men_unemployment_yearly |>
+  rename(unemployment_rate = average_unemployment) |>
+  mutate(group = "Hispanic Men")
+
+white_men_unemployment_yearly <- white_men_unemployment_yearly |>
+  rename(unemployment_rate = average_unemployment) |>
+  mutate(group = "White Men")
+
+# Combine all datasets into one
+combined_unemployment_men <- bind_rows(
+  men_unemployment_yearly,
+  black_men_unemployment_yearly,
+  hispanic_men_unemployment_yearly,
+  white_men_unemployment_yearly
+)
+
+
+```
+
+```{r}
+# Create line plot
+ggplot(combined_unemployment_men, aes(x = year, y = unemployment_rate, color = group)) +
+  geom_line(size = 1.2) +
+  geom_point(size = 2) +
+  theme_minimal() +
+  labs(title = "Unemployment Rates by Demographic Group",
+       x = "Year",
+       y = "Unemployment Rate",
+       color = "Demographic Group") +
+  scale_x_continuous(breaks = seq(2011, 2022, by = 1)) +
+  scale_color_manual(values = c("Men Overall" = "blue", "Black Men" = "red", "Hispanic Men" = "green", "White Men" = "purple"))
+```
+
+Lets try a stacked bar chart
+
+```{r}
+# Create stacked bar chart
+ggplot(combined_unemployment_men, aes(x = factor(year), y = unemployment_rate, fill = group)) +
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  labs(title = "Unemployment Rates: Men x Race",
+       x = "Year",
+       y = "Unemployment Rate",
+       fill = "Demographic Group") +
+  scale_fill_manual(values = c(
+    "Men Overall" = "grey",
+    "Black Men" = "blue",
+    "Hispanic Men" = "orange",
+    "White Men" = "red"
+  )) +
+  scale_x_discrete(breaks = seq(2011, 2022, by = 1))
+```
+
 White women, 20 yrs. & older
 
 ```{r}
@@ -1065,21 +1385,64 @@ kable(head(white_women_unemployment_yearly), format = "html") |>
 
 Data shortcoming - this not available for Asian x Gender, but available for other races.
 
+Lets do the same for women x race:
+
+Creating a combined dataset for women countrywide and each women x race dataset.
+
+```{r}
+# Add a 'group' column to each dataset
+women_unemployment_yearly <- women_unemployment_yearly |>
+  rename(unemployment_rate = average_unemployment) |>
+  mutate(group = "Women Overall")
+
+black_women_unemployment_yearly <- black_women_unemployment_yearly |>
+  rename(unemployment_rate = average_unemployment) |>
+  mutate(group = "Black Women")
+
+hispanic_women_unemployment_yearly <- hispanic_women_unemployment_yearly |>
+  rename(unemployment_rate = average_unemployment) |>
+  mutate(group = "Hispanic Women")
+
+white_women_unemployment_yearly <- white_women_unemployment_yearly |>
+  rename(unemployment_rate = average_unemployment) |>
+  mutate(group = "White Women")
+
+# Combine all datasets into one
+combined_unemployment_women <- bind_rows(
+  women_unemployment_yearly,
+  black_women_unemployment_yearly,
+  hispanic_women_unemployment_yearly,
+  white_women_unemployment_yearly
+)
+```
+
+Stacked bar chart
+
+```{r}
+# Create stacked bar chart
+ggplot(combined_unemployment_women, aes(x = factor(year), y = unemployment_rate, fill = group)) +
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  labs(title = "Unemployment Rates: Women x Race",
+       x = "Year",
+       y = "Unemployment Rate",
+       fill = "Demographic Group") +
+  scale_fill_manual(values = c(
+    "Women Overall" = "grey",
+    "Black Women" = "blue",
+    "Hispanic Women" = "orange",
+    "White Women" = "red"
+  )) +
+  scale_x_discrete(breaks = seq(2011, 2022, by = 1))
+```
+
 ## **Appendix**
 
 Exploring neighborhood-level data from the American Community Survey (ACS) through the US Census Bureau
 
 Installing packages for direct access to the Census Bureau's API to allow me to pull ACS data for various geographic levels, in the attempt to get more granular than bureau
 
-```{r}
-install.packages("tidycensus")
-install.packages("tidyverse")
-install.packages("dplyr")
-```
-
-Loading libraries
-
-```{r}
+```{r, include=FALSE}
 library(tidycensus)
 library(tidyverse)
 library(dplyr)
@@ -1087,20 +1450,20 @@ library(gt)
 library(ggplot2)
 ```
 
-```{r, eval=FALSE}
-census_api_key("6636b8e0ee8ebbb2edd3e4bfe9ef001572dc79ad", install=TRUE)
+```{r, include=FALSE}
+census_api_key("6636b8e0ee8ebbb2edd3e4bfe9ef001572dc79ad", overwrite=TRUE)
 ```
 
 Exploring ACS Variables
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 acs_vars <- load_variables(2022, "acs5", cache =TRUE) #using 2022 as most recent full year available in ACS
 view(acs_vars)
 ```
 
 Fetching Neighborhood-Level Data
 
-```{r}
+```{r, message=FALSE, warning=FALSE, reults='hide'}
 
 # Variables for analysis
 selected_vars <- c(
@@ -1125,7 +1488,7 @@ head(nyc_neighborhood_data)
 
 ```
 
-```{r}
+```{r, message=FALSE, warning=FALSE, reults='hide'}
 # Summarize median income across census tracts
 income_summary <- nyc_neighborhood_data |>
   filter(variable == "B19013_001") |>
@@ -1142,7 +1505,7 @@ print(income_summary)
 
 List of neighborhoods with data
 
-```{r}
+```{r, message=FALSE, warning=FALSE, reults='hide'}
 
 # Filter data for median income
 median_income_table <- nyc_neighborhood_data |>
@@ -1263,5 +1626,3 @@ for (borough in boroughs) {
 
 
 ```
-
-Race, gender, education for model
