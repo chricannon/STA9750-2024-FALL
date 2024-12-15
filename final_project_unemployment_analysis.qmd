@@ -294,13 +294,15 @@ state_yearly_counts <- state_unemployment_yearly |>
   )
 
 # Create gt table
-state_yearly_counts |> 
+#using invisible function to prevent table's automatic rendering
+invisible(
+  state_yearly_counts |> 
   gt() |> 
   tab_header(
     title = "Yearly Records Count by State",
     subtitle = "Number of years with unemployment data (2011-2022)"
   )
-
+)
 
 # Create the table and style it. trying additional formatting as head function wasnt working correctly 
 kable(state_yearly_counts |> head(5), format = "html") |>
